@@ -11,6 +11,7 @@ import 'app.dart';
 import 'platform/windows/win_browser_detector.dart';
 import 'platform/windows/win_icon_extractor.dart';
 import 'platform/windows/win_instance.dart';
+import 'platform/windows/win_launch_service.dart';
 import 'platform/windows/win_pipe_server.dart';
 import 'platform/windows/win_registration_service.dart';
 import 'platform/windows/win_startup_service.dart';
@@ -60,6 +61,7 @@ void main(List<String> args) async {
   final ruleService = RuleService(rulesFile: rulesFile);
   final registrationService = WinRegistrationService();
   final startupService = WinStartupService();
+  final launchService = WinLaunchService();
 
   final pipeServer = WinPipeServer();
   await pipeServer.start();
@@ -101,6 +103,7 @@ void main(List<String> args) async {
       startupServiceProvider.overrideWithValue(startupService),
       iconExtractorProvider.overrideWithValue(iconExtractor),
       iconsDirProvider.overrideWithValue(iconsDir),
+      launchServiceProvider.overrideWithValue(launchService),
     ],
   );
 
@@ -127,14 +130,13 @@ void main(List<String> args) async {
   });
 
   pipeServer.messages.listen((message) {
-    final notifier = container.read(appStateProvider.notifier);
     switch (message) {
       case OpenUrlMessage(:final url):
         _log.info('Pipe received: open_url $url');
-        notifier.showPicker(url);
+        _handleUrl(url, container);
       case ShowSettingsMessage():
         _log.info('Pipe received: show_settings');
-        notifier.showSettings();
+        container.read(appStateProvider.notifier).showSettings();
       case PingMessage():
         _log.fine('Pipe received: ping');
     }
@@ -150,13 +152,33 @@ void main(List<String> args) async {
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    final notifier = container.read(appStateProvider.notifier);
     if (isFirstBoot) {
-      notifier.showSettings();
+      container.read(appStateProvider.notifier).showSettings();
     } else if (url != null) {
-      notifier.showPicker(url);
+      _handleUrl(url, container);
     }
   });
+}
+
+void _handleUrl(String url, ProviderContainer container) {
+  final ruleService = container.read(ruleServiceProvider);
+  final matchedBrowserId = ruleService.lookupBrowser(url);
+
+  if (matchedBrowserId != null) {
+    final browsers = container.read(browserServiceProvider).browsers;
+    final browser = browsers.where((b) => b.id == matchedBrowserId).firstOrNull;
+    if (browser != null) {
+      _log.info('Rule match: $url → ${browser.name}');
+      container.read(launchServiceProvider).launch(
+            browser.executablePath,
+            url,
+            browser.extraArgs,
+          );
+      return;
+    }
+  }
+
+  container.read(appStateProvider.notifier).showPicker(url);
 }
 
 String? _extractUrl(List<String> args) {

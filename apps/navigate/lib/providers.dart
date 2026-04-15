@@ -27,6 +27,10 @@ final iconsDirProvider = Provider<Directory>(
   (_) => throw StateError('Override at startup'),
 );
 
+final launchServiceProvider = Provider<LaunchService>(
+  (_) => throw StateError('Override at startup'),
+);
+
 enum AppMode { hidden, settings, picker }
 
 final class AppState {
