@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Navigate" "\0"
-            VALUE "FileDescription", "Navigate" "\0"
+            VALUE "CompanyName", "LinkUnbound" "\0"
+            VALUE "FileDescription", "LinkUnbound" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "Navigate" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Navigate. All rights reserved." "\0"
-            VALUE "OriginalFilename", "navigate.exe" "\0"
-            VALUE "ProductName", "Navigate" "\0"
+            VALUE "InternalName", "LinkUnbound" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 LinkUnbound. All rights reserved." "\0"
+            VALUE "OriginalFilename", "linkunbound.exe" "\0"
+            VALUE "ProductName", "LinkUnbound" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

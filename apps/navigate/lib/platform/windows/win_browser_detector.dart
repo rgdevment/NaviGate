@@ -30,7 +30,7 @@ final class WinBrowserDetector implements BrowserDetector {
 
     try {
       for (final name in root.subkeyNames) {
-        if (name == 'Navigate') continue;
+        if (name == 'LinkUnbound') continue;
         if (browsers.containsKey(name.toLowerCase())) continue;
 
         try {

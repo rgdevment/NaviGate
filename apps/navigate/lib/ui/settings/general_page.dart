@@ -41,8 +41,8 @@ class GeneralPage extends ConsumerWidget {
               Expanded(
                 child: Text(
                   isDefaultAsync.valueOrNull == true
-                      ? 'Navigate is set as the default browser'
-                      : 'Navigate is not the default browser',
+                      ? 'LinkUnbound is set as the default browser'
+                      : 'LinkUnbound is not the default browser',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
@@ -50,7 +50,7 @@ class GeneralPage extends ConsumerWidget {
                 TextButton(
                   onPressed: () => launchUrl(
                     Uri.parse(
-                      'ms-settings:defaultapps?registeredAppUser=Navigate',
+                      'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
                     ),
                   ),
                   child: const Text('Set default'),

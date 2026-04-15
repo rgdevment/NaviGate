@@ -21,7 +21,7 @@ class AboutPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Navigate', style: Theme.of(context).textTheme.titleMedium),
+              Text('LinkUnbound', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
               Text('Version 1.0.0', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 8),
@@ -52,7 +52,7 @@ class AboutPage extends ConsumerWidget {
               Divider(height: 1, color: colors.outline.withAlpha(40)),
               _ActionRow(
                 icon: Icons.delete_outline,
-                label: 'Unregister Navigate',
+                label: 'Unregister LinkUnbound',
                 description: 'Remove from Windows browser list',
                 color: colors.error,
                 onTap: () => _confirmUnregister(context, ref),
@@ -102,9 +102,9 @@ class AboutPage extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => BaseDialog(
-        title: 'Unregister Navigate',
+        title: 'Unregister LinkUnbound',
         content:
-            'This will remove Navigate from the Windows browser list. '
+            'This will remove LinkUnbound from the Windows browser list. '
             'You may need to change your default browser in Windows Settings '
             'afterwards. Continue?',
         confirmLabel: 'Unregister',

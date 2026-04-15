@@ -44,12 +44,18 @@ function Remove-Folder([string]$Path) {
     }
 }
 
-Write-Host "`nNavigate Dev Cleanup" -ForegroundColor White
+Write-Host "`nLinkUnbound Dev Cleanup" -ForegroundColor White
 if ($DryRun) { Write-Host "(DRY RUN - nothing will be deleted)" -ForegroundColor Yellow }
 
 if (-not $SkipRegistry) {
-    Write-Section "Registry: Navigate registration (HKCU)"
+    Write-Section "Registry: LinkUnbound registration (HKCU)"
 
+    Remove-RegistryPath "HKCU:\SOFTWARE\Classes\LinkUnboundURL"
+    Remove-RegistryPath "HKCU:\SOFTWARE\Clients\StartMenuInternet\LinkUnbound"
+    Remove-RegistryPath "HKCU:\SOFTWARE\LinkUnbound"
+    Remove-RegistryValue "HKCU:\SOFTWARE\RegisteredApplications" "LinkUnbound"
+
+    # Legacy Navigate keys
     Remove-RegistryPath "HKCU:\SOFTWARE\Classes\NavigateURL"
     Remove-RegistryPath "HKCU:\SOFTWARE\Classes\Navigate.URL"
     Remove-RegistryPath "HKCU:\SOFTWARE\Clients\StartMenuInternet\Navigate"
@@ -65,6 +71,8 @@ if (-not $SkipRegistry) {
 
     Write-Section "Registry: URL association toasts"
 
+    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "LinkUnboundURL_http"
+    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "LinkUnboundURL_https"
     Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NavigateURL_http"
     Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NavigateURL_https"
     Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGate.URL_http"
@@ -82,7 +90,7 @@ if (-not $SkipRegistry) {
             ForEach-Object {
                 $propName = $_.Name
                 $propVal = (Get-ItemProperty -Path $openWithPath).$propName
-                if ($propVal -eq 'navigate.exe') {
+                if ($propVal -eq 'linkunbound.exe' -or $propVal -eq 'navigate.exe') {
                     if ($DryRun) { Write-Step "Would remove value: $openWithPath\$propName" }
                     else {
                         Remove-ItemProperty -Path $openWithPath -Name $propName -Force -ErrorAction SilentlyContinue
@@ -95,6 +103,7 @@ if (-not $SkipRegistry) {
 
     Write-Section "Registry: Startup (HKCU Run)"
 
+    Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "LinkUnbound"
     Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "Navigate"
     Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "NaviGate"
     Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "navigate"
@@ -105,7 +114,7 @@ if (-not $SkipRegistry) {
     if (Test-Path $muiPath) {
         Get-ItemProperty -Path $muiPath -ErrorAction SilentlyContinue |
             Get-Member -MemberType NoteProperty |
-            Where-Object { $_.Name -like '*navigate*' -or $_.Name -like '*NaviGate*' } |
+            Where-Object { $_.Name -like '*linkunbound*' -or $_.Name -like '*LinkUnbound*' -or $_.Name -like '*navigate*' -or $_.Name -like '*NaviGate*' } |
             ForEach-Object {
                 $propName = $_.Name
                 if ($DryRun) { Write-Step "Would remove MuiCache: $propName" }
@@ -121,12 +130,15 @@ if (-not $SkipRegistry) {
 if (-not $SkipFiles) {
     Write-Section "Files: AppData"
 
+    Remove-Folder "$env:APPDATA\LinkUnbound"
     Remove-Folder "$env:APPDATA\Navigate"
     Remove-Folder "$env:APPDATA\navigate"
     Remove-Folder "$env:APPDATA\com.navigate"
 
     Write-Section "Files: Temp folders"
 
+    Get-ChildItem -Path $env:TEMP -Directory -Filter "linkunbound*" -ErrorAction SilentlyContinue |
+        ForEach-Object { Remove-Folder $_.FullName }
     Get-ChildItem -Path $env:TEMP -Directory -Filter "navigate*" -ErrorAction SilentlyContinue |
         ForEach-Object { Remove-Folder $_.FullName }
     Get-ChildItem -Path $env:TEMP -Directory -Filter "Navigate*" -ErrorAction SilentlyContinue |

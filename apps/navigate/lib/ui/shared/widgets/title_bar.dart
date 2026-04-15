@@ -33,7 +33,7 @@ class TitleBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Navigate',
+              'LinkUnbound',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
