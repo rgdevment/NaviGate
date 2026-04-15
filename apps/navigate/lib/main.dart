@@ -199,7 +199,7 @@ Future<void> _initTray(
   final tray = SystemTray();
   await tray.initSystemTray(
     title: 'NaviGate',
-    iconPath: 'windows\\runner\\resources\\app_icon.ico',
+    iconPath: 'assets/app_icon.ico',
     toolTip: 'NaviGate — Browser Picker',
   );
 
