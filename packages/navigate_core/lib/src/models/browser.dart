@@ -1,0 +1,44 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'browser.g.dart';
+
+@JsonSerializable()
+final class Browser {
+  const Browser({
+    required this.id,
+    required this.name,
+    required this.executablePath,
+    required this.iconPath,
+    this.extraArgs = const [],
+    this.isCustom = false,
+  });
+
+  factory Browser.fromJson(Map<String, dynamic> json) =>
+      _$BrowserFromJson(json);
+
+  final String id;
+  final String name;
+  final String executablePath;
+  final String iconPath;
+  final List<String> extraArgs;
+  final bool isCustom;
+
+  Map<String, dynamic> toJson() => _$BrowserToJson(this);
+
+  Browser copyWith({
+    String? id,
+    String? name,
+    String? executablePath,
+    String? iconPath,
+    List<String>? extraArgs,
+    bool? isCustom,
+  }) =>
+      Browser(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        executablePath: executablePath ?? this.executablePath,
+        iconPath: iconPath ?? this.iconPath,
+        extraArgs: extraArgs ?? this.extraArgs,
+        isCustom: isCustom ?? this.isCustom,
+      );
+}
