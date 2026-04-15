@@ -92,7 +92,10 @@ void main(List<String> args) async {
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
   await windowManager.waitUntilReadyToShow(
-    const WindowOptions(titleBarStyle: TitleBarStyle.hidden),
+    const WindowOptions(
+      titleBarStyle: TitleBarStyle.hidden,
+      size: Size(1, 1),
+    ),
     () async {
       await windowManager.hide();
     },
