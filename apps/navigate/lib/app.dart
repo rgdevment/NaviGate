@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'providers.dart';
+import 'ui/settings/settings_window.dart';
+import 'ui/shared/app_theme.dart';
 
 final class NavigateApp extends ConsumerStatefulWidget {
   const NavigateApp({super.key});
@@ -37,11 +39,10 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
       home: switch (appState.mode) {
         AppMode.hidden => const SizedBox.shrink(),
-        AppMode.settings => const Scaffold(
-          body: Center(child: Text('Settings — Phase 4')),
-        ),
+        AppMode.settings => const SettingsWindow(),
         AppMode.picker => Scaffold(
           body: Center(
             child: Text('Picker: ${appState.pendingUrl ?? ""}'),

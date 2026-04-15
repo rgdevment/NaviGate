@@ -51,3 +51,60 @@ final class AppStateNotifier extends Notifier<AppState> {
   void hide() => state = const AppState();
 }
 
+final browsersProvider =
+    NotifierProvider<BrowsersNotifier, List<Browser>>(BrowsersNotifier.new);
+
+final class BrowsersNotifier extends Notifier<List<Browser>> {
+  @override
+  List<Browser> build() => ref.read(browserServiceProvider).browsers;
+
+  Future<void> refresh() async {
+    final service = ref.read(browserServiceProvider);
+    await service.scanAndMerge();
+    state = service.browsers;
+  }
+
+  Future<void> add(Browser browser) async {
+    final service = ref.read(browserServiceProvider);
+    service.addBrowser(browser);
+    await service.save();
+    state = service.browsers;
+  }
+
+  Future<void> remove(String id) async {
+    final service = ref.read(browserServiceProvider);
+    service.removeBrowser(id);
+    await service.save();
+    state = service.browsers;
+  }
+}
+
+final rulesProvider =
+    NotifierProvider<RulesNotifier, List<Rule>>(RulesNotifier.new);
+
+final class RulesNotifier extends Notifier<List<Rule>> {
+  @override
+  List<Rule> build() => ref.read(ruleServiceProvider).rules;
+
+  Future<void> updateRule(String domain, {required String browserId}) async {
+    final service = ref.read(ruleServiceProvider);
+    service.updateRule(domain, browserId: browserId);
+    await service.save();
+    state = service.rules;
+  }
+
+  Future<void> removeRule(String domain) async {
+    final service = ref.read(ruleServiceProvider);
+    service.removeRule(domain);
+    await service.save();
+    state = service.rules;
+  }
+}
+
+final isDefaultBrowserProvider = FutureProvider.autoDispose<bool>((ref) {
+  return ref.read(registrationServiceProvider).isDefault;
+});
+
+final isStartupEnabledProvider = FutureProvider.autoDispose<bool>((ref) {
+  return ref.read(startupServiceProvider).isEnabled;
+});
