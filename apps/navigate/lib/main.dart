@@ -16,6 +16,7 @@ import 'platform/windows/win_pipe_server.dart';
 import 'platform/windows/win_registration_service.dart';
 import 'platform/windows/win_startup_service.dart';
 import 'providers.dart';
+import 'ui/picker/picker_layout.dart';
 
 final _log = Logger('Main');
 
@@ -122,7 +123,12 @@ void main(List<String> args) async {
         await windowManager.show();
         await windowManager.focus();
       case AppMode.picker:
-        await windowManager.setSize(const Size(400, 350));
+        final browsers = container.read(browsersProvider);
+        final (_, rows) = PickerLayout.grid(browsers.length);
+        // Header(58) + divider(1) + grid padding(20) + rows*tile(88) +
+        // row gaps((rows-1)*8) + divider(1) + footer(36) + buffer(16)
+        final pickerHeight = 132.0 + rows * 88.0 + (rows > 1 ? (rows - 1) * 8.0 : 0);
+        await windowManager.setSize(Size(400, pickerHeight));
         await windowManager.center();
         await windowManager.setSkipTaskbar(true);
         await windowManager.setAlwaysOnTop(true);

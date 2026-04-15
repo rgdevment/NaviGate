@@ -53,15 +53,9 @@ class _PickerViewState extends ConsumerState<PickerView> {
         children: [
           _UrlHeader(url: widget.url, domain: domain),
           Divider(height: 0.5, color: colors.outline.withAlpha(50)),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: browsers.length > 9
-                  ? SingleChildScrollView(
-                      child: _buildGrid(browsers, columns, iconsDir),
-                    )
-                  : _buildGrid(browsers, columns, iconsDir),
-            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: _buildGrid(browsers, columns, iconsDir),
           ),
           Divider(height: 0.5, color: colors.outline.withAlpha(50)),
           _AlwaysOpenFooter(
@@ -211,7 +205,7 @@ class _PickerTileState extends State<_PickerTile> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 100),
-          width: 80,
+          width: 88,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
           decoration: BoxDecoration(
             color: _hovered

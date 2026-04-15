@@ -53,26 +53,29 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: ScaleTransition(
-          scale: _scaleAnim,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colors.outline.withAlpha(60)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(80),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: PickerView(url: widget.url),
+      body: Center(
+        child: FadeTransition(
+          opacity: _fadeAnim,
+          child: ScaleTransition(
+            scale: _scaleAnim,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.outline.withAlpha(60)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(80),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: PickerView(url: widget.url),
+              ),
             ),
           ),
         ),
