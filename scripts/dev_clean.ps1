@@ -151,7 +151,7 @@ if (-not $SkipFiles) {
     $buildDir = Join-Path $projectRoot "build"
     Remove-Folder $buildDir
 
-    $appsBuildDir = Join-Path $projectRoot "apps\navigate\build"
+    $appsBuildDir = Join-Path $projectRoot "apps\linkunbound\build"
     Remove-Folder $appsBuildDir
 }
 

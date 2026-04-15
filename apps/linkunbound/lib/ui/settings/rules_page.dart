@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 
 import '../../providers.dart';
 import '../shared/widgets/base_dialog.dart';

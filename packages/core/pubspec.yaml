@@ -1,4 +1,4 @@
-name: navigate_core
+name: linkunbound_core
 description: Core business logic for LinkUnbound browser picker. Pure Dart, no Flutter dependencies.
 version: 1.0.0
 repository: https://github.com/RgDevment/NaviGate

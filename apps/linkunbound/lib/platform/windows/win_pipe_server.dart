@@ -5,7 +5,7 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:logging/logging.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 
 final _log = Logger('WinPipeServer');
 

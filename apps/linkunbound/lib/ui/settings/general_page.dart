@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers.dart';

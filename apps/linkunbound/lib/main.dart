@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -127,11 +127,11 @@ void main(List<String> args) async {
         await windowManager.focus();
       case AppMode.picker:
         final browsers = container.read(browsersProvider);
-        final (_, rows) = PickerLayout.grid(browsers.length);
-        // Header(58) + divider(1) + grid padding(20) + rows*tile(88) +
-        // row gaps((rows-1)*8) + divider(1) + footer(36) + buffer(16)
-        final pickerHeight = 132.0 + rows * 88.0 + (rows > 1 ? (rows - 1) * 8.0 : 0);
-        await windowManager.setSize(Size(400, pickerHeight));
+        final (columns, rows) = PickerLayout.grid(browsers.length);
+        final gridWidth = columns * 88.0 + (columns > 1 ? (columns - 1) * 8.0 : 0);
+        final pickerWidth = (gridWidth + 48.0).clamp(340.0, 600.0);
+        final pickerHeight = 140.0 + rows * 88.0 + (rows > 1 ? (rows - 1) * 8.0 : 0);
+        await windowManager.setSize(Size(pickerWidth, pickerHeight));
         await windowManager.center();
         await windowManager.setSkipTaskbar(true);
         await windowManager.setAlwaysOnTop(true);

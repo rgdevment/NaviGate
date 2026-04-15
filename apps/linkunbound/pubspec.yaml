@@ -1,4 +1,4 @@
-name: navigate
+name: linkunbound
 description: LinkUnbound — Browser picker for Windows. Intercepts link clicks and lets you choose which browser opens them.
 version: 1.0.0+1
 publish_to: none
@@ -12,8 +12,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  navigate_core:
-    path: ../../packages/navigate_core
+  linkunbound_core:
+    path: ../../packages/core
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   window_manager: ^0.5.1
