@@ -81,6 +81,13 @@ final class BrowsersNotifier extends Notifier<List<Browser>> {
     await service.save();
     state = service.browsers;
   }
+
+  Future<void> update(String id, Browser browser) async {
+    final service = ref.read(browserServiceProvider);
+    service.updateBrowser(id, browser);
+    await service.save();
+    state = service.browsers;
+  }
 }
 
 final rulesProvider =

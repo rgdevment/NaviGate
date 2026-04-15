@@ -9,7 +9,7 @@ import 'package:navigate_core/navigate_core.dart';
 
 final _log = Logger('WinPipeServer');
 
-const _pipeName = r'\\.\pipe\NaviGate';
+const _pipeName = r'\\.\pipe\Navigate';
 const _bufferSize = 4096;
 
 const _pipeAccessDuplex = 0x00000003;

@@ -1,5 +1,5 @@
 name: navigate_core
-description: Core business logic for NaviGate browser picker. Pure Dart, no Flutter dependencies.
+description: Core business logic for Navigate browser picker. Pure Dart, no Flutter dependencies.
 version: 1.0.0
 repository: https://github.com/RgDevment/NaviGate
 publish_to: none

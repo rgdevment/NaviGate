@@ -44,12 +44,19 @@ function Remove-Folder([string]$Path) {
     }
 }
 
-Write-Host "`nNaviGate Dev Cleanup" -ForegroundColor White
+Write-Host "`nNavigate Dev Cleanup" -ForegroundColor White
 if ($DryRun) { Write-Host "(DRY RUN - nothing will be deleted)" -ForegroundColor Yellow }
 
 if (-not $SkipRegistry) {
-    Write-Section "Registry: NaviGate registration (HKCU)"
+    Write-Section "Registry: Navigate registration (HKCU)"
 
+    Remove-RegistryPath "HKCU:\SOFTWARE\Classes\NavigateURL"
+    Remove-RegistryPath "HKCU:\SOFTWARE\Classes\Navigate.URL"
+    Remove-RegistryPath "HKCU:\SOFTWARE\Clients\StartMenuInternet\Navigate"
+    Remove-RegistryPath "HKCU:\SOFTWARE\Navigate"
+    Remove-RegistryValue "HKCU:\SOFTWARE\RegisteredApplications" "Navigate"
+
+    # Legacy NaviGate keys
     Remove-RegistryPath "HKCU:\SOFTWARE\Classes\NaviGateURL"
     Remove-RegistryPath "HKCU:\SOFTWARE\Classes\NaviGate.URL"
     Remove-RegistryPath "HKCU:\SOFTWARE\Clients\StartMenuInternet\NaviGate"
@@ -58,6 +65,8 @@ if (-not $SkipRegistry) {
 
     Write-Section "Registry: URL association toasts"
 
+    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NavigateURL_http"
+    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NavigateURL_https"
     Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGate.URL_http"
     Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGate.URL_https"
     Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGateURL_http"
@@ -86,6 +95,7 @@ if (-not $SkipRegistry) {
 
     Write-Section "Registry: Startup (HKCU Run)"
 
+    Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "Navigate"
     Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "NaviGate"
     Remove-RegistryValue "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "navigate"
 
@@ -111,12 +121,15 @@ if (-not $SkipRegistry) {
 if (-not $SkipFiles) {
     Write-Section "Files: AppData"
 
+    Remove-Folder "$env:APPDATA\Navigate"
     Remove-Folder "$env:APPDATA\navigate"
     Remove-Folder "$env:APPDATA\com.navigate"
 
     Write-Section "Files: Temp folders"
 
-    Get-ChildItem -Path $env:TEMP -Directory -Filter "NaviGate*" -ErrorAction SilentlyContinue |
+    Get-ChildItem -Path $env:TEMP -Directory -Filter "navigate*" -ErrorAction SilentlyContinue |
+        ForEach-Object { Remove-Folder $_.FullName }
+    Get-ChildItem -Path $env:TEMP -Directory -Filter "Navigate*" -ErrorAction SilentlyContinue |
         ForEach-Object { Remove-Folder $_.FullName }
 
     Write-Section "Files: Build outputs"

@@ -5,7 +5,7 @@ import 'package:win32_registry/win32_registry.dart';
 final _log = Logger('WinStartupService');
 
 const _runKeyPath = r'Software\Microsoft\Windows\CurrentVersion\Run';
-const _valueName = 'NaviGate';
+const _valueName = 'Navigate';
 
 final class WinStartupService implements StartupService {
   @override

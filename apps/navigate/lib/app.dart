@@ -35,6 +35,12 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
   }
 
   @override
+  void onWindowFocus() {
+    ref.invalidate(isDefaultBrowserProvider);
+    ref.invalidate(isStartupEnabledProvider);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider);
 
