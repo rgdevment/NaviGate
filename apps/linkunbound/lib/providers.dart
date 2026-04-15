@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 
 final browserServiceProvider = Provider<BrowserService>(
   (_) => throw StateError('Override at startup'),

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 
 import '../../providers.dart';
 import 'picker_layout.dart';
@@ -80,6 +80,7 @@ class _PickerViewState extends ConsumerState<PickerView> {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
+      alignment: WrapAlignment.center,
       children: [
         for (var i = 0; i < browsers.length; i++)
           _PickerTile(

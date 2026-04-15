@@ -1,7 +1,7 @@
 import 'dart:ffi';
 
 import 'package:logging/logging.dart';
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 final _log = Logger('WinRegistrationService');

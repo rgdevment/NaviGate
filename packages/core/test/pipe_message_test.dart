@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:navigate_core/navigate_core.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:test/test.dart';
 
 void main() {
