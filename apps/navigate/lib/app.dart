@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'providers.dart';
+import 'ui/picker/picker_window.dart';
 import 'ui/settings/settings_window.dart';
 import 'ui/shared/app_theme.dart';
 
@@ -43,11 +44,7 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
       home: switch (appState.mode) {
         AppMode.hidden => const SizedBox.shrink(),
         AppMode.settings => const SettingsWindow(),
-        AppMode.picker => Scaffold(
-          body: Center(
-            child: Text('Picker: ${appState.pendingUrl ?? ""}'),
-          ),
-        ),
+        AppMode.picker => PickerWindow(url: appState.pendingUrl ?? ''),
       },
     );
   }
