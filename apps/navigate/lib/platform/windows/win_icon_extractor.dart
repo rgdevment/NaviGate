@@ -13,12 +13,15 @@ final class WinIconExtractor implements IconExtractor {
 
     await outFile.parent.create(recursive: true);
 
+    final escapedExe = executablePath.replaceAll("'", "''");
+    final escapedOut = outputPath.replaceAll("'", "''");
+
     final script = '''
 Add-Type -AssemblyName System.Drawing
-\$icon = [System.Drawing.Icon]::ExtractAssociatedIcon("$executablePath")
+\$icon = [System.Drawing.Icon]::ExtractAssociatedIcon('$escapedExe')
 if (\$icon) {
   \$bmp = \$icon.ToBitmap()
-  \$bmp.Save("$outputPath", [System.Drawing.Imaging.ImageFormat]::Png)
+  \$bmp.Save('$escapedOut', [System.Drawing.Imaging.ImageFormat]::Png)
   \$bmp.Dispose()
   \$icon.Dispose()
 }

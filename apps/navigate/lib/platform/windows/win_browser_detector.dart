@@ -100,6 +100,9 @@ final class WinBrowserDetector implements BrowserDetector {
       return trimmed.substring(1, end);
     }
 
+    final exeIndex = trimmed.toLowerCase().indexOf('.exe');
+    if (exeIndex > 0) return trimmed.substring(0, exeIndex + 4);
+
     final spaceIndex = trimmed.indexOf(' ');
     if (spaceIndex < 0) return trimmed;
     return trimmed.substring(0, spaceIndex);
