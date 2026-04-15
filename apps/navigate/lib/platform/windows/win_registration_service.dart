@@ -34,18 +34,18 @@ final class WinRegistrationService implements RegistrationService {
     _writeRegisteredApplications();
     _notifyShell();
 
-    _log.info('Registered NaviGate as browser handler');
+    _log.info('Registered Navigate as browser handler');
   }
 
   @override
   Future<void> unregister() async {
-    _deleteKeyTree(r'Software\Classes\NaviGateURL');
-    _deleteKeyTree(r'Software\Clients\StartMenuInternet\NaviGate');
-    _deleteKeyTree(r'Software\NaviGate');
+    _deleteKeyTree(r'Software\Classes\NavigateURL');
+    _deleteKeyTree(r'Software\Clients\StartMenuInternet\Navigate');
+    _deleteKeyTree(r'Software\Navigate');
     _removeRegisteredApplication();
     _notifyShell();
 
-    _log.info('Unregistered NaviGate from browser handlers');
+    _log.info('Unregistered Navigate from browser handlers');
   }
 
   @override
@@ -58,7 +58,7 @@ final class WinRegistrationService implements RegistrationService {
       );
       final progId = key.getValueAsString('ProgId');
       key.close();
-      return progId == 'NaviGateURL';
+      return progId == 'NavigateURL';
     } on Exception {
       return false;
     }
@@ -71,15 +71,15 @@ final class WinRegistrationService implements RegistrationService {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-    final progId = root.createKey('NaviGateURL');
+    final progId = root.createKey('NavigateURL');
     progId.createValue(
-      const RegistryValue('', RegistryValueType.string, 'NaviGate URL'),
+      const RegistryValue('', RegistryValueType.string, 'Navigate URL'),
     );
     progId.createValue(
       const RegistryValue(
         'FriendlyTypeName',
         RegistryValueType.string,
-        'NaviGate URL',
+        'Navigate URL',
       ),
     );
     progId.createValue(
@@ -91,7 +91,7 @@ final class WinRegistrationService implements RegistrationService {
       const RegistryValue(
         'ApplicationName',
         RegistryValueType.string,
-        'NaviGate',
+        'Navigate',
       ),
     );
     app.createValue(
@@ -133,9 +133,9 @@ final class WinRegistrationService implements RegistrationService {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-    final key = root.createKey('NaviGate');
+    final key = root.createKey('Navigate');
     key.createValue(
-      const RegistryValue('', RegistryValueType.string, 'NaviGate'),
+      const RegistryValue('', RegistryValueType.string, 'Navigate'),
     );
 
     final defaultIcon = key.createKey('DefaultIcon');
@@ -174,12 +174,12 @@ final class WinRegistrationService implements RegistrationService {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-    final caps = root.createKey(r'NaviGate\Capabilities');
+    final caps = root.createKey(r'Navigate\Capabilities');
     caps.createValue(
       const RegistryValue(
         'ApplicationName',
         RegistryValueType.string,
-        'NaviGate',
+        'Navigate',
       ),
     );
     caps.createValue(
@@ -202,26 +202,26 @@ final class WinRegistrationService implements RegistrationService {
       const RegistryValue(
         'StartMenuInternet',
         RegistryValueType.string,
-        'NaviGate',
+        'Navigate',
       ),
     );
     startMenu.close();
 
     final urlAssoc = caps.createKey('URLAssociations');
     urlAssoc.createValue(
-      const RegistryValue('http', RegistryValueType.string, 'NaviGateURL'),
+      const RegistryValue('http', RegistryValueType.string, 'NavigateURL'),
     );
     urlAssoc.createValue(
-      const RegistryValue('https', RegistryValueType.string, 'NaviGateURL'),
+      const RegistryValue('https', RegistryValueType.string, 'NavigateURL'),
     );
     urlAssoc.close();
 
     final fileAssoc = caps.createKey('FileAssociations');
     fileAssoc.createValue(
-      const RegistryValue('.htm', RegistryValueType.string, 'NaviGateURL'),
+      const RegistryValue('.htm', RegistryValueType.string, 'NavigateURL'),
     );
     fileAssoc.createValue(
-      const RegistryValue('.html', RegistryValueType.string, 'NaviGateURL'),
+      const RegistryValue('.html', RegistryValueType.string, 'NavigateURL'),
     );
     fileAssoc.close();
 
@@ -237,9 +237,9 @@ final class WinRegistrationService implements RegistrationService {
     );
     key.createValue(
       const RegistryValue(
-        'NaviGate',
+        'Navigate',
         RegistryValueType.string,
-        r'Software\NaviGate\Capabilities',
+        r'Software\Navigate\Capabilities',
       ),
     );
     key.close();
@@ -252,7 +252,7 @@ final class WinRegistrationService implements RegistrationService {
         path: r'Software\RegisteredApplications',
         desiredAccessRights: AccessRights.allAccess,
       );
-      key.deleteValue('NaviGate');
+      key.deleteValue('Navigate');
       key.close();
     } on Exception {
       // Value may not exist

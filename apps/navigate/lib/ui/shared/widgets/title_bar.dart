@@ -24,9 +24,16 @@ class TitleBar extends StatelessWidget {
         color: colors.surface,
         child: Row(
           children: [
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
+            Image.asset(
+              'assets/app_icon.png',
+              width: 16,
+              height: 16,
+              filterQuality: FilterQuality.medium,
+            ),
+            const SizedBox(width: 8),
             Text(
-              'NaviGate',
+              'Navigate',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

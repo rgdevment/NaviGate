@@ -23,7 +23,7 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final appDataDir = Directory(
-    '${Platform.environment['APPDATA']}\\NaviGate',
+    '${Platform.environment['APPDATA']}\\Navigate',
   );
   final browsersFile = File('${appDataDir.path}\\browsers.json');
   final rulesFile = File('${appDataDir.path}\\rules.json');
@@ -92,7 +92,9 @@ void main(List<String> args) async {
   await windowManager.setPreventClose(true);
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(titleBarStyle: TitleBarStyle.hidden),
-    () async {},
+    () async {
+      await windowManager.hide();
+    },
   );
 
   final container = ProviderContainer(
@@ -198,9 +200,9 @@ Future<void> _initTray(
 ) async {
   final tray = SystemTray();
   await tray.initSystemTray(
-    title: 'NaviGate',
+    title: 'Navigate',
     iconPath: 'assets/app_icon.ico',
-    toolTip: 'NaviGate — Browser Picker',
+    toolTip: 'Navigate — Browser Picker',
   );
 
   final menu = Menu();
@@ -223,8 +225,11 @@ Future<void> _initTray(
   await tray.setContextMenu(menu);
 
   tray.registerSystemTrayEventHandler((eventName) {
-    if (eventName == kSystemTrayEventClick) {
-      container.read(appStateProvider.notifier).showSettings();
+    switch (eventName) {
+      case kSystemTrayEventClick:
+        container.read(appStateProvider.notifier).showSettings();
+      case kSystemTrayEventRightClick:
+        tray.popUpContextMenu();
     }
   });
 }

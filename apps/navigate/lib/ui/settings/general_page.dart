@@ -41,15 +41,17 @@ class GeneralPage extends ConsumerWidget {
               Expanded(
                 child: Text(
                   isDefaultAsync.valueOrNull == true
-                      ? 'NaviGate is set as the default browser'
-                      : 'NaviGate is not the default browser',
+                      ? 'Navigate is set as the default browser'
+                      : 'Navigate is not the default browser',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
               if (isDefaultAsync.valueOrNull != true)
                 TextButton(
                   onPressed: () => launchUrl(
-                    Uri.parse('ms-settings:defaultapps'),
+                    Uri.parse(
+                      'ms-settings:defaultapps?registeredAppUser=Navigate',
+                    ),
                   ),
                   child: const Text('Set default'),
                 ),
@@ -112,6 +114,18 @@ class GeneralPage extends ConsumerWidget {
                       // Best-effort icon extraction
                     }
                   }
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Found ${ref.read(browsersProvider).length} browsers',
+                        ),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        width: 250,
+                      ),
+                    );
+                  }
                 },
                 icon: const Icon(Icons.refresh, size: 18),
                 padding: EdgeInsets.zero,
@@ -130,24 +144,43 @@ class GeneralPage extends ConsumerWidget {
                   (b) => BrowserTile(
                     name: b.name,
                     iconPath: '${iconsDir.path}\\${b.id}.png',
-                    trailing: b.isCustom
-                        ? IconButton(
-                            onPressed: () => ref
-                                .read(browsersProvider.notifier)
-                                .remove(b.id),
-                            icon: Icon(
-                              Icons.close,
-                              size: 16,
-                              color: colors.error,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 28,
-                              minHeight: 28,
-                            ),
-                            tooltip: 'Remove',
-                          )
-                        : null,
+                    onTap: () => _showEditBrowserDialog(context, ref, b),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (action) async {
+                        switch (action) {
+                          case 'edit':
+                            _showEditBrowserDialog(context, ref, b);
+                          case 'duplicate':
+                            await _duplicateBrowser(context, ref, b);
+                          case 'remove':
+                            ref.read(browsersProvider.notifier).remove(b.id);
+                        }
+                      },
+                      icon: Icon(
+                        Icons.more_vert,
+                        size: 16,
+                        color: colors.onSurfaceVariant,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Edit'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'duplicate',
+                          child: Text('Duplicate'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'remove',
+                          child: Text('Remove'),
+                        ),
+                      ],
+                    ),
                   ),
                 )
                 .toList(),
@@ -158,8 +191,54 @@ class GeneralPage extends ConsumerWidget {
   }
 
   void _showAddBrowserDialog(BuildContext context, WidgetRef ref) {
-    final nameController = TextEditingController();
-    final pathController = TextEditingController();
+    _showBrowserFormDialog(context, ref);
+  }
+
+  void _showEditBrowserDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Browser browser,
+  ) {
+    _showBrowserFormDialog(context, ref, existing: browser);
+  }
+
+  Future<void> _duplicateBrowser(
+    BuildContext context,
+    WidgetRef ref,
+    Browser source,
+  ) async {
+    final copyId =
+        'custom-${source.id}-copy-${DateTime.now().millisecondsSinceEpoch}';
+    final copy = Browser(
+      id: copyId,
+      name: '${source.name} (Copy)',
+      executablePath: source.executablePath,
+      iconPath: source.iconPath,
+      extraArgs: [...source.extraArgs],
+      isCustom: true,
+    );
+    await ref.read(browsersProvider.notifier).add(copy);
+
+    final iconsDir = ref.read(iconsDirProvider);
+    final sourceIcon = File('${iconsDir.path}\\${source.id}.png');
+    final destIcon = File('${iconsDir.path}\\$copyId.png');
+    if (sourceIcon.existsSync()) {
+      await sourceIcon.copy(destIcon.path);
+    }
+  }
+
+  void _showBrowserFormDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    Browser? existing,
+  }) {
+    final isEdit = existing != null;
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final pathController =
+        TextEditingController(text: existing?.executablePath ?? '');
+    final argsController =
+        TextEditingController(text: existing?.extraArgs.join(' ') ?? '');
+    final iconController = TextEditingController();
 
     showDialog<void>(
       context: context,
@@ -171,7 +250,7 @@ class GeneralPage extends ConsumerWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 380),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -179,42 +258,27 @@ class GeneralPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Add custom browser',
+                    isEdit ? 'Edit browser' : 'Add custom browser',
                     style: Theme.of(ctx).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Name',
-                      filled: true,
-                      fillColor: colors.surfaceBright,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                    ),
-                    style: Theme.of(ctx).textTheme.bodyMedium,
+                  _FormField(controller: nameController, label: 'Name'),
+                  const SizedBox(height: 12),
+                  _FormField(
+                    controller: pathController,
+                    label: 'Executable path',
+                    enabled: isEdit ? existing.isCustom : true,
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: pathController,
-                    decoration: InputDecoration(
-                      labelText: 'Executable path',
-                      filled: true,
-                      fillColor: colors.surfaceBright,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                    ),
-                    style: Theme.of(ctx).textTheme.bodyMedium,
+                  _FormField(
+                    controller: argsController,
+                    label: 'Extra arguments (space-separated)',
+                  ),
+                  const SizedBox(height: 12),
+                  _FormField(
+                    controller: iconController,
+                    label: 'Custom icon path (optional)',
+                    hint: 'Leave empty to auto-detect from exe',
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -231,26 +295,61 @@ class GeneralPage extends ConsumerWidget {
                           final path = pathController.text.trim();
                           if (name.isEmpty || path.isEmpty) return;
 
-                          final id = name
-                              .toLowerCase()
-                              .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-                              .replaceAll(RegExp(r'^-|-$'), '');
+                          final args = argsController.text.trim();
+                          final extraArgs = args.isEmpty
+                              ? <String>[]
+                              : args.split(RegExp(r'\s+'));
 
-                          await ref.read(browsersProvider.notifier).add(
-                                Browser(
-                                  id: 'custom-$id',
-                                  name: name,
-                                  executablePath: path,
-                                  iconPath: path,
-                                  isCustom: true,
-                                ),
-                              );
+                          final customIcon = iconController.text.trim();
+
+                          if (isEdit) {
+                            final updated = existing.copyWith(
+                              name: name,
+                              executablePath:
+                                  existing.isCustom ? path : null,
+                              extraArgs: extraArgs,
+                            );
+                            await ref
+                                .read(browsersProvider.notifier)
+                                .update(existing.id, updated);
+                          } else {
+                            final id = name
+                                .toLowerCase()
+                                .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+                                .replaceAll(RegExp(r'^-|-$'), '');
+
+                            await ref.read(browsersProvider.notifier).add(
+                                  Browser(
+                                    id: 'custom-$id',
+                                    name: name,
+                                    executablePath: path,
+                                    iconPath: path,
+                                    isCustom: true,
+                                    extraArgs: extraArgs,
+                                  ),
+                                );
+                          }
 
                           final iconsDir = ref.read(iconsDirProvider);
+                          final browserId = isEdit
+                              ? existing.id
+                              : 'custom-${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-\$'), '')}';
+                          final iconSource =
+                              customIcon.isNotEmpty ? customIcon : path;
+                          final iconDest =
+                              File('${iconsDir.path}\\$browserId.png');
+
+                          if (customIcon.isNotEmpty &&
+                              iconDest.existsSync()) {
+                            await iconDest.delete();
+                          }
+
                           try {
-                            await ref.read(iconExtractorProvider).extractIcon(
-                                  path,
-                                  '${iconsDir.path}\\custom-$id.png',
+                            await ref
+                                .read(iconExtractorProvider)
+                                .extractIcon(
+                                  iconSource,
+                                  '${iconsDir.path}\\$browserId.png',
                                 );
                           } on Exception {
                             // Best-effort
@@ -258,7 +357,7 @@ class GeneralPage extends ConsumerWidget {
 
                           if (ctx.mounted) Navigator.of(ctx).pop();
                         },
-                        child: const Text('Add'),
+                        child: Text(isEdit ? 'Save' : 'Add'),
                       ),
                     ],
                   ),
@@ -268,6 +367,44 @@ class GeneralPage extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _FormField extends StatelessWidget {
+  const _FormField({
+    required this.controller,
+    required this.label,
+    this.hint,
+    this.enabled = true,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String? hint;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        filled: true,
+        fillColor: colors.surfaceBright,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
+      ),
+      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 }
