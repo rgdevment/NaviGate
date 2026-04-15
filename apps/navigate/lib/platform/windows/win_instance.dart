@@ -32,7 +32,7 @@ typedef _CloseHandleDart = int Function(int hObject);
 typedef _AllowSetForegroundWindowNative = Int32 Function(Uint32 dwProcessId);
 typedef _AllowSetForegroundWindowDart = int Function(int dwProcessId);
 
-const _mutexName = r'Local\Navigate_SingleInstance';
+const _mutexName = r'Local\LinkUnbound_SingleInstance';
 const _waitObject0 = 0;
 const _waitAbandoned = 0x80;
 const _asfwAny = 0xFFFFFFFF;

@@ -23,7 +23,7 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final appDataDir = Directory(
-    '${Platform.environment['APPDATA']}\\Navigate',
+    '${Platform.environment['APPDATA']}\\LinkUnbound',
   );
   final browsersFile = File('${appDataDir.path}\\browsers.json');
   final rulesFile = File('${appDataDir.path}\\rules.json');
@@ -200,9 +200,9 @@ Future<void> _initTray(
 ) async {
   final tray = SystemTray();
   await tray.initSystemTray(
-    title: 'Navigate',
+    title: 'LinkUnbound',
     iconPath: 'assets/app_icon.ico',
-    toolTip: 'Navigate — Browser Picker',
+    toolTip: 'LinkUnbound — Browser Picker',
   );
 
   final menu = Menu();

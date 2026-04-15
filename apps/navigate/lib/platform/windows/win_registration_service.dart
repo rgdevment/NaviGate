@@ -34,18 +34,18 @@ final class WinRegistrationService implements RegistrationService {
     _writeRegisteredApplications();
     _notifyShell();
 
-    _log.info('Registered Navigate as browser handler');
+    _log.info('Registered LinkUnbound as browser handler');
   }
 
   @override
   Future<void> unregister() async {
-    _deleteKeyTree(r'Software\Classes\NavigateURL');
-    _deleteKeyTree(r'Software\Clients\StartMenuInternet\Navigate');
-    _deleteKeyTree(r'Software\Navigate');
+    _deleteKeyTree(r'Software\Classes\LinkUnboundURL');
+    _deleteKeyTree(r'Software\Clients\StartMenuInternet\LinkUnbound');
+    _deleteKeyTree(r'Software\LinkUnbound');
     _removeRegisteredApplication();
     _notifyShell();
 
-    _log.info('Unregistered Navigate from browser handlers');
+    _log.info('Unregistered LinkUnbound from browser handlers');
   }
 
   @override
@@ -58,7 +58,7 @@ final class WinRegistrationService implements RegistrationService {
       );
       final progId = key.getValueAsString('ProgId');
       key.close();
-      return progId == 'NavigateURL';
+      return progId == 'LinkUnboundURL';
     } on Exception {
       return false;
     }
@@ -71,15 +71,15 @@ final class WinRegistrationService implements RegistrationService {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-    final progId = root.createKey('NavigateURL');
+    final progId = root.createKey('LinkUnboundURL');
     progId.createValue(
-      const RegistryValue('', RegistryValueType.string, 'Navigate URL'),
+      const RegistryValue('', RegistryValueType.string, 'LinkUnbound URL'),
     );
     progId.createValue(
       const RegistryValue(
         'FriendlyTypeName',
         RegistryValueType.string,
-        'Navigate URL',
+        'LinkUnbound URL',
       ),
     );
     progId.createValue(
@@ -91,7 +91,7 @@ final class WinRegistrationService implements RegistrationService {
       const RegistryValue(
         'ApplicationName',
         RegistryValueType.string,
-        'Navigate',
+        'LinkUnbound',
       ),
     );
     app.createValue(
@@ -133,9 +133,9 @@ final class WinRegistrationService implements RegistrationService {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-    final key = root.createKey('Navigate');
+    final key = root.createKey('LinkUnbound');
     key.createValue(
-      const RegistryValue('', RegistryValueType.string, 'Navigate'),
+      const RegistryValue('', RegistryValueType.string, 'LinkUnbound'),
     );
 
     final defaultIcon = key.createKey('DefaultIcon');
@@ -174,12 +174,12 @@ final class WinRegistrationService implements RegistrationService {
       desiredAccessRights: AccessRights.allAccess,
     );
 
-    final caps = root.createKey(r'Navigate\Capabilities');
+    final caps = root.createKey(r'LinkUnbound\Capabilities');
     caps.createValue(
       const RegistryValue(
         'ApplicationName',
         RegistryValueType.string,
-        'Navigate',
+        'LinkUnbound',
       ),
     );
     caps.createValue(
@@ -202,26 +202,26 @@ final class WinRegistrationService implements RegistrationService {
       const RegistryValue(
         'StartMenuInternet',
         RegistryValueType.string,
-        'Navigate',
+        'LinkUnbound',
       ),
     );
     startMenu.close();
 
     final urlAssoc = caps.createKey('URLAssociations');
     urlAssoc.createValue(
-      const RegistryValue('http', RegistryValueType.string, 'NavigateURL'),
+      const RegistryValue('http', RegistryValueType.string, 'LinkUnboundURL'),
     );
     urlAssoc.createValue(
-      const RegistryValue('https', RegistryValueType.string, 'NavigateURL'),
+      const RegistryValue('https', RegistryValueType.string, 'LinkUnboundURL'),
     );
     urlAssoc.close();
 
     final fileAssoc = caps.createKey('FileAssociations');
     fileAssoc.createValue(
-      const RegistryValue('.htm', RegistryValueType.string, 'NavigateURL'),
+      const RegistryValue('.htm', RegistryValueType.string, 'LinkUnboundURL'),
     );
     fileAssoc.createValue(
-      const RegistryValue('.html', RegistryValueType.string, 'NavigateURL'),
+      const RegistryValue('.html', RegistryValueType.string, 'LinkUnboundURL'),
     );
     fileAssoc.close();
 
@@ -237,9 +237,9 @@ final class WinRegistrationService implements RegistrationService {
     );
     key.createValue(
       const RegistryValue(
-        'Navigate',
+        'LinkUnbound',
         RegistryValueType.string,
-        r'Software\Navigate\Capabilities',
+        r'Software\LinkUnbound\Capabilities',
       ),
     );
     key.close();
@@ -252,7 +252,7 @@ final class WinRegistrationService implements RegistrationService {
         path: r'Software\RegisteredApplications',
         desiredAccessRights: AccessRights.allAccess,
       );
-      key.deleteValue('Navigate');
+      key.deleteValue('LinkUnbound');
       key.close();
     } on Exception {
       // Value may not exist

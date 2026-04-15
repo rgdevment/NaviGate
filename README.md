@@ -1,6 +1,6 @@
-﻿# NaviGate
+﻿# LinkUnbound
 
-Browser picker for Windows. Every link you click — in Teams, Outlook, Slack, a PDF, wherever — gets intercepted by NaviGate. If there's a domain rule, the assigned browser opens silently. If not, a small picker appears near your cursor and lets you choose.
+Browser picker for Windows. Every link you click — in Teams, Outlook, Slack, a PDF, wherever — gets intercepted by LinkUnbound. If there's a domain rule, the assigned browser opens silently. If not, a small picker appears near your cursor and lets you choose.
 
 ## What it does
 
@@ -19,10 +19,10 @@ Browser picker for Windows. Every link you click — in Teams, Outlook, Slack, a
 
 ## Setup
 
-1. Run `navigate.exe`
-2. On first launch, NaviGate scans your installed browsers and registers itself
-3. In the settings window, click **Set as default** — Windows Settings opens, select NaviGate
-4. Done — every link now goes through NaviGate
+1. Run `linkunbound.exe`
+2. On first launch, LinkUnbound scans your installed browsers and registers itself
+3. In the settings window, click **Set as default** — Windows Settings opens, select LinkUnbound
+4. Done — every link now goes through LinkUnbound
 
 ## How it works
 
@@ -44,7 +44,7 @@ Rules match hierarchically. A rule for `google.com` covers `mail.google.com`, `d
 
 One exe, two modes:
 
-- `navigate.exe` (no args) → settings + tray (resident process)
-- `navigate.exe "https://..."` (link click) → reads JSON from disk, applies rules or shows picker, launches browser, exits
+- `linkunbound.exe` (no args) → settings + tray (resident process)
+- `linkunbound.exe "https://..."` (link click) → sends URL via named pipe to resident, or operates standalone if no resident
 
-No IPC between processes. Disk (JSON) is the shared state. A Windows mutex prevents duplicate settings windows.
+The resident process listens on a named pipe. Second instances send the URL and exit immediately. A Windows mutex prevents duplicate resident processes.
