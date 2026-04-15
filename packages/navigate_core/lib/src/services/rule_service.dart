@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
@@ -20,11 +21,20 @@ final class RuleService {
       return;
     }
     _log.info('Loading rules from ${rulesFile.path}');
-    throw UnimplementedError();
+    final content = await rulesFile.readAsString();
+    final decoded = jsonDecode(content) as List;
+    _rules = decoded
+        .map((e) => Rule.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> save() async {
-    throw UnimplementedError();
+    _log.info('Saving ${_rules.length} rules to ${rulesFile.path}');
+    await rulesFile.parent.create(recursive: true);
+    const encoder = JsonEncoder.withIndent('  ');
+    await rulesFile.writeAsString(
+      encoder.convert(_rules.map((r) => r.toJson()).toList()),
+    );
   }
 
   void addRule(Rule rule) {
