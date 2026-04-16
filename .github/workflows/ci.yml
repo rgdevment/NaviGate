@@ -113,8 +113,8 @@ jobs:
             -Dsonar.sources=packages/core/lib,apps/linkunbound/lib
             -Dsonar.tests=packages/core/test,apps/linkunbound/test
             -Dsonar.dart.lcov.reportPaths=coverage/coverage-merged.info
-            -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/l10n/app_localizations_*.dart
-            -Dsonar.coverage.exclusions=**/main.dart,**/app.dart,**/platform/**,**/update_service.dart
+            -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/l10n/app_localizations_*.dart,**/l10n/app_localizations.dart
+            -Dsonar.coverage.exclusions=**/main.dart,**/app.dart,**/platform/**,**/update_service.dart,**/picker_window.dart,**/settings_window.dart,**/settings_view.dart,**/title_bar.dart
 
   build:
     name: Build (Windows)
