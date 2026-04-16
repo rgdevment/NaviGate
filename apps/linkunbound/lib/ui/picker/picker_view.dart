@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
+import 'package:logging/logging.dart';
 
 import '../../providers.dart';
-import 'picker_layout.dart';
+
+final _log = Logger('PickerView');
 
 class PickerView extends ConsumerStatefulWidget {
   const PickerView({required this.url, super.key});
@@ -25,9 +27,10 @@ class _PickerViewState extends ConsumerState<PickerView> {
     final colors = Theme.of(context).colorScheme;
     final browsers = ref.watch(browsersProvider);
     final iconsDir = ref.read(iconsDirProvider);
-    final (columns, _) = PickerLayout.grid(browsers.length);
     final uri = Uri.tryParse(widget.url);
     final domain = uri?.host ?? widget.url;
+
+    _log.info('Building: ${browsers.length} browsers, domain=$domain');
 
     return Focus(
       autofocus: true,
@@ -49,13 +52,20 @@ class _PickerViewState extends ConsumerState<PickerView> {
         return KeyEventResult.ignored;
       },
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           _UrlHeader(url: widget.url, domain: domain),
           Divider(height: 0.5, color: colors.outline.withAlpha(50)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: _buildGrid(browsers, columns, iconsDir),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              itemCount: browsers.length,
+              itemBuilder: (context, index) => _BrowserRow(
+                browser: browsers[index],
+                iconPath: '${iconsDir.path}\\${browsers[index].id}.png',
+                shortcut: index < 9 ? '${index + 1}' : null,
+                onTap: () => _launch(browsers[index], iconsDir),
+              ),
+            ),
           ),
           Divider(height: 0.5, color: colors.outline.withAlpha(50)),
           _AlwaysOpenFooter(
@@ -64,32 +74,6 @@ class _PickerViewState extends ConsumerState<PickerView> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildGrid(List<Browser> browsers, int columns, Directory iconsDir) {
-    if (columns == 0) {
-      return Center(
-        child: Text(
-          'No browsers found',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      );
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      alignment: WrapAlignment.center,
-      children: [
-        for (var i = 0; i < browsers.length; i++)
-          _PickerTile(
-            browser: browsers[i],
-            iconPath: '${iconsDir.path}\\${browsers[i].id}.png',
-            shortcutLabel: i < 9 ? '${i + 1}' : null,
-            onTap: () => _launch(browsers[i], iconsDir),
-          ),
-      ],
     );
   }
 
@@ -134,7 +118,7 @@ class _UrlHeader extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 8, 10),
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 10),
       child: Row(
         children: [
           Icon(Icons.link, size: 16, color: colors.primary),
@@ -174,24 +158,24 @@ class _UrlHeader extends StatelessWidget {
   }
 }
 
-class _PickerTile extends StatefulWidget {
-  const _PickerTile({
+class _BrowserRow extends StatefulWidget {
+  const _BrowserRow({
     required this.browser,
     required this.iconPath,
     required this.onTap,
-    this.shortcutLabel,
+    this.shortcut,
   });
 
   final Browser browser;
   final String iconPath;
   final VoidCallback onTap;
-  final String? shortcutLabel;
+  final String? shortcut;
 
   @override
-  State<_PickerTile> createState() => _PickerTileState();
+  State<_BrowserRow> createState() => _BrowserRowState();
 }
 
-class _PickerTileState extends State<_PickerTile> {
+class _BrowserRowState extends State<_BrowserRow> {
   bool _hovered = false;
 
   @override
@@ -206,68 +190,41 @@ class _PickerTileState extends State<_PickerTile> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 100),
-          width: 88,
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-          decoration: BoxDecoration(
-            color: _hovered
-                ? colors.surfaceBright
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          color: _hovered ? colors.surfaceBright : Colors.transparent,
+          child: Row(
             children: [
-              Stack(
-                children: [
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: iconFile.existsSync()
-                        ? Image.file(
-                            iconFile,
-                            filterQuality: FilterQuality.medium,
-                          )
-                        : Icon(
-                            Icons.public,
-                            size: 48,
-                            color: colors.onSurfaceVariant,
-                          ),
-                  ),
-                  if (_hovered && widget.shortcutLabel != null)
-                    Positioned(
-                      right: -2,
-                      top: -2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colors.primary,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          widget.shortcutLabel!,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: colors.surface,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              SizedBox(
+                width: 28,
+                height: 28,
+                child: iconFile.existsSync()
+                    ? Image.file(iconFile, filterQuality: FilterQuality.medium)
+                    : Icon(Icons.public, size: 28, color: colors.onSurfaceVariant),
               ),
-              const SizedBox(height: 6),
-              Text(
-                widget.browser.name,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colors.onSurface,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.browser.name,
+                  style: TextStyle(fontSize: 13, color: colors.onSurface),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
               ),
+              if (widget.shortcut != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceBright,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    widget.shortcut!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -286,7 +243,7 @@ class _AlwaysOpenFooter extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: Row(
         children: [
           SizedBox(
