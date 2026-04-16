@@ -1,0 +1,185 @@
+# Privacy Policy
+
+**Last updated:** April 16, 2026
+
+---
+
+## The Short Version
+
+**Everything stays on your computer.** LinkUnbound does not collect, transmit, or share any of your data. There is no cloud, no accounts, no telemetry, no analytics, no tracking. Nothing leaves your machine.
+
+This is a technical fact you can verify yourself: the entire source code is [open and public](https://github.com/rgdevment/LinkUnbound). Read the code, run a network monitor, check for yourself.
+
+---
+
+## Privacy Philosophy
+
+LinkUnbound was built with privacy as the foundation, not an afterthought. Every design decision starts from the same principle: **your data stays on your machine.**
+
+- **Local-only by design** — Your data never leaves your computer.
+- **No telemetry** — No measurement, no tracking, no analysis of your usage.
+- **No analytics** — No Google Analytics, no App Insights, no Sentry, nothing.
+- **No accounts** — No sign-up, no login, no user profiles.
+- **No cloud sync** — Your configuration is yours alone.
+- **No automatic reporting** — Nothing is sent anywhere without your explicit action.
+- **Fully auditable** — Every line of code is open source under [GPLv3](LICENSE).
+
+---
+
+## What Data Does LinkUnbound Store?
+
+LinkUnbound stores only what it needs to function:
+
+### Browser List
+
+| Data               | Purpose                           | Format |
+| :----------------- | :-------------------------------- | :----- |
+| Browser name       | Display in picker                 | JSON   |
+| Executable path    | Launch the selected browser       | JSON   |
+| Icon path          | Show browser icon in picker       | JSON   |
+| Extra arguments    | Custom launch flags (if any)      | JSON   |
+| Custom flag        | Distinguish manually-added browsers | JSON |
+
+### Domain Rules
+
+| Data       | Purpose                                          | Format |
+| :--------- | :----------------------------------------------- | :----- |
+| Domain     | Match URLs to a browser (e.g., `github.com`)     | JSON   |
+| Browser ID | Which browser opens that domain                  | JSON   |
+
+### Navigation Log
+
+| Data      | Purpose                                      | Format     |
+| :-------- | :------------------------------------------- | :--------- |
+| Timestamp | When a link was processed                    | Plain text |
+| Log level | Severity (INFO, WARNING, etc.)               | Plain text |
+| Message   | Application events and errors                | Plain text |
+
+The navigation log contains **application events only** — not the URLs you open or the browsers you choose.
+
+### Extracted Icons
+
+Browser icons are extracted locally from installed browser executables and stored as image files. These are visual assets only.
+
+---
+
+## Where Is Everything Stored?
+
+All data is stored locally under your user profile:
+
+| Data     | Location                                    |
+| :------- | :------------------------------------------ |
+| Browsers | `%APPDATA%\LinkUnbound\browsers.json`       |
+| Rules    | `%APPDATA%\LinkUnbound\rules.json`          |
+| Log      | `%APPDATA%\LinkUnbound\navigate.log`        |
+| Icons    | `%APPDATA%\LinkUnbound\icons\`              |
+
+These folders are protected by your Windows user account permissions. Other users on the same computer cannot access them under normal conditions.
+
+---
+
+## What LinkUnbound Does NOT Do
+
+- Does not send data to any server.
+- Does not use cookies or tracking technologies.
+- Does not create user accounts or profiles.
+- Does not share data with third parties.
+- Does not use advertising or ad networks.
+- Does not record or transmit the URLs you open.
+- Does not monitor your browsing activity.
+- Does not phone home — except the update checker described below.
+
+---
+
+## Network Requests
+
+LinkUnbound makes **one type of network request**:
+
+### Update Checker
+
+| Detail        | Value                                                                    |
+| :------------ | :----------------------------------------------------------------------- |
+| **Purpose**   | Check if a newer version of LinkUnbound is available                     |
+| **URL**       | `https://api.github.com/repos/rgdevment/LinkUnbound/releases/latest`     |
+| **Method**    | GET (read-only)                                                          |
+| **Data sent** | Standard HTTP headers only — no user data                                |
+| **Frequency** | Once per application launch                                              |
+| **Timeout**   | 5 seconds                                                                |
+| **On failure**| Silent — the app continues working normally                              |
+
+**Important:**
+
+- This request is **read-only** — it only downloads a small JSON response containing the latest version number. No data is ever uploaded.
+- **No URLs, no rules, no browser information, no personal data** is ever sent.
+- If an update is found, a non-invasive indicator appears in the app. No automatic download or installation occurs.
+- The app works fully offline if the request fails or is blocked.
+
+### User-Initiated Navigation
+
+When you click "Download" on an update notification, LinkUnbound opens the GitHub release page in your default browser. This is a standard browser navigation initiated by your action — LinkUnbound does not make this request itself.
+
+---
+
+## Microsoft Store Distribution
+
+LinkUnbound is available through the Microsoft Store. The Store version:
+
+- **Follows the same privacy principles** as the standalone version.
+- **Makes the same single read-only request** to check for updates via the GitHub Releases API.
+- **Uses MSIX packaging** — installs and uninstalls cleanly with standard Windows mechanisms.
+- **Microsoft Store policies** apply to distribution, but LinkUnbound itself does not share any data with Microsoft beyond what the Store platform requires for installation and updates.
+
+For Microsoft's own privacy practices, refer to [Microsoft's Privacy Statement](https://privacy.microsoft.com/privacystatement).
+
+---
+
+## Data Deletion
+
+### In-App
+
+Settings → About → **Unregister** removes LinkUnbound's browser registration from Windows.
+
+### Complete Removal
+
+1. Uninstall LinkUnbound (via Settings → Apps or the standalone uninstaller).
+2. Delete the data folder: `%APPDATA%\LinkUnbound\`
+
+After these steps, no LinkUnbound data remains on your system.
+
+---
+
+## Children's Privacy
+
+LinkUnbound does not collect personal information from anyone, including children under 13. The application has no accounts, no registration, and no data transmission.
+
+---
+
+## Open Source Transparency
+
+The best privacy policy is one you can verify. LinkUnbound is **100% open source** under the [GNU General Public License v3.0](LICENSE):
+
+- **Full source code:** [github.com/rgdevment/LinkUnbound](https://github.com/rgdevment/LinkUnbound)
+- **Audit the code yourself** — every network request, every file write, every registry read.
+- **Report concerns** — [open an issue](https://github.com/rgdevment/LinkUnbound/issues) or [email](mailto:github@apirest.cl).
+
+See our [Security Policy](SECURITY.md) for responsible disclosure guidelines.
+
+---
+
+## Changes to This Policy
+
+If this privacy policy changes, the changes will be:
+
+- Committed to the public repository with a clear commit message.
+- Reflected in the "Last updated" date above.
+- Documented in the release notes.
+
+Since LinkUnbound is open source, any change to privacy behavior would also be visible as a code change before it reaches you.
+
+---
+
+## Contact
+
+- **Email:** [github@apirest.cl](mailto:github@apirest.cl)
+- **GitHub Discussions:** [github.com/rgdevment/LinkUnbound/discussions](https://github.com/rgdevment/LinkUnbound/discussions)
+- **Issues:** [github.com/rgdevment/LinkUnbound/issues](https://github.com/rgdevment/LinkUnbound/issues)
