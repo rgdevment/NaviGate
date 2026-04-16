@@ -3,32 +3,30 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 
+StateError _mustOverride() => StateError('Override at startup');
+
 final browserServiceProvider = Provider<BrowserService>(
-  (_) => throw StateError('Override at startup'),
+  (_) => throw _mustOverride(),
 );
 
-final ruleServiceProvider = Provider<RuleService>(
-  (_) => throw StateError('Override at startup'),
-);
+final ruleServiceProvider = Provider<RuleService>((_) => throw _mustOverride());
 
 final registrationServiceProvider = Provider<RegistrationService>(
-  (_) => throw StateError('Override at startup'),
+  (_) => throw _mustOverride(),
 );
 
 final startupServiceProvider = Provider<StartupService>(
-  (_) => throw StateError('Override at startup'),
+  (_) => throw _mustOverride(),
 );
 
 final iconExtractorProvider = Provider<IconExtractor>(
-  (_) => throw StateError('Override at startup'),
+  (_) => throw _mustOverride(),
 );
 
-final iconsDirProvider = Provider<Directory>(
-  (_) => throw StateError('Override at startup'),
-);
+final iconsDirProvider = Provider<Directory>((_) => throw _mustOverride());
 
 final launchServiceProvider = Provider<LaunchService>(
-  (_) => throw StateError('Override at startup'),
+  (_) => throw _mustOverride(),
 );
 
 enum AppMode { hidden, settings, picker }

@@ -80,6 +80,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Resolve dependencies
+        run: |
+          cd packages/core && dart pub get
+          cd ../../apps/linkunbound && flutter pub get
+
       - name: Download coverage reports
         uses: actions/download-artifact@v4
         with:

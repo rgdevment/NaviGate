@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 
 final _log = Logger('WinInstance');
 final _kernel32 = DynamicLibrary.open('kernel32.dll');
+final _user32 = DynamicLibrary.open('user32.dll');
 
 typedef _CreateMutexWNative =
     IntPtr Function(
@@ -93,8 +94,7 @@ final class WinInstance {
   }
 
   static void allowForeground() {
-    final user32 = DynamicLibrary.open('user32.dll');
-    final allowSetForegroundWindow = user32
+    final allowSetForegroundWindow = _user32
         .lookupFunction<
           _AllowSetForegroundWindowNative,
           _AllowSetForegroundWindowDart
@@ -103,8 +103,7 @@ final class WinInstance {
   }
 
   static (double, double) getCursorPosition() {
-    final user32 = DynamicLibrary.open('user32.dll');
-    final getCursorPos = user32
+    final getCursorPos = _user32
         .lookupFunction<
           Int32 Function(Pointer<_POINT>),
           int Function(Pointer<_POINT>)
@@ -119,8 +118,7 @@ final class WinInstance {
   }
 
   static (double, double) getScreenSize() {
-    final user32 = DynamicLibrary.open('user32.dll');
-    final getSystemMetrics = user32
+    final getSystemMetrics = _user32
         .lookupFunction<Int32 Function(Int32), int Function(int)>(
           'GetSystemMetrics',
         );

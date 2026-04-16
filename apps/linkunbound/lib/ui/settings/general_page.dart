@@ -15,7 +15,6 @@ class GeneralPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).colorScheme;
     final browsers = ref.watch(browsersProvider);
     final isDefaultAsync = ref.watch(isDefaultBrowserProvider);
     final isStartupAsync = ref.watch(isStartupEnabledProvider);
@@ -24,197 +23,234 @@ class GeneralPage extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       children: [
-        const SectionHeader(label: 'DEFAULT BROWSER'),
-        GroupCard(
-          child: Row(
-            children: [
-              Icon(
-                isDefaultAsync.valueOrNull == true
-                    ? Icons.check_circle_outline
-                    : Icons.warning_amber_rounded,
-                size: 20,
-                color: isDefaultAsync.valueOrNull == true
-                    ? Colors.green
-                    : colors.error,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  isDefaultAsync.valueOrNull == true
-                      ? 'LinkUnbound is set as the default browser'
-                      : 'LinkUnbound is not the default browser',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              if (isDefaultAsync.valueOrNull != true)
-                TextButton(
-                  onPressed: () => launchUrl(
-                    Uri.parse(
-                      'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
-                    ),
-                  ),
-                  child: const Text('Set default'),
-                ),
-            ],
-          ),
-        ),
+        ..._buildDefaultBrowserSection(context, isDefaultAsync),
         const SizedBox(height: 20),
-        const SectionHeader(label: 'STARTUP'),
-        GroupCard(
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Launch at Windows startup',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              Switch(
-                value: isStartupAsync.valueOrNull ?? false,
-                onChanged: (enabled) async {
-                  final service = ref.read(startupServiceProvider);
-                  if (enabled) {
-                    await service.enable(Platform.resolvedExecutable);
-                  } else {
-                    await service.disable();
-                  }
-                  ref.invalidate(isStartupEnabledProvider);
-                },
-              ),
-            ],
-          ),
-        ),
+        ..._buildStartupSection(context, ref, isStartupAsync),
         const SizedBox(height: 20),
-        SectionHeader(
-          label: 'BROWSERS',
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () => _showAddBrowserDialog(context, ref),
-                icon: const Icon(Icons.add, size: 18),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                tooltip: 'Add custom browser',
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                onPressed: () async {
-                  await ref.read(browsersProvider.notifier).refresh();
-                  final iconExtractor = ref.read(iconExtractorProvider);
-                  for (final browser in ref.read(browsersProvider)) {
-                    try {
-                      await iconExtractor.extractIcon(
-                        browser.executablePath,
-                        '${iconsDir.path}\\${browser.id}.png',
-                      );
-                    } on Exception {
-                      // Best-effort icon extraction
-                    }
-                  }
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Found ${ref.read(browsersProvider).length} browsers',
-                        ),
-                        duration: const Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        width: 250,
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.refresh, size: 18),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                tooltip: 'Refresh browsers',
-              ),
-            ],
-          ),
-        ),
-        GroupCard(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-          child: ReorderableListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            buildDefaultDragHandles: false,
-            itemCount: browsers.length,
-            onReorder: (oldIndex, newIndex) {
-              if (newIndex > oldIndex) newIndex--;
-              ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
-            },
-            proxyDecorator: (child, index, animation) {
-              return AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) => Material(
-                  color: colors.surfaceBright,
-                  borderRadius: BorderRadius.circular(6),
-                  elevation: 4,
-                  child: child,
-                ),
-                child: child,
-              );
-            },
-            itemBuilder: (context, index) {
-              final b = browsers[index];
-              return BrowserTile(
-                key: ValueKey(b.id),
-                name: b.name,
-                iconPath: '${iconsDir.path}\\${b.id}.png',
-                onTap: () => _showEditBrowserDialog(context, ref, b),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PopupMenuButton<String>(
-                      onSelected: (action) async {
-                        switch (action) {
-                          case 'edit':
-                            _showEditBrowserDialog(context, ref, b);
-                          case 'duplicate':
-                            await _duplicateBrowser(context, ref, b);
-                          case 'remove':
-                            ref.read(browsersProvider.notifier).remove(b.id);
-                        }
-                      },
-                      icon: Icon(
-                        Icons.more_vert,
-                        size: 16,
-                        color: colors.onSurfaceVariant,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      itemBuilder: (_) => [
-                        const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        const PopupMenuItem(
-                          value: 'duplicate',
-                          child: Text('Duplicate'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'remove',
-                          child: Text('Remove'),
-                        ),
-                      ],
-                    ),
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: Icon(
-                        Icons.drag_handle,
-                        size: 18,
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+        ..._buildBrowsersSection(context, ref, browsers, iconsDir),
       ],
     );
+  }
+
+  List<Widget> _buildDefaultBrowserSection(
+    BuildContext context,
+    AsyncValue<bool> isDefaultAsync,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final isDefault = isDefaultAsync.valueOrNull == true;
+
+    return [
+      const SectionHeader(label: 'DEFAULT BROWSER'),
+      GroupCard(
+        child: Row(
+          children: [
+            Icon(
+              isDefault
+                  ? Icons.check_circle_outline
+                  : Icons.warning_amber_rounded,
+              size: 20,
+              color: isDefault ? Colors.green : colors.error,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isDefault
+                    ? 'LinkUnbound is set as the default browser'
+                    : 'LinkUnbound is not the default browser',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            if (!isDefault)
+              TextButton(
+                onPressed: () => launchUrl(
+                  Uri.parse(
+                    'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
+                  ),
+                ),
+                child: const Text('Set default'),
+              ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildStartupSection(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<bool> isStartupAsync,
+  ) {
+    return [
+      const SectionHeader(label: 'STARTUP'),
+      GroupCard(
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Launch at Windows startup',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            Switch(
+              value: isStartupAsync.valueOrNull ?? false,
+              onChanged: (enabled) async {
+                final service = ref.read(startupServiceProvider);
+                if (enabled) {
+                  await service.enable(Platform.resolvedExecutable);
+                } else {
+                  await service.disable();
+                }
+                ref.invalidate(isStartupEnabledProvider);
+              },
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildBrowsersSection(
+    BuildContext context,
+    WidgetRef ref,
+    List<Browser> browsers,
+    Directory iconsDir,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+
+    return [
+      SectionHeader(
+        label: 'BROWSERS',
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: () => _showAddBrowserDialog(context, ref),
+              icon: const Icon(Icons.add, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              tooltip: 'Add custom browser',
+            ),
+            const SizedBox(width: 4),
+            IconButton(
+              onPressed: () => _refreshBrowsers(context, ref, iconsDir),
+              icon: const Icon(Icons.refresh, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              tooltip: 'Refresh browsers',
+            ),
+          ],
+        ),
+      ),
+      GroupCard(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        child: ReorderableListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          itemCount: browsers.length,
+          onReorder: (oldIndex, newIndex) {
+            if (newIndex > oldIndex) newIndex--;
+            ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
+          },
+          proxyDecorator: (child, index, animation) {
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) => Material(
+                color: colors.surfaceBright,
+                borderRadius: BorderRadius.circular(6),
+                elevation: 4,
+                child: child,
+              ),
+              child: child,
+            );
+          },
+          itemBuilder: (context, index) {
+            final b = browsers[index];
+            return BrowserTile(
+              key: ValueKey(b.id),
+              name: b.name,
+              iconPath: '${iconsDir.path}\\${b.id}.png',
+              onTap: () => _showEditBrowserDialog(context, ref, b),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PopupMenuButton<String>(
+                    onSelected: (action) async {
+                      switch (action) {
+                        case 'edit':
+                          _showEditBrowserDialog(context, ref, b);
+                        case 'duplicate':
+                          await _duplicateBrowser(context, ref, b);
+                        case 'remove':
+                          ref.read(browsersProvider.notifier).remove(b.id);
+                      }
+                    },
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: 16,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
+                    ),
+                    itemBuilder: (_) => [
+                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      const PopupMenuItem(
+                        value: 'duplicate',
+                        child: Text('Duplicate'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'remove',
+                        child: Text('Remove'),
+                      ),
+                    ],
+                  ),
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: Icon(
+                      Icons.drag_handle,
+                      size: 18,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _refreshBrowsers(
+    BuildContext context,
+    WidgetRef ref,
+    Directory iconsDir,
+  ) async {
+    await ref.read(browsersProvider.notifier).refresh();
+    final iconExtractor = ref.read(iconExtractorProvider);
+    for (final browser in ref.read(browsersProvider)) {
+      try {
+        await iconExtractor.extractIcon(
+          browser.executablePath,
+          '${iconsDir.path}\\${browser.id}.png',
+        );
+      } on Exception {
+        // Best-effort icon extraction
+      }
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Found ${ref.read(browsersProvider).length} browsers'),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          width: 250,
+        ),
+      );
+    }
   }
 
   void _showAddBrowserDialog(BuildContext context, WidgetRef ref) {
@@ -320,75 +356,15 @@ class GeneralPage extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
-                        onPressed: () async {
-                          final name = nameController.text.trim();
-                          final path = pathController.text.trim();
-                          if (name.isEmpty || path.isEmpty) return;
-
-                          final args = argsController.text.trim();
-                          final extraArgs = args.isEmpty
-                              ? <String>[]
-                              : args.split(RegExp(r'\s+'));
-
-                          final customIcon = iconController.text.trim();
-
-                          if (isEdit) {
-                            final updated = existing.copyWith(
-                              name: name,
-                              executablePath: existing.isCustom ? path : null,
-                              extraArgs: extraArgs,
-                            );
-                            await ref
-                                .read(browsersProvider.notifier)
-                                .update(existing.id, updated);
-                          } else {
-                            final id = name
-                                .toLowerCase()
-                                .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-                                .replaceAll(RegExp(r'^-|-$'), '');
-
-                            await ref
-                                .read(browsersProvider.notifier)
-                                .add(
-                                  Browser(
-                                    id: 'custom-$id',
-                                    name: name,
-                                    executablePath: path,
-                                    iconPath: path,
-                                    isCustom: true,
-                                    extraArgs: extraArgs,
-                                  ),
-                                );
-                          }
-
-                          final iconsDir = ref.read(iconsDirProvider);
-                          final browserId = isEdit
-                              ? existing.id
-                              : 'custom-${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-\$'), '')}';
-                          final iconSource = customIcon.isNotEmpty
-                              ? customIcon
-                              : path;
-                          final iconDest = File(
-                            '${iconsDir.path}\\$browserId.png',
-                          );
-
-                          if (customIcon.isNotEmpty && iconDest.existsSync()) {
-                            await iconDest.delete();
-                          }
-
-                          try {
-                            await ref
-                                .read(iconExtractorProvider)
-                                .extractIcon(
-                                  iconSource,
-                                  '${iconsDir.path}\\$browserId.png',
-                                );
-                          } on Exception {
-                            // Best-effort
-                          }
-
-                          if (ctx.mounted) Navigator.of(ctx).pop();
-                        },
+                        onPressed: () => _saveBrowser(
+                          ctx,
+                          ref,
+                          existing: existing,
+                          name: nameController.text.trim(),
+                          path: pathController.text.trim(),
+                          args: argsController.text.trim(),
+                          customIcon: iconController.text.trim(),
+                        ),
                         child: Text(isEdit ? 'Save' : 'Add'),
                       ),
                     ],
@@ -400,6 +376,75 @@ class GeneralPage extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _saveBrowser(
+    BuildContext ctx,
+    WidgetRef ref, {
+    Browser? existing,
+    required String name,
+    required String path,
+    required String args,
+    required String customIcon,
+  }) async {
+    if (name.isEmpty || path.isEmpty) return;
+
+    final extraArgs = args.isEmpty ? <String>[] : args.split(RegExp(r'\s+'));
+
+    final String browserId;
+    if (existing != null) {
+      final updated = existing.copyWith(
+        name: name,
+        executablePath: existing.isCustom ? path : null,
+        extraArgs: extraArgs,
+      );
+      await ref.read(browsersProvider.notifier).update(existing.id, updated);
+      browserId = existing.id;
+    } else {
+      final id = name
+          .toLowerCase()
+          .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+          .replaceAll(RegExp(r'^-|-$'), '');
+      browserId = 'custom-$id';
+      await ref
+          .read(browsersProvider.notifier)
+          .add(
+            Browser(
+              id: browserId,
+              name: name,
+              executablePath: path,
+              iconPath: path,
+              isCustom: true,
+              extraArgs: extraArgs,
+            ),
+          );
+    }
+
+    await _updateBrowserIcon(ref, browserId, customIcon, path);
+    if (ctx.mounted) Navigator.of(ctx).pop();
+  }
+
+  Future<void> _updateBrowserIcon(
+    WidgetRef ref,
+    String browserId,
+    String customIcon,
+    String exePath,
+  ) async {
+    final iconsDir = ref.read(iconsDirProvider);
+    final iconSource = customIcon.isNotEmpty ? customIcon : exePath;
+    final iconDest = File('${iconsDir.path}\\$browserId.png');
+
+    if (customIcon.isNotEmpty && iconDest.existsSync()) {
+      await iconDest.delete();
+    }
+
+    try {
+      await ref
+          .read(iconExtractorProvider)
+          .extractIcon(iconSource, '${iconsDir.path}\\$browserId.png');
+    } on Exception {
+      // Best-effort
+    }
   }
 }
 
