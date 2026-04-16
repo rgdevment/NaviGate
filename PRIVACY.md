@@ -55,7 +55,7 @@ LinkUnbound stores only what it needs to function:
 | Log level | Severity (INFO, WARNING, etc.)               | Plain text |
 | Message   | Application events and errors                | Plain text |
 
-The navigation log contains **application events only** — not the URLs you open or the browsers you choose.
+The navigation log **does not contain actual URLs**. All URLs are automatically redacted at write time before reaching the log file — they are replaced with privacy-safe placeholders like `https://<redacted>/2 segments`. The original URLs exist only in memory during processing and are never persisted to disk.
 
 ### Extracted Icons
 
@@ -85,8 +85,7 @@ These folders are protected by your Windows user account permissions. Other user
 - Does not create user accounts or profiles.
 - Does not share data with third parties.
 - Does not use advertising or ad networks.
-- Does not record or transmit the URLs you open.
-- Does not monitor your browsing activity.
+- Does not monitor your browsing activity beyond processing each link.
 - Does not phone home — except the update checker described below.
 
 ---
@@ -137,7 +136,10 @@ For Microsoft's own privacy practices, refer to [Microsoft's Privacy Statement](
 
 ### In-App
 
-Settings → About → **Unregister** removes LinkUnbound's browser registration from Windows.
+Settings → **Maintenance** tab provides:
+
+- **Reset configuration** — clears all browsers, rules, and icons, then re-scans installed browsers.
+- **Unregister** — removes LinkUnbound's browser registration from Windows.
 
 ### Complete Removal
 
@@ -145,6 +147,36 @@ Settings → About → **Unregister** removes LinkUnbound's browser registration
 2. Delete the data folder: `%APPDATA%\LinkUnbound\`
 
 After these steps, no LinkUnbound data remains on your system.
+
+---
+
+## Diagnostics Export
+
+LinkUnbound includes an optional **Export diagnostics** feature (Settings → Maintenance) that generates a ZIP file for troubleshooting. This file is created locally and **never sent automatically** — you choose whether and where to share it.
+
+### What the ZIP Contains
+
+| File              | Content                                                       |
+| :---------------- | :------------------------------------------------------------ |
+| `system_info.txt` | OS version, locale, app version, executable path, data files  |
+| `registry.txt`    | LinkUnbound's own Windows registry entries                    |
+| `navigate.log`    | Last 200 lines of the navigation log (URLs already redacted)  |
+
+### What the ZIP Does NOT Contain
+
+- **Browser list** (`browsers.json`) — not included
+- **Domain rules** (`rules.json`) — not included
+- **Icons** — not included
+- **Actual URLs** — URLs are redacted at the source (log writing), not at export time
+
+### URL Redaction
+
+URLs are redacted **at write time** — before they ever reach the log file on disk. Every URL is replaced with a privacy-safe placeholder that preserves only the protocol and the number of path segments:
+
+- `https://mail.google.com/inbox/123` → `https://<redacted>/3 segments`
+- `http://internal.company.net/app` → `http://<redacted>/2 segments`
+
+This means the `navigate.log` file on your machine never contains real URLs. The diagnostics export simply copies the last 200 lines of this already-redacted log.
 
 ---
 

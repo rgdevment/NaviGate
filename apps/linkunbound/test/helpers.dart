@@ -125,6 +125,7 @@ makeFixtures({
     iconsDirProvider.overrideWithValue(iconsDir),
     localeFileProvider.overrideWithValue(localeFile),
     edgeWarningFileProvider.overrideWithValue(edgeWarningFile),
+    appDataDirProvider.overrideWithValue(tempDir),
     packageInfoProvider.overrideWith(
       (ref) async => PackageInfo(
         appName: 'LinkUnbound',

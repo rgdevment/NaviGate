@@ -87,6 +87,7 @@ This isn't a company product. I'm a developer who needed a way to pick which bro
 **Everything stays local.** LinkUnbound is built on a single, non-negotiable principle: your data never leaves your computer.
 
 - **Local-only storage** — browser list, domain rules, and logs stay on your machine
+- **URL redaction** — URLs are automatically redacted in logs at write time; the log file never contains actual URLs
 - **No tracking** — no telemetry, no analytics, no hidden collection
 - **No accounts** — no sign-up, no login, no profiles
 - **One network request** — a read-only check against GitHub Releases API for updates (no user data sent, works offline)
@@ -136,11 +137,12 @@ Since LinkUnbound is an independent open source project, the installer uses a se
 
 **Link click without a rule:** a picker appears near your cursor. Pick a browser. Optionally check "Always open here" to save a rule for that subdomain.
 
-**Settings (tray):** double-click the tray icon or right-click → Settings. Three tabs:
+**Settings (tray):** double-click the tray icon or right-click → Settings. Four tabs:
 
 - **General** — browsers, default browser status, startup toggle, language
 - **Rules** — all domain rules, change browser per rule, delete rules
-- **About** — version, license, update notifications, unregister
+- **About** — version, license, update notifications, support links
+- **Maintenance** — export diagnostics, reset configuration, unregister
 
 ---
 
@@ -169,7 +171,7 @@ The resident process listens on a named pipe. Second instances send the URL and 
 Yes. Completely free and open source. No premium tiers, no subscriptions, no paywalls — ever.
 
 **Does it track my browsing?**
-No. LinkUnbound does not record, store, or transmit the URLs you open. It processes each link in memory and discards it after opening the browser.
+No. LinkUnbound does not track or transmit anything. URLs are processed in memory and automatically redacted before being written to the navigation log — the log file never contains actual URLs, only privacy-safe placeholders.
 
 **Does it need internet?**
 No. LinkUnbound works fully offline. The only network request is a lightweight update check against the GitHub Releases API — no user data sent. The app works perfectly without a connection.

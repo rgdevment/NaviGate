@@ -9,6 +9,7 @@ import '../../providers.dart';
 import '../shared/widgets/title_bar.dart';
 import 'about_page.dart';
 import 'general_page.dart';
+import 'maintenance_page.dart';
 import 'rules_page.dart';
 
 class SettingsView extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class _SettingsViewState extends ConsumerState<SettingsView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -43,7 +44,12 @@ class _SettingsViewState extends ConsumerState<SettingsView>
       children: [
         TitleBar(
           tabController: _tabController,
-          tabs: [l10n.tabGeneral, l10n.tabRules, l10n.tabAbout],
+          tabs: [
+            l10n.tabGeneral,
+            l10n.tabRules,
+            l10n.tabAbout,
+            l10n.tabMaintenance,
+          ],
           onClose: () async {
             await windowManager.hide();
             ref.read(appStateProvider.notifier).hide();
@@ -57,7 +63,12 @@ class _SettingsViewState extends ConsumerState<SettingsView>
           child: TabBarView(
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(),
-            children: const [GeneralPage(), RulesPage(), AboutPage()],
+            children: const [
+              GeneralPage(),
+              RulesPage(),
+              AboutPage(),
+              MaintenancePage(),
+            ],
           ),
         ),
         if (updateAsync.valueOrNull case final update?)

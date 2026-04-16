@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'About'**
   String get tabAbout;
 
+  /// No description provided for @tabMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get tabMaintenance;
+
   /// No description provided for @sectionDefaultBrowser.
   ///
   /// In en, this message translates to:
@@ -368,12 +374,6 @@ abstract class AppLocalizations {
   /// **'MIT License'**
   String get mitLicense;
 
-  /// No description provided for @sectionActions.
-  ///
-  /// In en, this message translates to:
-  /// **'ACTIONS'**
-  String get sectionActions;
-
   /// No description provided for @resetConfigLabel.
   ///
   /// In en, this message translates to:
@@ -511,6 +511,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it, don\'t show again'**
   String get edgeWarningDismiss;
+
+  /// No description provided for @sectionMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'MAINTENANCE'**
+  String get sectionMaintenance;
+
+  /// No description provided for @exportDiagnosticsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Export diagnostics'**
+  String get exportDiagnosticsLabel;
+
+  /// No description provided for @exportDiagnosticsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a ZIP with system info, registry data, and logs for troubleshooting'**
+  String get exportDiagnosticsDescription;
 }
 
 class _AppLocalizationsDelegate

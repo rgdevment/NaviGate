@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabAbout => 'About';
 
   @override
+  String get tabMaintenance => 'Maintenance';
+
+  @override
   String get sectionDefaultBrowser => 'DEFAULT BROWSER';
 
   @override
@@ -151,9 +154,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mitLicense => 'MIT License';
 
   @override
-  String get sectionActions => 'ACTIONS';
-
-  @override
   String get resetConfigLabel => 'Reset configuration';
 
   @override
@@ -231,4 +231,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get edgeWarningDismiss => 'Got it, don\'t show again';
+
+  @override
+  String get sectionMaintenance => 'MAINTENANCE';
+
+  @override
+  String get exportDiagnosticsLabel => 'Export diagnostics';
+
+  @override
+  String get exportDiagnosticsDescription =>
+      'Generate a ZIP with system info, registry data, and logs for troubleshooting';
 }

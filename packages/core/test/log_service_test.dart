@@ -121,4 +121,50 @@ void main() {
       expect(backup.lengthSync(), greaterThan(2 * 1024 * 1024));
     });
   });
+
+  group('redactUrls', () {
+    test('replaces http URL with redacted placeholder', () {
+      expect(
+        redactUrls('opened http://example.com/page'),
+        equals('opened http://<redacted>/1 segments'),
+      );
+    });
+
+    test('replaces https URL with redacted placeholder', () {
+      expect(
+        redactUrls('visit https://mail.google.com/inbox/123'),
+        equals('visit https://<redacted>/2 segments'),
+      );
+    });
+
+    test('preserves text without URLs', () {
+      expect(redactUrls('no urls here'), equals('no urls here'));
+    });
+
+    test('redacts multiple URLs in one line', () {
+      final result = redactUrls(
+        'from https://a.com/x to http://b.com/y/z done',
+      );
+      expect(result, isNot(contains('a.com')));
+      expect(result, isNot(contains('b.com')));
+      expect(result, contains('https://<redacted>/1 segments'));
+      expect(result, contains('http://<redacted>/2 segments'));
+    });
+
+    test('handles URL with no path segments', () {
+      expect(
+        redactUrls('root https://example.com'),
+        equals('root https://<redacted>/0 segments'),
+      );
+    });
+
+    test('log messages are redacted before writing to file', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.info('open_url https://secret.example.com/path');
+      final content = logFile.readAsStringSync();
+      expect(content, isNot(contains('secret.example.com')));
+      expect(content, contains('https://<redacted>/1 segments'));
+    });
+  });
 }

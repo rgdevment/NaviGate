@@ -23,6 +23,7 @@ This is a personal open source project, not a company product. Security here is 
 - **Open Source** — Every line of code is public under GPLv3. You can inspect, audit, and verify everything.
 - **Dependency Updates** — Dependencies are regularly updated to patch known vulnerabilities.
 - **Code Reviews** — All contributions go through review before merging.
+- **URL Redaction in Logs** — All URLs are automatically redacted at write time before reaching the log file. The `navigate.log` never contains actual URLs, only privacy-safe placeholders.
 
 ### Network Requests
 
@@ -55,6 +56,7 @@ If you discover a security vulnerability in LinkUnbound, please report it respon
 - Bypass of domain rule matching
 - Command injection through browser arguments or URL handling
 - Data leakage or unintended storage
+- Bypass of URL redaction in diagnostics export
 
 **Not security issues:**
 
