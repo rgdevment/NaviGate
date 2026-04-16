@@ -54,7 +54,7 @@
   "sectionAbout": "ACERCA DE",
   "appVersion": "Versión {version}",
   "appDescription": "Selector de navegadores de código abierto para Windows.",
-  "mitLicense": "Licencia MIT",
+  "mitLicense": "Licencia GPL-3.0",
   "resetConfigLabel": "Restablecer configuración",
   "resetConfigDescription": "Limpiar navegadores y reglas, luego volver a escanear",
   "unregisterLabel": "Desregistrar LinkUnbound",

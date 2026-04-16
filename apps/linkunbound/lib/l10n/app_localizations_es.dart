@@ -158,7 +158,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Selector de navegadores de código abierto para Windows.';
 
   @override
-  String get mitLicense => 'Licencia MIT';
+  String get mitLicense => 'Licencia GPL-3.0';
 
   @override
   String get resetConfigLabel => 'Restablecer configuración';

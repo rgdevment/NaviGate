@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @mitLicense.
   ///
   /// In en, this message translates to:
-  /// **'MIT License'**
+  /// **'GPL-3.0 License'**
   String get mitLicense;
 
   /// No description provided for @resetConfigLabel.

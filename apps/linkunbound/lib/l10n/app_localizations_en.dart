@@ -154,7 +154,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appDescription => 'Open-source browser picker for Windows.';
 
   @override
-  String get mitLicense => 'MIT License';
+  String get mitLicense => 'GPL-3.0 License';
 
   @override
   String get resetConfigLabel => 'Reset configuration';
