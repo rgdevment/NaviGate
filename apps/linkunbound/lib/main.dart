@@ -223,9 +223,10 @@ void _handleUrl(String url, ProviderContainer container) {
 
 String? _extractUrl(List<String> args) {
   for (final arg in args) {
-    final uri = Uri.tryParse(arg);
+    final resolved = stripEdgeProtocol(arg);
+    final uri = Uri.tryParse(resolved);
     if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
-      return _unwrapSafeLink(arg);
+      return _unwrapSafeLink(resolved);
     }
   }
   return null;
