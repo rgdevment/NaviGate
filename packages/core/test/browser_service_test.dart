@@ -225,7 +225,12 @@ void main() {
       );
       for (final id in ids) {
         service.addBrowser(
-          Browser(id: id, name: id, executablePath: '$id.exe', iconPath: '$id.png'),
+          Browser(
+            id: id,
+            name: id,
+            executablePath: '$id.exe',
+            iconPath: '$id.png',
+          ),
         );
       }
       return service;
