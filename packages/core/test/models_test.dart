@@ -43,7 +43,10 @@ void main() {
       });
 
       test('overrides id and executablePath', () {
-        final copy = base.copyWith(id: 'chromium', executablePath: 'D:\\chromium.exe');
+        final copy = base.copyWith(
+          id: 'chromium',
+          executablePath: 'D:\\chromium.exe',
+        );
         expect(copy.id, 'chromium');
         expect(copy.executablePath, 'D:\\chromium.exe');
         expect(copy.name, base.name);

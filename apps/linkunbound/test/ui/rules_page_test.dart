@@ -45,28 +45,36 @@ void main() {
   group('RulesPage rendering — empty state', () {
     testWidgets('renders without throwing', (tester) async {
       final f = makeFixtures(dir: tempDir);
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(RulesPage), findsOneWidget);
     });
 
     testWidgets('shows URL RULES section header', (tester) async {
       final f = makeFixtures(dir: tempDir);
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.text('URL RULES'), findsOneWidget);
     });
 
     testWidgets('shows empty state hint when no rules', (tester) async {
       final f = makeFixtures(dir: tempDir);
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.textContaining('No rules yet'), findsOneWidget);
     });
 
     testWidgets('empty state does not show column headers', (tester) async {
       final f = makeFixtures(dir: tempDir);
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Domain'), findsNothing);
       expect(find.text('Browser'), findsNothing);
@@ -80,7 +88,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Domain'), findsOneWidget);
       expect(find.text('Browser'), findsOneWidget);
@@ -92,7 +102,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.textContaining('github.com'), findsWidgets);
     });
@@ -106,7 +118,9 @@ void main() {
           const Rule(domain: 'mail.google.com', browserId: 'firefox'),
         ],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.textContaining('github.com'), findsWidgets);
       expect(find.textContaining('mail.google.com'), findsWidgets);
@@ -118,7 +132,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       expect(find.textContaining('No rules yet'), findsNothing);
     });
@@ -131,7 +147,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       final deleteButton = find.byTooltip('Delete rule');
       expect(deleteButton, findsOneWidget);
@@ -146,7 +164,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Delete rule'));
       await tester.pumpAndSettle();
@@ -159,7 +179,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Delete rule'));
       await tester.pumpAndSettle();
@@ -174,7 +196,9 @@ void main() {
         browsers: [_chrome],
         rules: [const Rule(domain: 'github.com', browserId: 'chrome')],
       );
-      await tester.pumpWidget(buildTestApp(const RulesPage(), overrides: f.overrides));
+      await tester.pumpWidget(
+        buildTestApp(const RulesPage(), overrides: f.overrides),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Delete rule'));
       await tester.pumpAndSettle();

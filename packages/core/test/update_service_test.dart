@@ -9,11 +9,17 @@ void main() {
         releaseUrl: 'https://github.com/owner/repo/releases/tag/v2.1.0',
       );
       expect(info.latestVersion, '2.1.0');
-      expect(info.releaseUrl, 'https://github.com/owner/repo/releases/tag/v2.1.0');
+      expect(
+        info.releaseUrl,
+        'https://github.com/owner/repo/releases/tag/v2.1.0',
+      );
     });
 
     test('fields are accessible after construction', () {
-      const info = UpdateInfo(latestVersion: '1.0.0', releaseUrl: 'https://example.com');
+      const info = UpdateInfo(
+        latestVersion: '1.0.0',
+        releaseUrl: 'https://example.com',
+      );
       expect(info.latestVersion, isNotEmpty);
       expect(info.releaseUrl, isNotEmpty);
     });
@@ -26,11 +32,18 @@ void main() {
       expect(service.repo, 'LinkUnbound');
     });
 
-    test('checkForUpdate returns null on network failure', () async {
-      // Unresolvable host triggers the on-Exception path → null
-      const service = UpdateService(owner: 'localhost-unreachable-host-xyz', repo: 'repo');
-      final result = await service.checkForUpdate('1.0.0');
-      expect(result, isNull);
-    }, timeout: const Timeout(Duration(seconds: 10)));
+    test(
+      'checkForUpdate returns null on network failure',
+      () async {
+        // Unresolvable host triggers the on-Exception path → null
+        const service = UpdateService(
+          owner: 'localhost-unreachable-host-xyz',
+          repo: 'repo',
+        );
+        final result = await service.checkForUpdate('1.0.0');
+        expect(result, isNull);
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
   });
 }

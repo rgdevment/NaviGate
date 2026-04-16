@@ -51,10 +51,8 @@ final class FakeLaunchService implements LaunchService {
 
 final class FakeIconExtractor implements IconExtractor {
   @override
-  Future<String> extractIcon(
-    String executablePath,
-    String outputPath,
-  ) async => outputPath;
+  Future<String> extractIcon(String executablePath, String outputPath) async =>
+      outputPath;
 }
 
 final class FakeBrowserDetector implements BrowserDetector {
@@ -82,7 +80,8 @@ Widget buildTestApp(Widget child, {required List<Override> overrides}) {
   RuleService ruleService,
   FakeLaunchService launchService,
   Directory tempDir,
-}) makeFixtures({
+})
+makeFixtures({
   Directory? dir,
   List<Browser> browsers = const [],
   List<Rule> rules = const [],

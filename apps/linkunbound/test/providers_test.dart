@@ -131,7 +131,10 @@ void main() {
     test('setLocale null when file absent does not throw', () {
       final c = makeContainer();
       addTearDown(c.dispose);
-      expect(() => c.read(localeProvider.notifier).setLocale(null), returnsNormally);
+      expect(
+        () => c.read(localeProvider.notifier).setLocale(null),
+        returnsNormally,
+      );
     });
 
     test('setLocale null sets state to null', () {
@@ -154,7 +157,10 @@ void main() {
       if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
     });
 
-    BrowserService makeService({List<Browser> browsers = const [], List<Browser> detected = const []}) {
+    BrowserService makeService({
+      List<Browser> browsers = const [],
+      List<Browser> detected = const [],
+    }) {
       final service = BrowserService(
         configFile: File('${tempDir.path}/browsers.json'),
         browserDetector: FakeBrowserDetector(detected),
@@ -165,12 +171,18 @@ void main() {
       return service;
     }
 
-    ProviderContainer makeContainer(BrowserService service) => ProviderContainer(
-      overrides: [browserServiceProvider.overrideWithValue(service)],
-    );
+    ProviderContainer makeContainer(BrowserService service) =>
+        ProviderContainer(
+          overrides: [browserServiceProvider.overrideWithValue(service)],
+        );
 
     test('initial state reads browsers from service', () {
-      const chrome = Browser(id: 'chrome', name: 'Chrome', executablePath: 'chrome.exe', iconPath: 'chrome.png');
+      const chrome = Browser(
+        id: 'chrome',
+        name: 'Chrome',
+        executablePath: 'chrome.exe',
+        iconPath: 'chrome.png',
+      );
       final c = makeContainer(makeService(browsers: [chrome]));
       addTearDown(c.dispose);
       expect(c.read(browsersProvider), hasLength(1));
@@ -186,17 +198,31 @@ void main() {
     test('add appends a browser', () async {
       final c = makeContainer(makeService());
       addTearDown(c.dispose);
-      await c.read(browsersProvider.notifier).add(
-        const Browser(id: 'ff', name: 'Firefox', executablePath: 'ff.exe', iconPath: 'ff.png'),
-      );
+      await c
+          .read(browsersProvider.notifier)
+          .add(
+            const Browser(
+              id: 'ff',
+              name: 'Firefox',
+              executablePath: 'ff.exe',
+              iconPath: 'ff.png',
+            ),
+          );
       expect(c.read(browsersProvider), hasLength(1));
       expect(c.read(browsersProvider).first.id, 'ff');
     });
 
     test('remove deletes by id', () async {
-      final service = makeService(browsers: [
-        const Browser(id: 'x', name: 'X', executablePath: 'x.exe', iconPath: 'x.png'),
-      ]);
+      final service = makeService(
+        browsers: [
+          const Browser(
+            id: 'x',
+            name: 'X',
+            executablePath: 'x.exe',
+            iconPath: 'x.png',
+          ),
+        ],
+      );
       final c = makeContainer(service);
       addTearDown(c.dispose);
       await c.read(browsersProvider.notifier).remove('x');
@@ -204,33 +230,79 @@ void main() {
     });
 
     test('update replaces browser by id', () async {
-      final service = makeService(browsers: [
-        const Browser(id: 'x', name: 'X', executablePath: 'x.exe', iconPath: 'x.png'),
-      ]);
+      final service = makeService(
+        browsers: [
+          const Browser(
+            id: 'x',
+            name: 'X',
+            executablePath: 'x.exe',
+            iconPath: 'x.png',
+          ),
+        ],
+      );
       final c = makeContainer(service);
       addTearDown(c.dispose);
-      await c.read(browsersProvider.notifier).update(
-        'x',
-        const Browser(id: 'x', name: 'Updated', executablePath: 'x.exe', iconPath: 'x.png'),
-      );
+      await c
+          .read(browsersProvider.notifier)
+          .update(
+            'x',
+            const Browser(
+              id: 'x',
+              name: 'Updated',
+              executablePath: 'x.exe',
+              iconPath: 'x.png',
+            ),
+          );
       expect(c.read(browsersProvider).first.name, 'Updated');
     });
 
     test('reorder changes browser order', () async {
-      final service = makeService(browsers: [
-        const Browser(id: 'a', name: 'A', executablePath: 'a.exe', iconPath: 'a.png'),
-        const Browser(id: 'b', name: 'B', executablePath: 'b.exe', iconPath: 'b.png'),
-        const Browser(id: 'c', name: 'C', executablePath: 'c.exe', iconPath: 'c.png'),
-      ]);
+      final service = makeService(
+        browsers: [
+          const Browser(
+            id: 'a',
+            name: 'A',
+            executablePath: 'a.exe',
+            iconPath: 'a.png',
+          ),
+          const Browser(
+            id: 'b',
+            name: 'B',
+            executablePath: 'b.exe',
+            iconPath: 'b.png',
+          ),
+          const Browser(
+            id: 'c',
+            name: 'C',
+            executablePath: 'c.exe',
+            iconPath: 'c.png',
+          ),
+        ],
+      );
       final c = makeContainer(service);
       addTearDown(c.dispose);
       await c.read(browsersProvider.notifier).reorder(0, 2);
-      expect(c.read(browsersProvider).map((b) => b.id).toList(), ['b', 'c', 'a']);
+      expect(c.read(browsersProvider).map((b) => b.id).toList(), [
+        'b',
+        'c',
+        'a',
+      ]);
     });
 
     test('refresh keeps custom browsers and picks up detected ones', () async {
-      const custom = Browser(id: 'my', name: 'My', executablePath: 'my.exe', iconPath: 'my.png', isCustom: true);
-      const detected = Browser(id: 'ff', name: 'Firefox', executablePath: 'ff.exe', iconPath: 'ff.png');
+      const custom = Browser(
+        id: 'my',
+        name: 'My',
+        executablePath: 'my.exe',
+        iconPath: 'my.png',
+        isCustom: true,
+      );
+      const detected = Browser(
+        id: 'ff',
+        name: 'Firefox',
+        executablePath: 'ff.exe',
+        iconPath: 'ff.png',
+      );
       final service = makeService(browsers: [custom], detected: [detected]);
       final c = makeContainer(service);
       addTearDown(c.dispose);
@@ -241,7 +313,12 @@ void main() {
     });
 
     test('refresh removes non-custom browser no longer detected', () async {
-      const old = Browser(id: 'old', name: 'Old', executablePath: 'old.exe', iconPath: 'old.png');
+      const old = Browser(
+        id: 'old',
+        name: 'Old',
+        executablePath: 'old.exe',
+        iconPath: 'old.png',
+      );
       final service = makeService(browsers: [old], detected: []);
       final c = makeContainer(service);
       addTearDown(c.dispose);
@@ -262,7 +339,9 @@ void main() {
     });
 
     RuleService makeService({List<Rule> rules = const []}) {
-      final service = RuleService(rulesFile: File('${tempDir.path}/rules.json'));
+      final service = RuleService(
+        rulesFile: File('${tempDir.path}/rules.json'),
+      );
       for (final r in rules) {
         service.addRule(r);
       }
@@ -274,7 +353,11 @@ void main() {
     );
 
     test('initial state reads rules from service', () {
-      final c = makeContainer(makeService(rules: [const Rule(domain: 'a.com', browserId: 'chrome')]));
+      final c = makeContainer(
+        makeService(
+          rules: [const Rule(domain: 'a.com', browserId: 'chrome')],
+        ),
+      );
       addTearDown(c.dispose);
       expect(c.read(rulesProvider), hasLength(1));
     });
@@ -286,29 +369,51 @@ void main() {
     });
 
     test('updateRule changes browserId', () async {
-      final c = makeContainer(makeService(rules: [const Rule(domain: 'a.com', browserId: 'chrome')]));
+      final c = makeContainer(
+        makeService(
+          rules: [const Rule(domain: 'a.com', browserId: 'chrome')],
+        ),
+      );
       addTearDown(c.dispose);
-      await c.read(rulesProvider.notifier).updateRule('a.com', browserId: 'firefox');
+      await c
+          .read(rulesProvider.notifier)
+          .updateRule('a.com', browserId: 'firefox');
       expect(c.read(rulesProvider).first.browserId, 'firefox');
     });
 
     test('removeRule deletes by domain', () async {
-      final c = makeContainer(makeService(rules: [const Rule(domain: 'a.com', browserId: 'chrome')]));
+      final c = makeContainer(
+        makeService(
+          rules: [const Rule(domain: 'a.com', browserId: 'chrome')],
+        ),
+      );
       addTearDown(c.dispose);
       await c.read(rulesProvider.notifier).removeRule('a.com');
       expect(c.read(rulesProvider), isEmpty);
     });
 
     test('updateRule persists state after multiple updates', () async {
-      final c = makeContainer(makeService(rules: [
-        const Rule(domain: 'a.com', browserId: 'chrome'),
-        const Rule(domain: 'b.com', browserId: 'edge'),
-      ]));
+      final c = makeContainer(
+        makeService(
+          rules: [
+            const Rule(domain: 'a.com', browserId: 'chrome'),
+            const Rule(domain: 'b.com', browserId: 'edge'),
+          ],
+        ),
+      );
       addTearDown(c.dispose);
-      await c.read(rulesProvider.notifier).updateRule('a.com', browserId: 'firefox');
+      await c
+          .read(rulesProvider.notifier)
+          .updateRule('a.com', browserId: 'firefox');
       expect(c.read(rulesProvider), hasLength(2));
-      expect(c.read(rulesProvider).firstWhere((r) => r.domain == 'a.com').browserId, 'firefox');
-      expect(c.read(rulesProvider).firstWhere((r) => r.domain == 'b.com').browserId, 'edge');
+      expect(
+        c.read(rulesProvider).firstWhere((r) => r.domain == 'a.com').browserId,
+        'firefox',
+      );
+      expect(
+        c.read(rulesProvider).firstWhere((r) => r.domain == 'b.com').browserId,
+        'edge',
+      );
     });
   });
 }
