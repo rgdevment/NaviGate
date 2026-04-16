@@ -197,4 +197,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateTooltip =>
       'New version available — check for updates in Settings';
+
+  @override
+  String get sectionSupport => 'SUPPORT';
+
+  @override
+  String get donateLabel => 'Buy me a coffee';
+
+  @override
+  String get donateDescription =>
+      'LinkUnbound is free and always will be. If it saves you time, consider supporting development.';
+
+  @override
+  String get sectionOtherTools => 'OTHER TOOLS';
+
+  @override
+  String get otherToolCopyPaste => 'CopyPaste';
+
+  @override
+  String get otherToolCopyPasteDescription =>
+      'Free, open source clipboard manager for Windows, macOS and Linux. Same philosophy: no ads, no telemetry, everything local.';
 }

@@ -451,6 +451,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New version available — check for updates in Settings'**
   String get updateTooltip;
+
+  /// No description provided for @sectionSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'SUPPORT'**
+  String get sectionSupport;
+
+  /// No description provided for @donateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy me a coffee'**
+  String get donateLabel;
+
+  /// No description provided for @donateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'LinkUnbound is free and always will be. If it saves you time, consider supporting development.'**
+  String get donateDescription;
+
+  /// No description provided for @sectionOtherTools.
+  ///
+  /// In en, this message translates to:
+  /// **'OTHER TOOLS'**
+  String get sectionOtherTools;
+
+  /// No description provided for @otherToolCopyPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'CopyPaste'**
+  String get otherToolCopyPaste;
+
+  /// No description provided for @otherToolCopyPasteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Free, open source clipboard manager for Windows, macOS and Linux. Same philosophy: no ads, no telemetry, everything local.'**
+  String get otherToolCopyPasteDescription;
 }
 
 class _AppLocalizationsDelegate
