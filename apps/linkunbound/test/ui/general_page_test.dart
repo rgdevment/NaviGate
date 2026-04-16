@@ -22,6 +22,14 @@ const _firefox = Browser(
   iconPath: 'firefox.png',
 );
 
+const _edge = Browser(
+  id: 'edge',
+  name: 'Microsoft Edge',
+  executablePath:
+      r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
+  iconPath: 'edge.png',
+);
+
 void main() {
   late Directory tempDir;
 
@@ -100,7 +108,9 @@ void main() {
       expect(find.text('Remove'), findsOneWidget);
     });
 
-    testWidgets('refresh with empty browsers shows snackbar', (tester) async {
+    testWidgets('refresh with empty browsers shows no-changes snackbar', (
+      tester,
+    ) async {
       final f = makeFixtures(dir: tempDir);
       await tester.pumpWidget(
         buildTestApp(const GeneralPage(), overrides: f.overrides),
@@ -108,7 +118,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Refresh browsers'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('Found'), findsOneWidget);
+      expect(find.text('No changes detected'), findsOneWidget);
     });
   });
 
@@ -339,6 +349,73 @@ void main() {
       await tester.tap(find.text('Add'));
       await tester.pumpAndSettle();
       expect(find.byType(Dialog), findsOneWidget);
+    });
+  });
+
+  group('GeneralPage — edge warning card', () {
+    testWidgets('hides edge warning when no edge browser', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome, _firefox]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Microsoft Edge detected'), findsNothing);
+    });
+
+    testWidgets(
+      'shows edge warning card when edge browser present and not dismissed',
+      (tester) async {
+        final f = makeFixtures(dir: tempDir, browsers: [_edge]);
+        await tester.pumpWidget(
+          buildTestApp(const GeneralPage(), overrides: f.overrides),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Microsoft Edge detected'), findsOneWidget);
+      },
+    );
+
+    testWidgets('hides edge warning when dismissed file already exists', (
+      tester,
+    ) async {
+      File('${tempDir.path}/edge_warning_dismissed').writeAsStringSync('1');
+      final f = makeFixtures(dir: tempDir, browsers: [_edge]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Microsoft Edge detected'), findsNothing);
+    });
+
+    testWidgets('edge warning card shows body text', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_edge]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Microsoft Teams'), findsOneWidget);
+    });
+
+    testWidgets('edge warning card shows dismiss button', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_edge]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text("Got it, don't show again"), findsOneWidget);
+    });
+
+    testWidgets('tapping dismiss hides edge warning card', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_edge]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      final dismissButton = find.text("Got it, don't show again");
+      await tester.ensureVisible(dismissButton);
+      await tester.pumpAndSettle();
+      await tester.tap(dismissButton);
+      await tester.pumpAndSettle();
+      expect(find.text('Microsoft Edge detected'), findsNothing);
     });
   });
 }

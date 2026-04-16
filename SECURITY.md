@@ -56,7 +56,7 @@ If you discover a security vulnerability in LinkUnbound, please report it respon
 - Bypass of domain rule matching
 - Command injection through browser arguments or URL handling
 - Data leakage or unintended storage
-- Bypass of URL redaction in diagnostics export
+- Bypass of URL redaction in log service
 
 **Not security issues:**
 

@@ -28,12 +28,14 @@
   "menuEdit": "Edit",
   "menuDuplicate": "Duplicate",
   "menuRemove": "Remove",
-  "foundBrowsersCount": "Found {count} browsers",
-  "@foundBrowsersCount": {
+  "refreshResult": "{added} added, {removed} removed",
+  "@refreshResult": {
     "placeholders": {
-      "count": { "type": "int" }
+      "added": { "type": "int" },
+      "removed": { "type": "int" }
     }
   },
+  "refreshNoChanges": "No changes detected",
   "editBrowserTitle": "Edit browser",
   "addBrowserTitle": "Add custom browser",
   "fieldName": "Name",

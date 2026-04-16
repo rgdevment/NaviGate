@@ -111,10 +111,11 @@ final class BrowsersNotifier extends Notifier<List<Browser>> {
   @override
   List<Browser> build() => ref.read(browserServiceProvider).browsers;
 
-  Future<void> refresh() async {
+  Future<({int added, int removed})> refresh() async {
     final service = ref.read(browserServiceProvider);
-    await service.scanAndMerge();
+    final result = await service.scanAndMerge();
     state = service.browsers;
+    return result;
   }
 
   Future<void> add(Browser browser) async {

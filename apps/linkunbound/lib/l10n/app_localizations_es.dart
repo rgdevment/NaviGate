@@ -77,9 +77,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuRemove => 'Eliminar';
 
   @override
-  String foundBrowsersCount(int count) {
-    return '$count navegadores encontrados';
+  String refreshResult(int added, int removed) {
+    return '$added añadidos, $removed eliminados';
   }
+
+  @override
+  String get refreshNoChanges => 'Sin cambios detectados';
 
   @override
   String get editBrowserTitle => 'Editar navegador';

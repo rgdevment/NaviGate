@@ -39,25 +39,35 @@ final class BrowserService {
     await configFile.writeAsString(encoder.convert(config.toJson()));
   }
 
-  Future<void> scanAndMerge() async {
+  Future<({int added, int removed})> scanAndMerge() async {
     _log.info('Scanning for browsers');
     final detected = await browserDetector.detect();
-    final existingById = {for (final b in _browsers) b.id: b};
-    final customBrowsers = _browsers.where((b) => b.isCustom).toList();
+    final detectedById = {for (final d in detected) d.id: d};
 
-    final merged = [
-      for (final d in detected)
-        if (existingById[d.id] case final existing? when !existing.isCustom)
-          d.copyWith(extraArgs: existing.extraArgs)
-        else
-          d,
-      ...customBrowsers,
+    final removedCount = _browsers
+        .where((b) => !b.isCustom && !detectedById.containsKey(b.id))
+        .length;
+
+    // Keep existing browsers that are still installed (or custom), preserving order
+    final kept = [
+      for (final b in _browsers)
+        if (b.isCustom)
+          b
+        else if (detectedById[b.id] case final d?)
+          b.copyWith(executablePath: d.executablePath, iconPath: d.iconPath),
     ];
 
-    _browsers = merged;
+    final existingIds = {for (final b in _browsers) b.id};
+    final newBrowsers = detected
+        .where((d) => !existingIds.contains(d.id))
+        .toList();
+
+    _browsers = [...kept, ...newBrowsers];
     _log.info(
-      'Found ${detected.length} detected + ${customBrowsers.length} custom',
+      'Scan complete: ${newBrowsers.length} added, $removedCount removed, '
+      '${kept.length} kept',
     );
+    return (added: newBrowsers.length, removed: removedCount);
   }
 
   void addBrowser(Browser browser) {
