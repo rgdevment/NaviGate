@@ -65,7 +65,11 @@ void main(List<String> args) async {
   final launchService = WinLaunchService();
 
   final pipeServer = WinPipeServer();
-  await pipeServer.start();
+  try {
+    await pipeServer.start();
+  } on Exception catch (e) {
+    _log.warning('Pipe server failed to start: $e');
+  }
 
   final isFirstBoot = !browsersFile.existsSync();
   await browserService.load();
@@ -132,7 +136,11 @@ void main(List<String> args) async {
         final pickerWidth = (gridWidth + 48.0).clamp(340.0, 600.0);
         final pickerHeight = 140.0 + rows * 88.0 + (rows > 1 ? (rows - 1) * 8.0 : 0);
         await windowManager.setSize(Size(pickerWidth, pickerHeight));
-        await windowManager.center();
+        final (cursorX, cursorY) = WinInstance.getCursorPosition();
+        final (screenW, screenH) = WinInstance.getScreenSize();
+        final x = (cursorX - pickerWidth / 2).clamp(8.0, screenW - pickerWidth - 8);
+        final y = (cursorY + 16).clamp(8.0, screenH - pickerHeight - 8);
+        await windowManager.setPosition(Offset(x, y));
         await windowManager.setSkipTaskbar(true);
         await windowManager.setAlwaysOnTop(true);
         await windowManager.show();
@@ -235,7 +243,7 @@ Future<void> _initTray(
 
   tray.registerSystemTrayEventHandler((eventName) {
     switch (eventName) {
-      case kSystemTrayEventClick:
+      case kSystemTrayEventDoubleClick:
         container.read(appStateProvider.notifier).showSettings();
       case kSystemTrayEventRightClick:
         tray.popUpContextMenu();
