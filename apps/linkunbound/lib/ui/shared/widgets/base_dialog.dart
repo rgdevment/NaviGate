@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class BaseDialog extends StatelessWidget {
   const BaseDialog({
     required this.title,
     required this.content,
-    this.confirmLabel = 'Confirm',
+    this.confirmLabel,
     this.confirmColor,
     this.onConfirm,
     this.onCancel,
@@ -13,7 +15,7 @@ class BaseDialog extends StatelessWidget {
 
   final String title;
   final String content;
-  final String confirmLabel;
+  final String? confirmLabel;
   final Color? confirmColor;
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
@@ -42,7 +44,7 @@ class BaseDialog extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: onCancel ?? () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   FilledButton(
@@ -50,7 +52,9 @@ class BaseDialog extends StatelessWidget {
                     style: confirmColor != null
                         ? FilledButton.styleFrom(backgroundColor: confirmColor)
                         : null,
-                    child: Text(confirmLabel),
+                    child: Text(
+                      confirmLabel ?? AppLocalizations.of(context)!.confirm,
+                    ),
                   ),
                 ],
               ),

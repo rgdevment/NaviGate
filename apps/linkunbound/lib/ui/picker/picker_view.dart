@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:logging/logging.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 
 final _log = Logger('PickerView');
@@ -153,7 +154,7 @@ class _UrlHeader extends StatelessWidget {
             icon: Icon(Icons.copy, size: 14, color: colors.onSurfaceVariant),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            tooltip: 'Copy URL',
+            tooltip: AppLocalizations.of(context)!.copyUrl,
           ),
         ],
       ),
@@ -272,7 +273,7 @@ class _AlwaysOpenFooter extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'Always open here',
+            AppLocalizations.of(context)!.alwaysOpenHere,
             style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
           ),
         ],

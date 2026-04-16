@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 import '../shared/widgets/browser_tile.dart';
 import '../shared/widgets/group_card.dart';
@@ -23,11 +24,13 @@ class GeneralPage extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       children: [
+        ..._buildBrowsersSection(context, ref, browsers, iconsDir),
+        const SizedBox(height: 20),
         ..._buildDefaultBrowserSection(context, isDefaultAsync),
         const SizedBox(height: 20),
         ..._buildStartupSection(context, ref, isStartupAsync),
         const SizedBox(height: 20),
-        ..._buildBrowsersSection(context, ref, browsers, iconsDir),
+        ..._buildLanguageSection(context, ref),
       ],
     );
   }
@@ -37,10 +40,11 @@ class GeneralPage extends ConsumerWidget {
     AsyncValue<bool> isDefaultAsync,
   ) {
     final colors = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final isDefault = isDefaultAsync.valueOrNull == true;
 
     return [
-      const SectionHeader(label: 'DEFAULT BROWSER'),
+      SectionHeader(label: l10n.sectionDefaultBrowser),
       GroupCard(
         child: Row(
           children: [
@@ -54,9 +58,7 @@ class GeneralPage extends ConsumerWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                isDefault
-                    ? 'LinkUnbound is set as the default browser'
-                    : 'LinkUnbound is not the default browser',
+                isDefault ? l10n.isDefaultBrowser : l10n.notDefaultBrowser,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -67,7 +69,7 @@ class GeneralPage extends ConsumerWidget {
                     'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
                   ),
                 ),
-                child: const Text('Set default'),
+                child: Text(l10n.setDefault),
               ),
           ],
         ),
@@ -80,14 +82,16 @@ class GeneralPage extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue<bool> isStartupAsync,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     return [
-      const SectionHeader(label: 'STARTUP'),
+      SectionHeader(label: l10n.sectionStartup),
       GroupCard(
         child: Row(
           children: [
             Expanded(
               child: Text(
-                'Launch at Windows startup',
+                l10n.launchAtStartup,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -109,6 +113,55 @@ class GeneralPage extends ConsumerWidget {
     ];
   }
 
+  List<Widget> _buildLanguageSection(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = ref.watch(localeProvider);
+
+    return [
+      SectionHeader(label: l10n.sectionLanguage),
+      GroupCard(
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.sectionLanguage,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: locale?.languageCode ?? 'auto',
+                isDense: true,
+                dropdownColor: Theme.of(context).colorScheme.surfaceBright,
+                style: Theme.of(context).textTheme.bodyMedium,
+                items: [
+                  DropdownMenuItem(
+                    value: 'auto',
+                    child: Text(l10n.languageAuto),
+                  ),
+                  DropdownMenuItem(
+                    value: 'en',
+                    child: Text(l10n.languageEnglish),
+                  ),
+                  DropdownMenuItem(
+                    value: 'es',
+                    child: Text(l10n.languageSpanish),
+                  ),
+                ],
+                onChanged: (code) {
+                  final newLocale = code == null || code == 'auto'
+                      ? null
+                      : Locale(code);
+                  ref.read(localeProvider.notifier).setLocale(newLocale);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
   List<Widget> _buildBrowsersSection(
     BuildContext context,
     WidgetRef ref,
@@ -116,10 +169,11 @@ class GeneralPage extends ConsumerWidget {
     Directory iconsDir,
   ) {
     final colors = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return [
       SectionHeader(
-        label: 'BROWSERS',
+        label: l10n.sectionBrowsers,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -128,7 +182,7 @@ class GeneralPage extends ConsumerWidget {
               icon: const Icon(Icons.add, size: 18),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-              tooltip: 'Add custom browser',
+              tooltip: l10n.addBrowserTooltip,
             ),
             const SizedBox(width: 4),
             IconButton(
@@ -136,7 +190,7 @@ class GeneralPage extends ConsumerWidget {
               icon: const Icon(Icons.refresh, size: 18),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-              tooltip: 'Refresh browsers',
+              tooltip: l10n.refreshBrowsersTooltip,
             ),
           ],
         ),
@@ -196,14 +250,14 @@ class GeneralPage extends ConsumerWidget {
                       minHeight: 28,
                     ),
                     itemBuilder: (_) => [
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                      const PopupMenuItem(
+                      PopupMenuItem(value: 'edit', child: Text(l10n.menuEdit)),
+                      PopupMenuItem(
                         value: 'duplicate',
-                        child: Text('Duplicate'),
+                        child: Text(l10n.menuDuplicate),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'remove',
-                        child: Text('Remove'),
+                        child: Text(l10n.menuRemove),
                       ),
                     ],
                   ),
@@ -244,7 +298,11 @@ class GeneralPage extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Found ${ref.read(browsersProvider).length} browsers'),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            )!.foundBrowsersCount(ref.read(browsersProvider).length),
+          ),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
           width: 250,
@@ -309,6 +367,7 @@ class GeneralPage extends ConsumerWidget {
       context: context,
       builder: (ctx) {
         final colors = Theme.of(ctx).colorScheme;
+        final l10n = AppLocalizations.of(ctx)!;
 
         return Dialog(
           backgroundColor: colors.surfaceContainer,
@@ -324,27 +383,27 @@ class GeneralPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isEdit ? 'Edit browser' : 'Add custom browser',
+                    isEdit ? l10n.editBrowserTitle : l10n.addBrowserTitle,
                     style: Theme.of(ctx).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
-                  _FormField(controller: nameController, label: 'Name'),
+                  _FormField(controller: nameController, label: l10n.fieldName),
                   const SizedBox(height: 12),
                   _FormField(
                     controller: pathController,
-                    label: 'Executable path',
+                    label: l10n.fieldExecutablePath,
                     enabled: isEdit ? existing.isCustom : true,
                   ),
                   const SizedBox(height: 12),
                   _FormField(
                     controller: argsController,
-                    label: 'Extra arguments (space-separated)',
+                    label: l10n.fieldExtraArgs,
                   ),
                   const SizedBox(height: 12),
                   _FormField(
                     controller: iconController,
-                    label: 'Custom icon path (optional)',
-                    hint: 'Leave empty to auto-detect from exe',
+                    label: l10n.fieldIconPath,
+                    hint: l10n.fieldIconHint,
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -352,7 +411,7 @@ class GeneralPage extends ConsumerWidget {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancel),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
@@ -365,7 +424,7 @@ class GeneralPage extends ConsumerWidget {
                           args: argsController.text.trim(),
                           customIcon: iconController.text.trim(),
                         ),
-                        child: Text(isEdit ? 'Save' : 'Add'),
+                        child: Text(isEdit ? l10n.save : l10n.add),
                       ),
                     ],
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'l10n/app_localizations.dart';
 import 'providers.dart';
 import 'ui/picker/picker_window.dart';
 import 'ui/settings/settings_window.dart';
@@ -43,10 +44,14 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
   @override
   Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: switch (appState.mode) {
         AppMode.hidden => const SizedBox.shrink(),
         AppMode.settings => const SettingsWindow(),

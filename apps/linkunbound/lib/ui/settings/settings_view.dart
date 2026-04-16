@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 import '../shared/widgets/title_bar.dart';
 import 'about_page.dart';
@@ -33,11 +34,13 @@ class _SettingsViewState extends ConsumerState<SettingsView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         TitleBar(
           tabController: _tabController,
-          tabs: const ['General', 'Rules', 'About'],
+          tabs: [l10n.tabGeneral, l10n.tabRules, l10n.tabAbout],
           onClose: () async {
             await windowManager.hide();
             ref.read(appStateProvider.notifier).hide();

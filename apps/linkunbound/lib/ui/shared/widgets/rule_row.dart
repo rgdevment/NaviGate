@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class RuleRow extends StatelessWidget {
   const RuleRow({
     required this.domain,
@@ -62,7 +64,7 @@ class RuleRow extends StatelessWidget {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             splashRadius: 16,
-            tooltip: 'Delete rule',
+            tooltip: AppLocalizations.of(context)!.deleteRuleTooltip,
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 import '../shared/widgets/base_dialog.dart';
 import '../shared/widgets/group_card.dart';
@@ -12,11 +13,12 @@ class AboutPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       children: [
-        const SectionHeader(label: 'ABOUT'),
+        SectionHeader(label: l10n.sectionAbout),
         GroupCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,36 +29,39 @@ class AboutPage extends ConsumerWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Version 1.0.0',
+                l10n.appVersion('1.0.0'),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
               Text(
-                'Open-source browser picker for Windows.',
+                l10n.appDescription,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 4),
-              Text('MIT License', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                l10n.mitLicense,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        const SectionHeader(label: 'ACTIONS'),
+        SectionHeader(label: l10n.sectionActions),
         GroupCard(
           child: Column(
             children: [
               _ActionRow(
                 icon: Icons.refresh,
-                label: 'Reset configuration',
-                description: 'Clear all browsers and rules, then re-scan',
+                label: l10n.resetConfigLabel,
+                description: l10n.resetConfigDescription,
                 color: colors.error,
                 onTap: () => _confirmReset(context, ref),
               ),
               Divider(height: 1, color: colors.outline.withAlpha(40)),
               _ActionRow(
                 icon: Icons.delete_outline,
-                label: 'Unregister LinkUnbound',
-                description: 'Remove from Windows browser list',
+                label: l10n.unregisterLabel,
+                description: l10n.unregisterDescription,
                 color: colors.error,
                 onTap: () => _confirmUnregister(context, ref),
               ),
@@ -68,14 +73,13 @@ class AboutPage extends ConsumerWidget {
   }
 
   void _confirmReset(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (ctx) => BaseDialog(
-        title: 'Reset configuration',
-        content:
-            'This will delete all browsers, rules and icons, then re-scan '
-            'installed browsers. Continue?',
-        confirmLabel: 'Reset',
+        title: l10n.resetConfigTitle,
+        content: l10n.resetConfigContent,
+        confirmLabel: l10n.reset,
         confirmColor: Theme.of(ctx).colorScheme.error,
         onConfirm: () async {
           Navigator.of(ctx).pop();
@@ -102,15 +106,13 @@ class AboutPage extends ConsumerWidget {
   }
 
   void _confirmUnregister(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (ctx) => BaseDialog(
-        title: 'Unregister LinkUnbound',
-        content:
-            'This will remove LinkUnbound from the Windows browser list. '
-            'You may need to change your default browser in Windows Settings '
-            'afterwards. Continue?',
-        confirmLabel: 'Unregister',
+        title: l10n.unregisterTitle,
+        content: l10n.unregisterContent,
+        confirmLabel: l10n.unregisterAction,
         confirmColor: Theme.of(ctx).colorScheme.error,
         onConfirm: () async {
           Navigator.of(ctx).pop();

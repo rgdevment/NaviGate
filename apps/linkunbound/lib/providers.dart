@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
@@ -28,6 +29,33 @@ final iconsDirProvider = Provider<Directory>((_) => throw _mustOverride());
 final launchServiceProvider = Provider<LaunchService>(
   (_) => throw _mustOverride(),
 );
+
+final localeFileProvider = Provider<File>((_) => throw _mustOverride());
+
+final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
+  LocaleNotifier.new,
+);
+
+final class LocaleNotifier extends Notifier<Locale?> {
+  @override
+  Locale? build() {
+    final file = ref.read(localeFileProvider);
+    if (!file.existsSync()) return null;
+    final code = file.readAsStringSync().trim();
+    if (code == 'en' || code == 'es') return Locale(code);
+    return null;
+  }
+
+  void setLocale(Locale? locale) {
+    final file = ref.read(localeFileProvider);
+    if (locale == null) {
+      if (file.existsSync()) file.deleteSync();
+    } else {
+      file.writeAsStringSync(locale.languageCode);
+    }
+    state = locale;
+  }
+}
 
 enum AppMode { hidden, settings, picker }
 

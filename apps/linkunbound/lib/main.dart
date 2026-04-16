@@ -95,6 +95,7 @@ void main(List<String> args) async {
       iconExtractorProvider.overrideWithValue(iconExtractor),
       iconsDirProvider.overrideWithValue(iconsDir),
       launchServiceProvider.overrideWithValue(launchService),
+      localeFileProvider.overrideWithValue(File('${appDataDir.path}\\locale')),
     ],
   );
 
@@ -104,7 +105,7 @@ void main(List<String> args) async {
       case AppMode.hidden:
         await windowManager.hide();
       case AppMode.settings:
-        await windowManager.setSize(const Size(800, 600));
+        await windowManager.setSize(const Size(800, 650));
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
