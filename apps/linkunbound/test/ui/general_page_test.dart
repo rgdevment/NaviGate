@@ -130,10 +130,7 @@ void main() {
         buildTestApp(const GeneralPage(), overrides: f.overrides),
       );
       await tester.pumpAndSettle();
-      expect(
-        find.textContaining('not the default browser'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('not the default browser'), findsOneWidget);
     });
 
     testWidgets('shows Set Default button when not default', (tester) async {
@@ -207,9 +204,7 @@ void main() {
       expect(sw.value, isTrue);
     });
 
-    testWidgets('tapping startup switch calls service disable', (
-      tester,
-    ) async {
+    testWidgets('tapping startup switch calls service disable', (tester) async {
       final f = makeFixtures(dir: tempDir, isStartupEnabled: true);
       await tester.pumpWidget(
         buildTestApp(const GeneralPage(), overrides: f.overrides),
