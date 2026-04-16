@@ -265,88 +265,90 @@ class GeneralPage extends ConsumerWidget {
           child: ReorderableListView.builder(
             buildDefaultDragHandles: false,
             itemCount: browsers.length,
-          onReorder: (oldIndex, newIndex) {
-            if (newIndex > oldIndex) newIndex--;
-            ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
-          },
-          proxyDecorator: (child, index, animation) {
-            return AnimatedBuilder(
-              animation: animation,
-              builder: (context, child) => Material(
-                color: colors.surfaceBright,
-                borderRadius: BorderRadius.circular(6),
-                elevation: 4,
+            onReorder: (oldIndex, newIndex) {
+              if (newIndex > oldIndex) newIndex--;
+              ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
+            },
+            proxyDecorator: (child, index, animation) {
+              return AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) => Material(
+                  color: colors.surfaceBright,
+                  borderRadius: BorderRadius.circular(6),
+                  elevation: 4,
+                  child: child,
+                ),
                 child: child,
-              ),
-              child: child,
-            );
-          },
-          itemBuilder: (context, index) {
-            final b = browsers[index];
-            final isEdge =
-                b.executablePath.toLowerCase().contains('msedge');
-            return BrowserTile(
-              key: ValueKey(b.id),
-              name: b.name,
-              iconPath: '${iconsDir.path}\\${b.id}.png',
-              onTap: () => _showEditBrowserDialog(context, ref, b),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isEdge)
-                    Tooltip(
-                      message: l10n.edgeWarningBody,
-                      child: Icon(
-                        Icons.warning_amber_rounded,
+              );
+            },
+            itemBuilder: (context, index) {
+              final b = browsers[index];
+              final isEdge = b.executablePath.toLowerCase().contains('msedge');
+              return BrowserTile(
+                key: ValueKey(b.id),
+                name: b.name,
+                iconPath: '${iconsDir.path}\\${b.id}.png',
+                onTap: () => _showEditBrowserDialog(context, ref, b),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isEdge)
+                      Tooltip(
+                        message: l10n.edgeWarningBody,
+                        child: Icon(
+                          Icons.warning_amber_rounded,
+                          size: 16,
+                          color: colors.error,
+                        ),
+                      ),
+                    PopupMenuButton<String>(
+                      onSelected: (action) async {
+                        switch (action) {
+                          case 'edit':
+                            _showEditBrowserDialog(context, ref, b);
+                          case 'duplicate':
+                            await _duplicateBrowser(context, ref, b);
+                          case 'remove':
+                            ref.read(browsersProvider.notifier).remove(b.id);
+                        }
+                      },
+                      icon: Icon(
+                        Icons.more_vert,
                         size: 16,
-                        color: colors.error,
+                        color: colors.onSurfaceVariant,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Text(l10n.menuEdit),
+                        ),
+                        PopupMenuItem(
+                          value: 'duplicate',
+                          child: Text(l10n.menuDuplicate),
+                        ),
+                        PopupMenuItem(
+                          value: 'remove',
+                          child: Text(l10n.menuRemove),
+                        ),
+                      ],
+                    ),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Icon(
+                        Icons.drag_handle,
+                        size: 18,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
-                  PopupMenuButton<String>(
-                    onSelected: (action) async {
-                      switch (action) {
-                        case 'edit':
-                          _showEditBrowserDialog(context, ref, b);
-                        case 'duplicate':
-                          await _duplicateBrowser(context, ref, b);
-                        case 'remove':
-                          ref.read(browsersProvider.notifier).remove(b.id);
-                      }
-                    },
-                    icon: Icon(
-                      Icons.more_vert,
-                      size: 16,
-                      color: colors.onSurfaceVariant,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 28,
-                      minHeight: 28,
-                    ),
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: 'edit', child: Text(l10n.menuEdit)),
-                      PopupMenuItem(
-                        value: 'duplicate',
-                        child: Text(l10n.menuDuplicate),
-                      ),
-                      PopupMenuItem(
-                        value: 'remove',
-                        child: Text(l10n.menuRemove),
-                      ),
-                    ],
-                  ),
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: Icon(
-                      Icons.drag_handle,
-                      size: 18,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -618,5 +620,3 @@ class _FormField extends StatelessWidget {
     );
   }
 }
-
-
