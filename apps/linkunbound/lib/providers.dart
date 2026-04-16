@@ -55,8 +55,9 @@ final class AppStateNotifier extends Notifier<AppState> {
   void hide() => state = const AppState();
 }
 
-final browsersProvider =
-    NotifierProvider<BrowsersNotifier, List<Browser>>(BrowsersNotifier.new);
+final browsersProvider = NotifierProvider<BrowsersNotifier, List<Browser>>(
+  BrowsersNotifier.new,
+);
 
 final class BrowsersNotifier extends Notifier<List<Browser>> {
   @override
@@ -97,8 +98,9 @@ final class BrowsersNotifier extends Notifier<List<Browser>> {
   }
 }
 
-final rulesProvider =
-    NotifierProvider<RulesNotifier, List<Rule>>(RulesNotifier.new);
+final rulesProvider = NotifierProvider<RulesNotifier, List<Rule>>(
+  RulesNotifier.new,
+);
 
 final class RulesNotifier extends Notifier<List<Rule>> {
   @override

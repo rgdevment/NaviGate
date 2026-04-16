@@ -51,11 +51,7 @@ class _SettingsViewState extends ConsumerState<SettingsView>
           child: TabBarView(
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(),
-            children: const [
-              GeneralPage(),
-              RulesPage(),
-              AboutPage(),
-            ],
+            children: const [GeneralPage(), RulesPage(), AboutPage()],
           ),
         ),
       ],

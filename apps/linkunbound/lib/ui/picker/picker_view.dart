@@ -95,17 +95,17 @@ class _PickerViewState extends ConsumerState<PickerView> {
   }
 
   int? _keyToIndex(LogicalKeyboardKey key) => switch (key) {
-        LogicalKeyboardKey.digit1 || LogicalKeyboardKey.numpad1 => 0,
-        LogicalKeyboardKey.digit2 || LogicalKeyboardKey.numpad2 => 1,
-        LogicalKeyboardKey.digit3 || LogicalKeyboardKey.numpad3 => 2,
-        LogicalKeyboardKey.digit4 || LogicalKeyboardKey.numpad4 => 3,
-        LogicalKeyboardKey.digit5 || LogicalKeyboardKey.numpad5 => 4,
-        LogicalKeyboardKey.digit6 || LogicalKeyboardKey.numpad6 => 5,
-        LogicalKeyboardKey.digit7 || LogicalKeyboardKey.numpad7 => 6,
-        LogicalKeyboardKey.digit8 || LogicalKeyboardKey.numpad8 => 7,
-        LogicalKeyboardKey.digit9 || LogicalKeyboardKey.numpad9 => 8,
-        _ => null,
-      };
+    LogicalKeyboardKey.digit1 || LogicalKeyboardKey.numpad1 => 0,
+    LogicalKeyboardKey.digit2 || LogicalKeyboardKey.numpad2 => 1,
+    LogicalKeyboardKey.digit3 || LogicalKeyboardKey.numpad3 => 2,
+    LogicalKeyboardKey.digit4 || LogicalKeyboardKey.numpad4 => 3,
+    LogicalKeyboardKey.digit5 || LogicalKeyboardKey.numpad5 => 4,
+    LogicalKeyboardKey.digit6 || LogicalKeyboardKey.numpad6 => 5,
+    LogicalKeyboardKey.digit7 || LogicalKeyboardKey.numpad7 => 6,
+    LogicalKeyboardKey.digit8 || LogicalKeyboardKey.numpad8 => 7,
+    LogicalKeyboardKey.digit9 || LogicalKeyboardKey.numpad9 => 8,
+    _ => null,
+  };
 }
 
 class _UrlHeader extends StatelessWidget {
@@ -138,7 +138,10 @@ class _UrlHeader extends StatelessWidget {
                 ),
                 Text(
                   url,
-                  style: TextStyle(fontSize: 11, color: colors.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colors.onSurfaceVariant,
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -199,7 +202,11 @@ class _BrowserRowState extends State<_BrowserRow> {
                 height: 28,
                 child: iconFile.existsSync()
                     ? Image.file(iconFile, filterQuality: FilterQuality.medium)
-                    : Icon(Icons.public, size: 28, color: colors.onSurfaceVariant),
+                    : Icon(
+                        Icons.public,
+                        size: 28,
+                        color: colors.onSurfaceVariant,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -211,7 +218,10 @@ class _BrowserRowState extends State<_BrowserRow> {
               ),
               if (widget.shortcut != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.surfaceBright,
                     borderRadius: BorderRadius.circular(4),

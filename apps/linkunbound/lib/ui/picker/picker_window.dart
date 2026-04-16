@@ -33,9 +33,10 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
       duration: const Duration(milliseconds: 120),
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
-    _scaleAnim = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 0.95,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) _active = true;

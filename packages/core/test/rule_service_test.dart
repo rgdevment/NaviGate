@@ -64,10 +64,7 @@ void main() {
     });
 
     test('exact subdomain match wins', () {
-      expect(
-        service.lookupBrowser('https://mail.google.com/inbox'),
-        'firefox',
-      );
+      expect(service.lookupBrowser('https://mail.google.com/inbox'), 'firefox');
     });
 
     test('falls back to parent domain', () {

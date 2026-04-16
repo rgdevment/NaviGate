@@ -38,10 +38,7 @@ final class RuleService {
   }
 
   void addRule(Rule rule) {
-    _rules = [
-      ..._rules.where((r) => r.domain != rule.domain),
-      rule,
-    ];
+    _rules = [..._rules.where((r) => r.domain != rule.domain), rule];
   }
 
   void removeRule(String domain) {

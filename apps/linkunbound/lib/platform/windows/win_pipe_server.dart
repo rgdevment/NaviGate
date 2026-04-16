@@ -22,95 +22,97 @@ const _genericRead = 0x80000000;
 const _genericWrite = 0x40000000;
 const _invalidHandleValue = -1;
 
-typedef _CreateNamedPipeWNative = IntPtr Function(
-  Pointer<Utf16> lpName,
-  Uint32 dwOpenMode,
-  Uint32 dwPipeMode,
-  Uint32 nMaxInstances,
-  Uint32 nOutBufferSize,
-  Uint32 nInBufferSize,
-  Uint32 nDefaultTimeOut,
-  Pointer<Void> lpSecurityAttributes,
-);
-typedef _CreateNamedPipeWDart = int Function(
-  Pointer<Utf16> lpName,
-  int dwOpenMode,
-  int dwPipeMode,
-  int nMaxInstances,
-  int nOutBufferSize,
-  int nInBufferSize,
-  int nDefaultTimeOut,
-  Pointer<Void> lpSecurityAttributes,
-);
+typedef _CreateNamedPipeWNative =
+    IntPtr Function(
+      Pointer<Utf16> lpName,
+      Uint32 dwOpenMode,
+      Uint32 dwPipeMode,
+      Uint32 nMaxInstances,
+      Uint32 nOutBufferSize,
+      Uint32 nInBufferSize,
+      Uint32 nDefaultTimeOut,
+      Pointer<Void> lpSecurityAttributes,
+    );
+typedef _CreateNamedPipeWDart =
+    int Function(
+      Pointer<Utf16> lpName,
+      int dwOpenMode,
+      int dwPipeMode,
+      int nMaxInstances,
+      int nOutBufferSize,
+      int nInBufferSize,
+      int nDefaultTimeOut,
+      Pointer<Void> lpSecurityAttributes,
+    );
 
-typedef _ConnectNamedPipeNative = Int32 Function(
-  IntPtr hNamedPipe,
-  Pointer<Void> lpOverlapped,
-);
-typedef _ConnectNamedPipeDart = int Function(
-  int hNamedPipe,
-  Pointer<Void> lpOverlapped,
-);
+typedef _ConnectNamedPipeNative =
+    Int32 Function(IntPtr hNamedPipe, Pointer<Void> lpOverlapped);
+typedef _ConnectNamedPipeDart =
+    int Function(int hNamedPipe, Pointer<Void> lpOverlapped);
 
 typedef _DisconnectNamedPipeNative = Int32 Function(IntPtr hNamedPipe);
 typedef _DisconnectNamedPipeDart = int Function(int hNamedPipe);
 
-typedef _CreateFileWNative = IntPtr Function(
-  Pointer<Utf16> lpFileName,
-  Uint32 dwDesiredAccess,
-  Uint32 dwShareMode,
-  Pointer<Void> lpSecurityAttributes,
-  Uint32 dwCreationDisposition,
-  Uint32 dwFlagsAndAttributes,
-  IntPtr hTemplateFile,
-);
-typedef _CreateFileWDart = int Function(
-  Pointer<Utf16> lpFileName,
-  int dwDesiredAccess,
-  int dwShareMode,
-  Pointer<Void> lpSecurityAttributes,
-  int dwCreationDisposition,
-  int dwFlagsAndAttributes,
-  int hTemplateFile,
-);
+typedef _CreateFileWNative =
+    IntPtr Function(
+      Pointer<Utf16> lpFileName,
+      Uint32 dwDesiredAccess,
+      Uint32 dwShareMode,
+      Pointer<Void> lpSecurityAttributes,
+      Uint32 dwCreationDisposition,
+      Uint32 dwFlagsAndAttributes,
+      IntPtr hTemplateFile,
+    );
+typedef _CreateFileWDart =
+    int Function(
+      Pointer<Utf16> lpFileName,
+      int dwDesiredAccess,
+      int dwShareMode,
+      Pointer<Void> lpSecurityAttributes,
+      int dwCreationDisposition,
+      int dwFlagsAndAttributes,
+      int hTemplateFile,
+    );
 
-typedef _ReadFileNative = Int32 Function(
-  IntPtr hFile,
-  Pointer<Uint8> lpBuffer,
-  Uint32 nNumberOfBytesToRead,
-  Pointer<Uint32> lpNumberOfBytesRead,
-  Pointer<Void> lpOverlapped,
-);
-typedef _ReadFileDart = int Function(
-  int hFile,
-  Pointer<Uint8> lpBuffer,
-  int nNumberOfBytesToRead,
-  Pointer<Uint32> lpNumberOfBytesRead,
-  Pointer<Void> lpOverlapped,
-);
+typedef _ReadFileNative =
+    Int32 Function(
+      IntPtr hFile,
+      Pointer<Uint8> lpBuffer,
+      Uint32 nNumberOfBytesToRead,
+      Pointer<Uint32> lpNumberOfBytesRead,
+      Pointer<Void> lpOverlapped,
+    );
+typedef _ReadFileDart =
+    int Function(
+      int hFile,
+      Pointer<Uint8> lpBuffer,
+      int nNumberOfBytesToRead,
+      Pointer<Uint32> lpNumberOfBytesRead,
+      Pointer<Void> lpOverlapped,
+    );
 
-typedef _WriteFileNative = Int32 Function(
-  IntPtr hFile,
-  Pointer<Uint8> lpBuffer,
-  Uint32 nNumberOfBytesToWrite,
-  Pointer<Uint32> lpNumberOfBytesWritten,
-  Pointer<Void> lpOverlapped,
-);
-typedef _WriteFileDart = int Function(
-  int hFile,
-  Pointer<Uint8> lpBuffer,
-  int nNumberOfBytesToWrite,
-  Pointer<Uint32> lpNumberOfBytesWritten,
-  Pointer<Void> lpOverlapped,
-);
+typedef _WriteFileNative =
+    Int32 Function(
+      IntPtr hFile,
+      Pointer<Uint8> lpBuffer,
+      Uint32 nNumberOfBytesToWrite,
+      Pointer<Uint32> lpNumberOfBytesWritten,
+      Pointer<Void> lpOverlapped,
+    );
+typedef _WriteFileDart =
+    int Function(
+      int hFile,
+      Pointer<Uint8> lpBuffer,
+      int nNumberOfBytesToWrite,
+      Pointer<Uint32> lpNumberOfBytesWritten,
+      Pointer<Void> lpOverlapped,
+    );
 
 typedef _CloseHandleNative = Int32 Function(IntPtr hObject);
 typedef _CloseHandleDart = int Function(int hObject);
 
-typedef _CancelIoExNative = Int32 Function(
-  IntPtr hFile,
-  Pointer<Void> lpOverlapped,
-);
+typedef _CancelIoExNative =
+    Int32 Function(IntPtr hFile, Pointer<Void> lpOverlapped);
 typedef _CancelIoExDart = int Function(int hFile, Pointer<Void> lpOverlapped);
 
 final class _NativePipe {
@@ -118,34 +120,28 @@ final class _NativePipe {
 
   static final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-  static final createNamedPipe =
-      _kernel32.lookupFunction<_CreateNamedPipeWNative, _CreateNamedPipeWDart>(
+  static final createNamedPipe = _kernel32
+      .lookupFunction<_CreateNamedPipeWNative, _CreateNamedPipeWDart>(
         'CreateNamedPipeW',
       );
-  static final connectNamedPipe =
-      _kernel32.lookupFunction<_ConnectNamedPipeNative, _ConnectNamedPipeDart>(
+  static final connectNamedPipe = _kernel32
+      .lookupFunction<_ConnectNamedPipeNative, _ConnectNamedPipeDart>(
         'ConnectNamedPipe',
       );
   static final disconnectNamedPipe = _kernel32
       .lookupFunction<_DisconnectNamedPipeNative, _DisconnectNamedPipeDart>(
         'DisconnectNamedPipe',
       );
-  static final createFile =
-      _kernel32.lookupFunction<_CreateFileWNative, _CreateFileWDart>(
-        'CreateFileW',
-      );
-  static final readFile =
-      _kernel32.lookupFunction<_ReadFileNative, _ReadFileDart>('ReadFile');
-  static final writeFile =
-      _kernel32.lookupFunction<_WriteFileNative, _WriteFileDart>('WriteFile');
-  static final closeHandle =
-      _kernel32.lookupFunction<_CloseHandleNative, _CloseHandleDart>(
-        'CloseHandle',
-      );
-  static final cancelIoEx =
-      _kernel32.lookupFunction<_CancelIoExNative, _CancelIoExDart>(
-        'CancelIoEx',
-      );
+  static final createFile = _kernel32
+      .lookupFunction<_CreateFileWNative, _CreateFileWDart>('CreateFileW');
+  static final readFile = _kernel32
+      .lookupFunction<_ReadFileNative, _ReadFileDart>('ReadFile');
+  static final writeFile = _kernel32
+      .lookupFunction<_WriteFileNative, _WriteFileDart>('WriteFile');
+  static final closeHandle = _kernel32
+      .lookupFunction<_CloseHandleNative, _CloseHandleDart>('CloseHandle');
+  static final cancelIoEx = _kernel32
+      .lookupFunction<_CancelIoExNative, _CancelIoExDart>('CancelIoEx');
 }
 
 final class WinPipeServer implements PipeServer {
@@ -175,10 +171,7 @@ final class WinPipeServer implements PipeServer {
       }
     });
 
-    _isolate = await Isolate.spawn(
-      _serverLoop,
-      _receivePort!.sendPort,
-    );
+    _isolate = await Isolate.spawn(_serverLoop, _receivePort!.sendPort);
     _log.info('Pipe server started');
   }
 
@@ -257,10 +250,8 @@ final class WinPipeServer implements PipeServer {
 
   static int _getLastError() {
     final kernel32 = DynamicLibrary.open('kernel32.dll');
-    final getLastError =
-        kernel32.lookupFunction<Uint32 Function(), int Function()>(
-          'GetLastError',
-        );
+    final getLastError = kernel32
+        .lookupFunction<Uint32 Function(), int Function()>('GetLastError');
     return getLastError();
   }
 }

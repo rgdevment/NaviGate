@@ -16,9 +16,7 @@ class RulesPage extends ConsumerWidget {
     final rules = ref.watch(rulesProvider);
     final browsers = ref.watch(browsersProvider);
 
-    final browserList = browsers
-        .map((b) => (id: b.id, name: b.name))
-        .toList();
+    final browserList = browsers.map((b) => (id: b.id, name: b.name)).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
@@ -66,16 +64,11 @@ class RulesPage extends ConsumerWidget {
                     browserName: _browserName(rule.browserId, browsers),
                     browsers: browserList,
                     onBrowserChanged: (browserId) {
-                      ref.read(rulesProvider.notifier).updateRule(
-                            rule.domain,
-                            browserId: browserId,
-                          );
+                      ref
+                          .read(rulesProvider.notifier)
+                          .updateRule(rule.domain, browserId: browserId);
                     },
-                    onDelete: () => _confirmDelete(
-                      context,
-                      ref,
-                      rule.domain,
-                    ),
+                    onDelete: () => _confirmDelete(context, ref, rule.domain),
                   ),
                 ),
               ],

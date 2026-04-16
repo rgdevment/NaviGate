@@ -79,8 +79,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(6),
           borderSide: const BorderSide(color: _outline),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     ),
   );

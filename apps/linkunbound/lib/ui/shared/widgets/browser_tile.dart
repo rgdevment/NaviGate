@@ -33,7 +33,11 @@ class BrowserTile extends StatelessWidget {
               height: 28,
               child: iconFile.existsSync()
                   ? Image.file(iconFile, filterQuality: FilterQuality.medium)
-                  : Icon(Icons.public, size: 28, color: colors.onSurfaceVariant),
+                  : Icon(
+                      Icons.public,
+                      size: 28,
+                      color: colors.onSurfaceVariant,
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(

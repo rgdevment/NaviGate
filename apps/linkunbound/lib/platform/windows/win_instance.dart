@@ -6,22 +6,23 @@ import 'package:logging/logging.dart';
 final _log = Logger('WinInstance');
 final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-typedef _CreateMutexWNative = IntPtr Function(
-  Pointer<Void> lpMutexAttributes,
-  Int32 bInitialOwner,
-  Pointer<Utf16> lpName,
-);
-typedef _CreateMutexWDart = int Function(
-  Pointer<Void> lpMutexAttributes,
-  int bInitialOwner,
-  Pointer<Utf16> lpName,
-);
+typedef _CreateMutexWNative =
+    IntPtr Function(
+      Pointer<Void> lpMutexAttributes,
+      Int32 bInitialOwner,
+      Pointer<Utf16> lpName,
+    );
+typedef _CreateMutexWDart =
+    int Function(
+      Pointer<Void> lpMutexAttributes,
+      int bInitialOwner,
+      Pointer<Utf16> lpName,
+    );
 
-typedef _WaitForSingleObjectNative = Uint32 Function(
-  IntPtr hHandle,
-  Uint32 dwMilliseconds,
-);
-typedef _WaitForSingleObjectDart = int Function(int hHandle, int dwMilliseconds);
+typedef _WaitForSingleObjectNative =
+    Uint32 Function(IntPtr hHandle, Uint32 dwMilliseconds);
+typedef _WaitForSingleObjectDart =
+    int Function(int hHandle, int dwMilliseconds);
 
 typedef _ReleaseMutexNative = Int32 Function(IntPtr hMutex);
 typedef _ReleaseMutexDart = int Function(int hMutex);
@@ -45,10 +46,8 @@ final class WinInstance {
   bool acquire() {
     if (_mutexHandle != 0) return false;
 
-    final createMutex =
-        _kernel32.lookupFunction<_CreateMutexWNative, _CreateMutexWDart>(
-          'CreateMutexW',
-        );
+    final createMutex = _kernel32
+        .lookupFunction<_CreateMutexWNative, _CreateMutexWDart>('CreateMutexW');
     final waitForSingleObject = _kernel32
         .lookupFunction<_WaitForSingleObjectNative, _WaitForSingleObjectDart>(
           'WaitForSingleObject',
@@ -69,10 +68,8 @@ final class WinInstance {
         return true;
       }
 
-      final closeHandle =
-          _kernel32.lookupFunction<_CloseHandleNative, _CloseHandleDart>(
-            'CloseHandle',
-          );
+      final closeHandle = _kernel32
+          .lookupFunction<_CloseHandleNative, _CloseHandleDart>('CloseHandle');
       closeHandle(handle);
       _log.info('Another instance already running');
       return false;
@@ -84,14 +81,10 @@ final class WinInstance {
   void release() {
     if (_mutexHandle == 0) return;
 
-    final releaseMutex =
-        _kernel32.lookupFunction<_ReleaseMutexNative, _ReleaseMutexDart>(
-          'ReleaseMutex',
-        );
-    final closeHandle =
-        _kernel32.lookupFunction<_CloseHandleNative, _CloseHandleDart>(
-          'CloseHandle',
-        );
+    final releaseMutex = _kernel32
+        .lookupFunction<_ReleaseMutexNative, _ReleaseMutexDart>('ReleaseMutex');
+    final closeHandle = _kernel32
+        .lookupFunction<_CloseHandleNative, _CloseHandleDart>('CloseHandle');
 
     releaseMutex(_mutexHandle);
     closeHandle(_mutexHandle);
@@ -101,19 +94,21 @@ final class WinInstance {
 
   static void allowForeground() {
     final user32 = DynamicLibrary.open('user32.dll');
-    final allowSetForegroundWindow = user32.lookupFunction<
-      _AllowSetForegroundWindowNative,
-      _AllowSetForegroundWindowDart
-    >('AllowSetForegroundWindow');
+    final allowSetForegroundWindow = user32
+        .lookupFunction<
+          _AllowSetForegroundWindowNative,
+          _AllowSetForegroundWindowDart
+        >('AllowSetForegroundWindow');
     allowSetForegroundWindow(_asfwAny);
   }
 
   static (double, double) getCursorPosition() {
     final user32 = DynamicLibrary.open('user32.dll');
-    final getCursorPos = user32.lookupFunction<
-      Int32 Function(Pointer<_POINT>),
-      int Function(Pointer<_POINT>)
-    >('GetCursorPos');
+    final getCursorPos = user32
+        .lookupFunction<
+          Int32 Function(Pointer<_POINT>),
+          int Function(Pointer<_POINT>)
+        >('GetCursorPos');
     final point = calloc<_POINT>();
     try {
       getCursorPos(point);
@@ -125,10 +120,10 @@ final class WinInstance {
 
   static (double, double) getScreenSize() {
     final user32 = DynamicLibrary.open('user32.dll');
-    final getSystemMetrics = user32.lookupFunction<
-      Int32 Function(Int32),
-      int Function(int)
-    >('GetSystemMetrics');
+    final getSystemMetrics = user32
+        .lookupFunction<Int32 Function(Int32), int Function(int)>(
+          'GetSystemMetrics',
+        );
     return (getSystemMetrics(0).toDouble(), getSystemMetrics(1).toDouble());
   }
 }
