@@ -88,6 +88,13 @@ final class BrowsersNotifier extends Notifier<List<Browser>> {
     await service.save();
     state = service.browsers;
   }
+
+  Future<void> reorder(int oldIndex, int newIndex) async {
+    final service = ref.read(browserServiceProvider);
+    service.reorder(oldIndex, newIndex);
+    await service.save();
+    state = service.browsers;
+  }
 }
 
 final rulesProvider =
