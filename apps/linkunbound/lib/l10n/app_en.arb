@@ -1,0 +1,82 @@
+{
+  "@@locale": "en",
+
+  "copyUrl": "Copy URL",
+  "alwaysOpenHere": "Always open here",
+
+  "tabGeneral": "General",
+  "tabRules": "Rules",
+  "tabAbout": "About",
+
+  "sectionDefaultBrowser": "DEFAULT BROWSER",
+  "isDefaultBrowser": "LinkUnbound is set as the default browser",
+  "notDefaultBrowser": "LinkUnbound is not the default browser",
+  "setDefault": "Set default",
+
+  "sectionStartup": "STARTUP",
+  "launchAtStartup": "Launch at Windows startup",
+
+  "sectionLanguage": "LANGUAGE",
+  "languageAuto": "Automatic (system)",
+  "languageEnglish": "English",
+  "languageSpanish": "Spanish",
+
+  "sectionBrowsers": "BROWSERS",
+  "addBrowserTooltip": "Add custom browser",
+  "refreshBrowsersTooltip": "Refresh browsers",
+  "menuEdit": "Edit",
+  "menuDuplicate": "Duplicate",
+  "menuRemove": "Remove",
+  "foundBrowsersCount": "Found {count} browsers",
+  "@foundBrowsersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "editBrowserTitle": "Edit browser",
+  "addBrowserTitle": "Add custom browser",
+  "fieldName": "Name",
+  "fieldExecutablePath": "Executable path",
+  "fieldExtraArgs": "Extra arguments (space-separated)",
+  "fieldIconPath": "Custom icon path (optional)",
+  "fieldIconHint": "Leave empty to auto-detect from exe",
+  "cancel": "Cancel",
+  "add": "Add",
+  "save": "Save",
+  "confirm": "Confirm",
+
+  "sectionUrlRules": "URL RULES",
+  "noRulesYet": "No rules yet. Rules are created from the browser picker when you check \"Always open here\".",
+  "columnDomain": "Domain",
+  "columnBrowser": "Browser",
+  "deleteRuleTitle": "Delete rule",
+  "deleteRuleContent": "Remove the rule for \"{domain}\"?",
+  "@deleteRuleContent": {
+    "placeholders": {
+      "domain": { "type": "String" }
+    }
+  },
+  "delete": "Delete",
+  "deleteRuleTooltip": "Delete rule",
+
+  "sectionAbout": "ABOUT",
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "appDescription": "Open-source browser picker for Windows.",
+  "mitLicense": "MIT License",
+  "sectionActions": "ACTIONS",
+  "resetConfigLabel": "Reset configuration",
+  "resetConfigDescription": "Clear all browsers and rules, then re-scan",
+  "unregisterLabel": "Unregister LinkUnbound",
+  "unregisterDescription": "Remove from Windows browser list",
+  "resetConfigTitle": "Reset configuration",
+  "resetConfigContent": "This will delete all browsers, rules and icons, then re-scan installed browsers. Continue?",
+  "reset": "Reset",
+  "unregisterTitle": "Unregister LinkUnbound",
+  "unregisterContent": "This will remove LinkUnbound from the Windows browser list. You may need to change your default browser in Windows Settings afterwards. Continue?",
+  "unregisterAction": "Unregister"
+}

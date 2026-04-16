@@ -1,0 +1,470 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('es'),
+  ];
+
+  /// No description provided for @copyUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy URL'**
+  String get copyUrl;
+
+  /// No description provided for @alwaysOpenHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Always open here'**
+  String get alwaysOpenHere;
+
+  /// No description provided for @tabGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get tabGeneral;
+
+  /// No description provided for @tabRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get tabRules;
+
+  /// No description provided for @tabAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get tabAbout;
+
+  /// No description provided for @sectionDefaultBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'DEFAULT BROWSER'**
+  String get sectionDefaultBrowser;
+
+  /// No description provided for @isDefaultBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'LinkUnbound is set as the default browser'**
+  String get isDefaultBrowser;
+
+  /// No description provided for @notDefaultBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'LinkUnbound is not the default browser'**
+  String get notDefaultBrowser;
+
+  /// No description provided for @setDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set default'**
+  String get setDefault;
+
+  /// No description provided for @sectionStartup.
+  ///
+  /// In en, this message translates to:
+  /// **'STARTUP'**
+  String get sectionStartup;
+
+  /// No description provided for @launchAtStartup.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch at Windows startup'**
+  String get launchAtStartup;
+
+  /// No description provided for @sectionLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'LANGUAGE'**
+  String get sectionLanguage;
+
+  /// No description provided for @languageAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic (system)'**
+  String get languageAuto;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageSpanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get languageSpanish;
+
+  /// No description provided for @sectionBrowsers.
+  ///
+  /// In en, this message translates to:
+  /// **'BROWSERS'**
+  String get sectionBrowsers;
+
+  /// No description provided for @addBrowserTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom browser'**
+  String get addBrowserTooltip;
+
+  /// No description provided for @refreshBrowsersTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh browsers'**
+  String get refreshBrowsersTooltip;
+
+  /// No description provided for @menuEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get menuEdit;
+
+  /// No description provided for @menuDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get menuDuplicate;
+
+  /// No description provided for @menuRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get menuRemove;
+
+  /// No description provided for @foundBrowsersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} browsers'**
+  String foundBrowsersCount(int count);
+
+  /// No description provided for @editBrowserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit browser'**
+  String get editBrowserTitle;
+
+  /// No description provided for @addBrowserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom browser'**
+  String get addBrowserTitle;
+
+  /// No description provided for @fieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get fieldName;
+
+  /// No description provided for @fieldExecutablePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Executable path'**
+  String get fieldExecutablePath;
+
+  /// No description provided for @fieldExtraArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra arguments (space-separated)'**
+  String get fieldExtraArgs;
+
+  /// No description provided for @fieldIconPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom icon path (optional)'**
+  String get fieldIconPath;
+
+  /// No description provided for @fieldIconHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to auto-detect from exe'**
+  String get fieldIconHint;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @sectionUrlRules.
+  ///
+  /// In en, this message translates to:
+  /// **'URL RULES'**
+  String get sectionUrlRules;
+
+  /// No description provided for @noRulesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No rules yet. Rules are created from the browser picker when you check \"Always open here\".'**
+  String get noRulesYet;
+
+  /// No description provided for @columnDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'Domain'**
+  String get columnDomain;
+
+  /// No description provided for @columnBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser'**
+  String get columnBrowser;
+
+  /// No description provided for @deleteRuleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete rule'**
+  String get deleteRuleTitle;
+
+  /// No description provided for @deleteRuleContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the rule for \"{domain}\"?'**
+  String deleteRuleContent(String domain);
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deleteRuleTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete rule'**
+  String get deleteRuleTooltip;
+
+  /// No description provided for @sectionAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'ABOUT'**
+  String get sectionAbout;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @appDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source browser picker for Windows.'**
+  String get appDescription;
+
+  /// No description provided for @mitLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'MIT License'**
+  String get mitLicense;
+
+  /// No description provided for @sectionActions.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIONS'**
+  String get sectionActions;
+
+  /// No description provided for @resetConfigLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset configuration'**
+  String get resetConfigLabel;
+
+  /// No description provided for @resetConfigDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all browsers and rules, then re-scan'**
+  String get resetConfigDescription;
+
+  /// No description provided for @unregisterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unregister LinkUnbound'**
+  String get unregisterLabel;
+
+  /// No description provided for @unregisterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Windows browser list'**
+  String get unregisterDescription;
+
+  /// No description provided for @resetConfigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset configuration'**
+  String get resetConfigTitle;
+
+  /// No description provided for @resetConfigContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete all browsers, rules and icons, then re-scan installed browsers. Continue?'**
+  String get resetConfigContent;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @unregisterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unregister LinkUnbound'**
+  String get unregisterTitle;
+
+  /// No description provided for @unregisterContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove LinkUnbound from the Windows browser list. You may need to change your default browser in Windows Settings afterwards. Continue?'**
+  String get unregisterContent;
+
+  /// No description provided for @unregisterAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unregister'**
+  String get unregisterAction;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'es'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

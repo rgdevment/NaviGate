@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 import '../shared/widgets/base_dialog.dart';
 import '../shared/widgets/group_card.dart';
@@ -15,18 +16,18 @@ class RulesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rules = ref.watch(rulesProvider);
     final browsers = ref.watch(browsersProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     final browserList = browsers.map((b) => (id: b.id, name: b.name)).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       children: [
-        const SectionHeader(label: 'URL RULES'),
+        SectionHeader(label: l10n.sectionUrlRules),
         if (rules.isEmpty)
           GroupCard(
             child: Text(
-              'No rules yet. Rules are created from the browser picker '
-              'when you check "Always open here".',
+              l10n.noRulesYet,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           )
@@ -42,7 +43,7 @@ class RulesPage extends ConsumerWidget {
                       Expanded(
                         flex: 3,
                         child: Text(
-                          'Domain',
+                          l10n.columnDomain,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ),
@@ -50,7 +51,7 @@ class RulesPage extends ConsumerWidget {
                       Expanded(
                         flex: 3,
                         child: Text(
-                          'Browser',
+                          l10n.columnBrowser,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ),
@@ -86,12 +87,13 @@ class RulesPage extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref, String domain) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (ctx) => BaseDialog(
-        title: 'Delete rule',
-        content: 'Remove the rule for "$domain"?',
-        confirmLabel: 'Delete',
+        title: l10n.deleteRuleTitle,
+        content: l10n.deleteRuleContent(domain),
+        confirmLabel: l10n.delete,
         confirmColor: Theme.of(ctx).colorScheme.error,
         onConfirm: () {
           ref.read(rulesProvider.notifier).removeRule(domain);
