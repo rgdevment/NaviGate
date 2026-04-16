@@ -76,10 +76,7 @@ final class WinBrowserDetector implements BrowserDetector {
 
       String iconPath = '';
       try {
-        final iconKey = Registry.openPath(
-          hive,
-          path: '$basePath\\DefaultIcon',
-        );
+        final iconKey = Registry.openPath(hive, path: '$basePath\\DefaultIcon');
         iconPath = _extractIconPath(iconKey.getValueAsString('') ?? '');
         iconKey.close();
       } on Exception {

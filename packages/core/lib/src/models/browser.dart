@@ -32,13 +32,12 @@ final class Browser {
     String? iconPath,
     List<String>? extraArgs,
     bool? isCustom,
-  }) =>
-      Browser(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        executablePath: executablePath ?? this.executablePath,
-        iconPath: iconPath ?? this.iconPath,
-        extraArgs: extraArgs ?? this.extraArgs,
-        isCustom: isCustom ?? this.isCustom,
-      );
+  }) => Browser(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    executablePath: executablePath ?? this.executablePath,
+    iconPath: iconPath ?? this.iconPath,
+    extraArgs: extraArgs ?? this.extraArgs,
+    isCustom: isCustom ?? this.isCustom,
+  );
 }

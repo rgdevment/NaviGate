@@ -16,7 +16,8 @@ final class WinIconExtractor implements IconExtractor {
     final escapedExe = executablePath.replaceAll("'", "''");
     final escapedOut = outputPath.replaceAll("'", "''");
 
-    final script = '''
+    final script =
+        '''
 Add-Type -AssemblyName System.Drawing
 \$icon = [System.Drawing.Icon]::ExtractAssociatedIcon('$escapedExe')
 if (\$icon) {
@@ -27,10 +28,12 @@ if (\$icon) {
 }
 ''';
 
-    final result = await Process.run(
-      'powershell',
-      ['-NoProfile', '-NonInteractive', '-Command', script],
-    );
+    final result = await Process.run('powershell', [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      script,
+    ]);
 
     if (result.exitCode != 0 || !outFile.existsSync()) {
       _log.warning(

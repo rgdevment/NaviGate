@@ -4,10 +4,7 @@ part 'rule.g.dart';
 
 @JsonSerializable()
 final class Rule {
-  const Rule({
-    required this.domain,
-    required this.browserId,
-  });
+  const Rule({required this.domain, required this.browserId});
 
   factory Rule.fromJson(Map<String, dynamic> json) => _$RuleFromJson(json);
 
@@ -16,12 +13,8 @@ final class Rule {
 
   Map<String, dynamic> toJson() => _$RuleToJson(this);
 
-  Rule copyWith({
-    String? domain,
-    String? browserId,
-  }) =>
-      Rule(
-        domain: domain ?? this.domain,
-        browserId: browserId ?? this.browserId,
-      );
+  Rule copyWith({String? domain, String? browserId}) => Rule(
+    domain: domain ?? this.domain,
+    browserId: browserId ?? this.browserId,
+  );
 }

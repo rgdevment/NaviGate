@@ -94,8 +94,7 @@ class GeneralPage extends ConsumerWidget {
                 onPressed: () => _showAddBrowserDialog(context, ref),
                 icon: const Icon(Icons.add, size: 18),
                 padding: EdgeInsets.zero,
-                constraints:
-                    const BoxConstraints(minWidth: 28, minHeight: 28),
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 tooltip: 'Add custom browser',
               ),
               const SizedBox(width: 4),
@@ -103,8 +102,7 @@ class GeneralPage extends ConsumerWidget {
                 onPressed: () async {
                   await ref.read(browsersProvider.notifier).refresh();
                   final iconExtractor = ref.read(iconExtractorProvider);
-                  for (final browser
-                      in ref.read(browsersProvider)) {
+                  for (final browser in ref.read(browsersProvider)) {
                     try {
                       await iconExtractor.extractIcon(
                         browser.executablePath,
@@ -129,8 +127,7 @@ class GeneralPage extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.refresh, size: 18),
                 padding: EdgeInsets.zero,
-                constraints:
-                    const BoxConstraints(minWidth: 28, minHeight: 28),
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 tooltip: 'Refresh browsers',
               ),
             ],
@@ -191,10 +188,7 @@ class GeneralPage extends ConsumerWidget {
                         minHeight: 28,
                       ),
                       itemBuilder: (_) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Edit'),
-                        ),
+                        const PopupMenuItem(value: 'edit', child: Text('Edit')),
                         const PopupMenuItem(
                           value: 'duplicate',
                           child: Text('Duplicate'),
@@ -267,10 +261,12 @@ class GeneralPage extends ConsumerWidget {
   }) {
     final isEdit = existing != null;
     final nameController = TextEditingController(text: existing?.name ?? '');
-    final pathController =
-        TextEditingController(text: existing?.executablePath ?? '');
-    final argsController =
-        TextEditingController(text: existing?.extraArgs.join(' ') ?? '');
+    final pathController = TextEditingController(
+      text: existing?.executablePath ?? '',
+    );
+    final argsController = TextEditingController(
+      text: existing?.extraArgs.join(' ') ?? '',
+    );
     final iconController = TextEditingController();
 
     showDialog<void>(
@@ -280,8 +276,9 @@ class GeneralPage extends ConsumerWidget {
 
         return Dialog(
           backgroundColor: colors.surfaceContainer,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Padding(
@@ -338,8 +335,7 @@ class GeneralPage extends ConsumerWidget {
                           if (isEdit) {
                             final updated = existing.copyWith(
                               name: name,
-                              executablePath:
-                                  existing.isCustom ? path : null,
+                              executablePath: existing.isCustom ? path : null,
                               extraArgs: extraArgs,
                             );
                             await ref
@@ -351,7 +347,9 @@ class GeneralPage extends ConsumerWidget {
                                 .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
                                 .replaceAll(RegExp(r'^-|-$'), '');
 
-                            await ref.read(browsersProvider.notifier).add(
+                            await ref
+                                .read(browsersProvider.notifier)
+                                .add(
                                   Browser(
                                     id: 'custom-$id',
                                     name: name,
@@ -367,13 +365,14 @@ class GeneralPage extends ConsumerWidget {
                           final browserId = isEdit
                               ? existing.id
                               : 'custom-${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-\$'), '')}';
-                          final iconSource =
-                              customIcon.isNotEmpty ? customIcon : path;
-                          final iconDest =
-                              File('${iconsDir.path}\\$browserId.png');
+                          final iconSource = customIcon.isNotEmpty
+                              ? customIcon
+                              : path;
+                          final iconDest = File(
+                            '${iconsDir.path}\\$browserId.png',
+                          );
 
-                          if (customIcon.isNotEmpty &&
-                              iconDest.existsSync()) {
+                          if (customIcon.isNotEmpty && iconDest.existsSync()) {
                             await iconDest.delete();
                           }
 
@@ -429,9 +428,7 @@ class _FormField extends StatelessWidget {
         hintText: hint,
         filled: true,
         fillColor: colors.surfaceBright,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 10,

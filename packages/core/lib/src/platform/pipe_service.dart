@@ -16,7 +16,8 @@ sealed class PipeMessage {
         'show_settings' => const ShowSettingsMessage(),
         'ping' => const PingMessage(),
         _ => throw FormatException(
-            'Unknown pipe message action: ${json['action']}'),
+          'Unknown pipe message action: ${json['action']}',
+        ),
       };
 }
 

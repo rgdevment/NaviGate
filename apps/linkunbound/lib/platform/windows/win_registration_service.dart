@@ -6,18 +6,20 @@ import 'package:win32_registry/win32_registry.dart';
 
 final _log = Logger('WinRegistrationService');
 
-typedef _SHChangeNotifyNative = Void Function(
-  Int32 wEventId,
-  Uint32 uFlags,
-  Pointer<Void> dwItem1,
-  Pointer<Void> dwItem2,
-);
-typedef _SHChangeNotifyDart = void Function(
-  int wEventId,
-  int uFlags,
-  Pointer<Void> dwItem1,
-  Pointer<Void> dwItem2,
-);
+typedef _SHChangeNotifyNative =
+    Void Function(
+      Int32 wEventId,
+      Uint32 uFlags,
+      Pointer<Void> dwItem1,
+      Pointer<Void> dwItem2,
+    );
+typedef _SHChangeNotifyDart =
+    void Function(
+      int wEventId,
+      int uFlags,
+      Pointer<Void> dwItem1,
+      Pointer<Void> dwItem2,
+    );
 
 const _shcneAssocChanged = 0x08000000;
 const _shcnfIdList = 0x0000;
@@ -145,18 +147,12 @@ final class WinRegistrationService implements RegistrationService {
     defaultIcon.close();
 
     final command = key.createKey(r'shell\open\command');
-    command.createValue(
-      RegistryValue('', RegistryValueType.string, quotedExe),
-    );
+    command.createValue(RegistryValue('', RegistryValueType.string, quotedExe));
     command.close();
 
     final installInfo = key.createKey('InstallInfo');
     installInfo.createValue(
-      RegistryValue(
-        'ReinstallCommand',
-        RegistryValueType.string,
-        quotedExe,
-      ),
+      RegistryValue('ReinstallCommand', RegistryValueType.string, quotedExe),
     );
     installInfo.createValue(
       const RegistryValue('IconsVisible', RegistryValueType.int32, 1),
@@ -288,8 +284,8 @@ final class WinRegistrationService implements RegistrationService {
 
   void _notifyShell() {
     final shell32 = DynamicLibrary.open('shell32.dll');
-    final shChangeNotify =
-        shell32.lookupFunction<_SHChangeNotifyNative, _SHChangeNotifyDart>(
+    final shChangeNotify = shell32
+        .lookupFunction<_SHChangeNotifyNative, _SHChangeNotifyDart>(
           'SHChangeNotify',
         );
     shChangeNotify(_shcneAssocChanged, _shcnfIdList, nullptr, nullptr);

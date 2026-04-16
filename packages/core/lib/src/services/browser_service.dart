@@ -8,10 +8,7 @@ import '../models/browser_config.dart';
 import '../platform/browser_detector.dart';
 
 final class BrowserService {
-  BrowserService({
-    required this.configFile,
-    required this.browserDetector,
-  });
+  BrowserService({required this.configFile, required this.browserDetector});
 
   final File configFile;
   final BrowserDetector browserDetector;

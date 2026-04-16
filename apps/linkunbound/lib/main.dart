@@ -38,8 +38,9 @@ void main(List<String> args) async {
   _log.info('Started with args: $args, extracted URL: $url');
 
   final client = WinPipeClient();
-  final delegateMessage =
-      url != null ? OpenUrlMessage(url) : const ShowSettingsMessage();
+  final delegateMessage = url != null
+      ? OpenUrlMessage(url)
+      : const ShowSettingsMessage();
   WinInstance.allowForeground();
 
   if (await client.send(delegateMessage)) {
@@ -96,10 +97,7 @@ void main(List<String> args) async {
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
   await windowManager.waitUntilReadyToShow(
-    const WindowOptions(
-      titleBarStyle: TitleBarStyle.hidden,
-      size: Size(1, 1),
-    ),
+    const WindowOptions(titleBarStyle: TitleBarStyle.hidden, size: Size(1, 1)),
     () async {
       await windowManager.hide();
     },
@@ -134,7 +132,10 @@ void main(List<String> args) async {
         final winSize = PickerLayout.windowSize(browsers.length);
         final (cursorX, cursorY) = WinInstance.getCursorPosition();
         final (screenW, screenH) = WinInstance.getScreenSize();
-        final x = (cursorX - winSize.width / 2).clamp(8.0, screenW - winSize.width - 8);
+        final x = (cursorX - winSize.width / 2).clamp(
+          8.0,
+          screenW - winSize.width - 8,
+        );
         final y = (cursorY + 16).clamp(8.0, screenH - winSize.height - 8);
         _log.info(
           'Picker: ${browsers.length} browsers, '
@@ -166,10 +167,7 @@ void main(List<String> args) async {
   await _initTray(container, instance, pipeServer);
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const NavigateApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const NavigateApp()),
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -191,11 +189,9 @@ void _handleUrl(String url, ProviderContainer container) {
     final browser = browsers.where((b) => b.id == matchedBrowserId).firstOrNull;
     if (browser != null) {
       _log.info('Rule match: $resolved → ${browser.name}');
-      container.read(launchServiceProvider).launch(
-            browser.executablePath,
-            resolved,
-            browser.extraArgs,
-          );
+      container
+          .read(launchServiceProvider)
+          .launch(browser.executablePath, resolved, browser.extraArgs);
       return;
     }
   }
@@ -218,7 +214,8 @@ String _unwrapSafeLink(String raw) {
   if (uri == null) return raw;
 
   final host = uri.host.toLowerCase();
-  final isSafeLink = host.endsWith('.safelinks.protection.outlook.com') ||
+  final isSafeLink =
+      host.endsWith('.safelinks.protection.outlook.com') ||
       host == 'statics.teams.cdn.office.net';
   if (!isSafeLink) return raw;
 

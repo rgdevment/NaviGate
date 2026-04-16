@@ -61,8 +61,7 @@ class TitleBar extends StatelessWidget {
                 indicatorWeight: 2,
                 dividerHeight: 0,
                 padding: EdgeInsets.zero,
-                labelPadding:
-                    const EdgeInsets.symmetric(horizontal: 14),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 14),
                 tabs: tabs.map((t) => Tab(height: 32, text: t)).toList(),
               ),
             ),

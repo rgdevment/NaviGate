@@ -48,9 +48,7 @@ class BaseDialog extends StatelessWidget {
                   FilledButton(
                     onPressed: onConfirm,
                     style: confirmColor != null
-                        ? FilledButton.styleFrom(
-                            backgroundColor: confirmColor,
-                          )
+                        ? FilledButton.styleFrom(backgroundColor: confirmColor)
                         : null,
                     child: Text(confirmLabel),
                   ),

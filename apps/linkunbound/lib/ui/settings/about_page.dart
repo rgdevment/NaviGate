@@ -21,19 +21,22 @@ class AboutPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('LinkUnbound', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'LinkUnbound',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 4),
-              Text('Version 1.0.0', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'Version 1.0.0',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 8),
               Text(
                 'Open-source browser picker for Windows.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 4),
-              Text(
-                'MIT License',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text('MIT License', style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
         ),
@@ -151,10 +154,9 @@ class _ActionRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: color),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: color),
                   ),
                   Text(
                     description,
