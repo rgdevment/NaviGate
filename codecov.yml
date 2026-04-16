@@ -2,8 +2,12 @@ coverage:
   precision: 2
   round: down
   ignore:
-    - "apps/linkunbound/lib/platform"
-    - "apps/linkunbound/lib/ui"
+    - "apps/linkunbound/lib/platform/**"
     - "apps/linkunbound/lib/main.dart"
+    - "apps/linkunbound/lib/app.dart"
+    - "apps/linkunbound/lib/l10n/app_localizations*.dart"
+    - "packages/core/lib/src/services/update_service.dart"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
 
 comment: false

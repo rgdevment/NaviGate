@@ -41,11 +41,18 @@ jobs:
             --out=coverage/lcov.info \
             --report-on=lib
 
+      - name: Run app tests with coverage
+        working-directory: apps/linkunbound
+        run: flutter test --coverage
+
+      - name: Merge coverage reports
+        run: cat packages/core/coverage/lcov.info apps/linkunbound/coverage/lcov.info > coverage-merged.info
+
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
-          path: packages/core/coverage/lcov.info
+          path: coverage-merged.info
 
   codecov:
     name: Codecov
@@ -60,12 +67,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-reports
-          path: packages/core/coverage
+          path: coverage
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: packages/core/coverage/lcov.info
+          files: coverage/coverage-merged.info
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
@@ -93,7 +100,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-reports
-          path: packages/core/coverage
+          path: coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v5
@@ -104,10 +111,10 @@ jobs:
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.sources=packages/core/lib,apps/linkunbound/lib
-            -Dsonar.tests=packages/core/test
-            -Dsonar.dart.lcov.reportPaths=packages/core/coverage/lcov.info
-            -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart
-            -Dsonar.coverage.exclusions=**/main.dart,**/platform/**,**/ui/**
+            -Dsonar.tests=packages/core/test,apps/linkunbound/test
+            -Dsonar.dart.lcov.reportPaths=coverage/coverage-merged.info
+            -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/l10n/app_localizations_*.dart
+            -Dsonar.coverage.exclusions=**/main.dart,**/app.dart,**/platform/**,**/update_service.dart
 
   build:
     name: Build (Windows)

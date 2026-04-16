@@ -216,4 +216,49 @@ void main() {
       expect(configFile.existsSync(), isFalse);
     });
   });
+
+  group('reorder', () {
+    BrowserService serviceWithBrowsers(List<String> ids) {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([]),
+      );
+      for (final id in ids) {
+        service.addBrowser(
+          Browser(id: id, name: id, executablePath: '$id.exe', iconPath: '$id.png'),
+        );
+      }
+      return service;
+    }
+
+    test('moves item forward in list', () {
+      final service = serviceWithBrowsers(['a', 'b', 'c']);
+      service.reorder(0, 2);
+      expect(service.browsers.map((b) => b.id).toList(), ['b', 'c', 'a']);
+    });
+
+    test('moves item backward in list', () {
+      final service = serviceWithBrowsers(['a', 'b', 'c']);
+      service.reorder(2, 0);
+      expect(service.browsers.map((b) => b.id).toList(), ['c', 'a', 'b']);
+    });
+
+    test('moves item one position forward', () {
+      final service = serviceWithBrowsers(['a', 'b', 'c']);
+      service.reorder(0, 1);
+      expect(service.browsers.map((b) => b.id).toList(), ['b', 'a', 'c']);
+    });
+
+    test('clamps newIndex to list length when out of bounds', () {
+      final service = serviceWithBrowsers(['a', 'b', 'c']);
+      service.reorder(0, 99);
+      expect(service.browsers.map((b) => b.id).toList(), ['b', 'c', 'a']);
+    });
+
+    test('clamps newIndex to 0 when negative', () {
+      final service = serviceWithBrowsers(['a', 'b', 'c']);
+      service.reorder(2, -1);
+      expect(service.browsers.map((b) => b.id).toList(), ['c', 'a', 'b']);
+    });
+  });
 }
