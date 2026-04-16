@@ -1,0 +1,9 @@
+coverage:
+  precision: 2
+  round: down
+  ignore:
+    - "apps/linkunbound/lib/platform"
+    - "apps/linkunbound/lib/ui"
+    - "apps/linkunbound/lib/main.dart"
+
+comment: false
