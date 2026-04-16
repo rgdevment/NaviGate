@@ -174,6 +174,12 @@ final isDefaultBrowserProvider = FutureProvider.autoDispose<bool>((ref) {
   return ref.read(registrationServiceProvider).isDefault;
 });
 
+final defaultAssociationsProvider = FutureProvider.autoDispose<Set<String>>((
+  ref,
+) {
+  return ref.read(registrationServiceProvider).defaultAssociations;
+});
+
 final isStartupEnabledProvider = FutureProvider.autoDispose<bool>((ref) {
   return ref.read(startupServiceProvider).isEnabled;
 });

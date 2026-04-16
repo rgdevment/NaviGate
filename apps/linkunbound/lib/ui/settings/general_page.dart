@@ -30,7 +30,11 @@ class GeneralPage extends ConsumerWidget {
       children: [
         ..._buildBrowsersSection(context, ref, browsers, iconsDir),
         const SizedBox(height: 20),
-        ..._buildDefaultBrowserSection(context, isDefaultAsync),
+        ..._buildDefaultBrowserSection(
+          context,
+          isDefaultAsync,
+          ref.watch(defaultAssociationsProvider),
+        ),
         if (hasEdge && !edgeDismissed) ...[
           const SizedBox(height: 20),
           ..._buildEdgeWarningSection(context, ref),
@@ -46,38 +50,57 @@ class GeneralPage extends ConsumerWidget {
   List<Widget> _buildDefaultBrowserSection(
     BuildContext context,
     AsyncValue<bool> isDefaultAsync,
+    AsyncValue<Set<String>> associationsAsync,
   ) {
     final colors = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final isDefault = isDefaultAsync.valueOrNull == true;
+    final associations = associationsAsync.valueOrNull ?? {};
 
     return [
       SectionHeader(label: l10n.sectionDefaultBrowser),
       GroupCard(
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              isDefault
-                  ? Icons.check_circle_outline
-                  : Icons.warning_amber_rounded,
-              size: 20,
-              color: isDefault ? Colors.green : colors.error,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                isDefault ? l10n.isDefaultBrowser : l10n.notDefaultBrowser,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-            if (!isDefault)
-              TextButton(
-                onPressed: () => launchUrl(
-                  Uri.parse(
-                    'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
+            Row(
+              children: [
+                Icon(
+                  isDefault
+                      ? Icons.check_circle_outline
+                      : Icons.warning_amber_rounded,
+                  size: 20,
+                  color: isDefault ? Colors.green : colors.error,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    isDefault ? l10n.isDefaultBrowser : l10n.notDefaultBrowser,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
-                child: Text(l10n.setDefault),
+                if (!isDefault)
+                  TextButton(
+                    onPressed: () => launchUrl(
+                      Uri.parse(
+                        'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
+                      ),
+                    ),
+                    child: Text(l10n.setDefault),
+                  ),
+              ],
+            ),
+            if (associations.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 32, top: 4),
+                child: Text(
+                  associations
+                      .map((a) => a.replaceAll('.', '').toUpperCase())
+                      .join(' · '),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
               ),
           ],
         ),

@@ -66,6 +66,34 @@ final class WinRegistrationService implements RegistrationService {
     }
   }
 
+  @override
+  Future<Set<String>> get defaultAssociations async {
+    final result = <String>{};
+    for (final entry in _userChoicePaths.entries) {
+      try {
+        final key = Registry.openPath(
+          RegistryHive.currentUser,
+          path: entry.value,
+        );
+        final progId = key.getValueAsString('ProgId');
+        key.close();
+        if (progId == 'LinkUnboundURL') result.add(entry.key);
+      } on Exception {
+        // Not set as default for this association.
+      }
+    }
+    return result;
+  }
+
+  static const _userChoicePaths = {
+    'http':
+        r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice',
+    'https':
+        r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice',
+    '.pdf':
+        r'Software\Microsoft\Windows\Shell\Associations\FileExts\.pdf\UserChoice',
+  };
+
   void _writeProgId(String exe, String quotedExe) {
     final root = Registry.openPath(
       RegistryHive.currentUser,
