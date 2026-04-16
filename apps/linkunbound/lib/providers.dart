@@ -35,6 +35,8 @@ final localeFileProvider = Provider<File>((_) => throw _mustOverride());
 
 final edgeWarningFileProvider = Provider<File>((_) => throw _mustOverride());
 
+final appDataDirProvider = Provider<Directory>((_) => throw _mustOverride());
+
 final edgeWarningDismissedProvider =
     NotifierProvider<EdgeWarningNotifier, bool>(EdgeWarningNotifier.new);
 

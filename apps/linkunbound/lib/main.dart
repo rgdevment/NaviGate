@@ -99,6 +99,7 @@ void main(List<String> args) async {
       edgeWarningFileProvider.overrideWithValue(
         File('${appDataDir.path}\\edge_warning_dismissed'),
       ),
+      appDataDirProvider.overrideWithValue(appDataDir),
     ],
   );
 
@@ -110,7 +111,7 @@ void main(List<String> args) async {
       case AppMode.hidden:
         await windowManager.hide();
       case AppMode.settings:
-        await windowManager.setSize(const Size(580, 700));
+        await windowManager.setSize(const Size(640, 700));
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
