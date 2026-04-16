@@ -1,11 +1,16 @@
+import 'package:flutter/painting.dart';
+
 final class PickerLayout {
   const PickerLayout._();
 
-  static (int columns, int rows) grid(int browserCount) => switch (browserCount) {
-        <= 0 => (0, 0),
-        <= 4 => (browserCount, 1),
-        <= 6 => (3, 2),
-        <= 8 => (4, 2),
-        _ => (3, (browserCount / 3).ceil()),
-      };
+  static const double width = 320.0;
+  static const double rowHeight = 44.0;
+  static const double _overhead = 100.0;
+  static const double _chromeW = 16.0;
+  static const double _chromeH = 9.0;
+
+  static Size windowSize(int browserCount) {
+    final h = _overhead + browserCount * rowHeight;
+    return Size(width + _chromeW, h + _chromeH);
+  }
 }

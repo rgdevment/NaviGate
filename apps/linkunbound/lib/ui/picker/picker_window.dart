@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../providers.dart';
 import 'picker_view.dart';
+
+final _log = Logger('PickerWindow');
 
 class PickerWindow extends ConsumerStatefulWidget {
   const PickerWindow({required this.url, super.key});
@@ -33,11 +36,9 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
     _scaleAnim = Tween<double>(begin: 0.95, end: 1.0).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeOut),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _animController.forward();
-      Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted) _active = true;
-      });
+    _animController.forward();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _active = true;
     });
   }
 
@@ -51,6 +52,7 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
   @override
   void onWindowBlur() {
     if (!_active) return;
+    _log.fine('Picker lost focus, hiding');
     ref.read(appStateProvider.notifier).hide();
   }
 
@@ -59,29 +61,13 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: colors.surface,
       body: FadeTransition(
         opacity: _fadeAnim,
         child: ScaleTransition(
           scale: _scaleAnim,
-          child: Container(
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colors.outline.withAlpha(60)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(80),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: PickerView(url: widget.url),
-            ),
-          ),
+          alignment: Alignment.topCenter,
+          child: PickerView(url: widget.url),
         ),
       ),
     );

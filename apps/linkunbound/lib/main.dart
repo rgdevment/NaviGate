@@ -131,15 +131,17 @@ void main(List<String> args) async {
         await windowManager.focus();
       case AppMode.picker:
         final browsers = container.read(browsersProvider);
-        final (columns, rows) = PickerLayout.grid(browsers.length);
-        final gridWidth = columns * 88.0 + (columns > 1 ? (columns - 1) * 8.0 : 0);
-        final pickerWidth = (gridWidth + 48.0).clamp(340.0, 600.0);
-        final pickerHeight = 140.0 + rows * 88.0 + (rows > 1 ? (rows - 1) * 8.0 : 0);
-        await windowManager.setSize(Size(pickerWidth, pickerHeight));
+        final winSize = PickerLayout.windowSize(browsers.length);
         final (cursorX, cursorY) = WinInstance.getCursorPosition();
         final (screenW, screenH) = WinInstance.getScreenSize();
-        final x = (cursorX - pickerWidth / 2).clamp(8.0, screenW - pickerWidth - 8);
-        final y = (cursorY + 16).clamp(8.0, screenH - pickerHeight - 8);
+        final x = (cursorX - winSize.width / 2).clamp(8.0, screenW - winSize.width - 8);
+        final y = (cursorY + 16).clamp(8.0, screenH - winSize.height - 8);
+        _log.info(
+          'Picker: ${browsers.length} browsers, '
+          'window=${winSize.width.toInt()}x${winSize.height.toInt()}, '
+          'pos=(${x.toInt()}, ${y.toInt()})',
+        );
+        await windowManager.setSize(winSize);
         await windowManager.setPosition(Offset(x, y));
         await windowManager.setSkipTaskbar(true);
         await windowManager.setAlwaysOnTop(true);
