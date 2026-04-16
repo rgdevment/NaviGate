@@ -70,7 +70,7 @@
     }
   },
   "appDescription": "Open-source browser picker for Windows.",
-  "mitLicense": "MIT License",
+  "mitLicense": "GPL-3.0 License",
   "resetConfigLabel": "Reset configuration",
   "resetConfigDescription": "Clear all browsers and rules, then re-scan",
   "unregisterLabel": "Unregister LinkUnbound",
