@@ -19,6 +19,7 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
   late final AnimationController _animController;
   late final Animation<double> _fadeAnim;
   late final Animation<double> _scaleAnim;
+  bool _active = false;
 
   @override
   void initState() {
@@ -32,7 +33,12 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
     _scaleAnim = Tween<double>(begin: 0.95, end: 1.0).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeOut),
     );
-    _animController.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animController.forward();
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) _active = true;
+      });
+    });
   }
 
   @override
@@ -44,6 +50,7 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
 
   @override
   void onWindowBlur() {
+    if (!_active) return;
     ref.read(appStateProvider.notifier).hide();
   }
 

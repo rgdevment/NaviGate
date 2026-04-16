@@ -107,4 +107,36 @@ final class WinInstance {
     >('AllowSetForegroundWindow');
     allowSetForegroundWindow(_asfwAny);
   }
+
+  static (double, double) getCursorPosition() {
+    final user32 = DynamicLibrary.open('user32.dll');
+    final getCursorPos = user32.lookupFunction<
+      Int32 Function(Pointer<_POINT>),
+      int Function(Pointer<_POINT>)
+    >('GetCursorPos');
+    final point = calloc<_POINT>();
+    try {
+      getCursorPos(point);
+      return (point.ref.x.toDouble(), point.ref.y.toDouble());
+    } finally {
+      calloc.free(point);
+    }
+  }
+
+  static (double, double) getScreenSize() {
+    final user32 = DynamicLibrary.open('user32.dll');
+    final getSystemMetrics = user32.lookupFunction<
+      Int32 Function(Int32),
+      int Function(int)
+    >('GetSystemMetrics');
+    return (getSystemMetrics(0).toDouble(), getSystemMetrics(1).toDouble());
+  }
+}
+
+final class _POINT extends Struct {
+  @Int32()
+  external int x;
+
+  @Int32()
+  external int y;
 }
