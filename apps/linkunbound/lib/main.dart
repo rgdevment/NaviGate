@@ -99,6 +99,8 @@ void main(List<String> args) async {
     ],
   );
 
+  container.read(updateInfoProvider);
+
   container.listen<AppState>(appStateProvider, (prev, next) async {
     if (prev?.mode == next.mode) return;
     switch (next.mode) {

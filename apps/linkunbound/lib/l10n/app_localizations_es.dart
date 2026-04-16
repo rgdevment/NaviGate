@@ -190,4 +190,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get unregisterAction => 'Desregistrar';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Versión $version disponible';
+  }
+
+  @override
+  String get updateDownload => 'Descargar';
+
+  @override
+  String get updateTooltip =>
+      'Nueva versión disponible — revisa las actualizaciones en Ajustes';
 }

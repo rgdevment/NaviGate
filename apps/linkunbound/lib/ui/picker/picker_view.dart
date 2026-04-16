@@ -244,14 +244,15 @@ class _BrowserRowState extends State<_BrowserRow> {
   }
 }
 
-class _AlwaysOpenFooter extends StatelessWidget {
+class _AlwaysOpenFooter extends ConsumerWidget {
   const _AlwaysOpenFooter({required this.value, required this.onChanged});
   final bool value;
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
+    final hasUpdate = ref.watch(updateInfoProvider).valueOrNull != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -276,7 +277,59 @@ class _AlwaysOpenFooter extends StatelessWidget {
             AppLocalizations.of(context)!.alwaysOpenHere,
             style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
           ),
+          const Spacer(),
+          if (hasUpdate) const _UpdateDot(),
         ],
+      ),
+    );
+  }
+}
+
+class _UpdateDot extends StatefulWidget {
+  const _UpdateDot();
+
+  @override
+  State<_UpdateDot> createState() => _UpdateDotState();
+}
+
+class _UpdateDotState extends State<_UpdateDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Tooltip(
+      message: AppLocalizations.of(context)!.updateTooltip,
+      preferBelow: false,
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 0.3, end: 1.0).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+        ),
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: colors.primary,
+          ),
+        ),
       ),
     );
   }

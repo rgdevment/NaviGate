@@ -433,6 +433,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unregister'**
   String get unregisterAction;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} available'**
+  String updateAvailable(String version);
+
+  /// No description provided for @updateDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get updateDownload;
+
+  /// No description provided for @updateTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'New version available — check for updates in Settings'**
+  String get updateTooltip;
 }
 
 class _AppLocalizationsDelegate

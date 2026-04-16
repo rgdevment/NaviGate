@@ -78,5 +78,14 @@
   "reset": "Reset",
   "unregisterTitle": "Unregister LinkUnbound",
   "unregisterContent": "This will remove LinkUnbound from the Windows browser list. You may need to change your default browser in Windows Settings afterwards. Continue?",
-  "unregisterAction": "Unregister"
+  "unregisterAction": "Unregister",
+
+  "updateAvailable": "Version {version} available",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "updateDownload": "Download",
+  "updateTooltip": "New version available — check for updates in Settings"
 }

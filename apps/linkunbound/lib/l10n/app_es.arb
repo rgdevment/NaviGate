@@ -63,5 +63,9 @@
   "reset": "Restablecer",
   "unregisterTitle": "Desregistrar LinkUnbound",
   "unregisterContent": "Esto eliminará LinkUnbound de la lista de navegadores de Windows. Es posible que necesites cambiar tu navegador predeterminado en la Configuración de Windows después. ¿Continuar?",
-  "unregisterAction": "Desregistrar"
+  "unregisterAction": "Desregistrar",
+
+  "updateAvailable": "Versión {version} disponible",
+  "updateDownload": "Descargar",
+  "updateTooltip": "Nueva versión disponible — revisa las actualizaciones en Ajustes"
 }

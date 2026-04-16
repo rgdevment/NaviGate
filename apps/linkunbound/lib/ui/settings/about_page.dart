@@ -28,9 +28,16 @@ class AboutPage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
-              Text(
-                l10n.appVersion('1.0.0'),
-                style: Theme.of(context).textTheme.bodySmall,
+              Consumer(
+                builder: (context, ref, _) {
+                  final version =
+                      ref.watch(packageInfoProvider).valueOrNull?.version ??
+                      '…';
+                  return Text(
+                    l10n.appVersion(version),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  );
+                },
               ),
               const SizedBox(height: 8),
               Text(

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 StateError _mustOverride() => StateError('Override at startup');
 
@@ -153,4 +154,15 @@ final isDefaultBrowserProvider = FutureProvider.autoDispose<bool>((ref) {
 
 final isStartupEnabledProvider = FutureProvider.autoDispose<bool>((ref) {
   return ref.read(startupServiceProvider).isEnabled;
+});
+
+final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
+  return PackageInfo.fromPlatform();
+});
+
+const _updateService = UpdateService(owner: 'rgdevment', repo: 'LinkUnbound');
+
+final updateInfoProvider = FutureProvider<UpdateInfo?>((ref) async {
+  final info = await ref.watch(packageInfoProvider.future);
+  return _updateService.checkForUpdate(info.version);
 });
