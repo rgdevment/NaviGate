@@ -20,19 +20,27 @@ class SettingsView extends ConsumerStatefulWidget {
 }
 
 class _SettingsViewState extends ConsumerState<SettingsView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WindowListener {
   late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    windowManager.addListener(this);
   }
 
   @override
   void dispose() {
+    windowManager.removeListener(this);
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void onWindowFocus() {
+    ref.invalidate(isDefaultBrowserProvider);
+    ref.invalidate(defaultAssociationsProvider);
   }
 
   @override
