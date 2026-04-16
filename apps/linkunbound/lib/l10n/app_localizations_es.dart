@@ -222,4 +222,18 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get otherToolCopyPasteDescription =>
       'Gestor de portapapeles gratuito y de código abierto para Windows, macOS y Linux. Misma filosofía: sin anuncios, sin telemetría, todo local.';
+
+  @override
+  String get edgeWarningTitle => 'Microsoft Edge detectado';
+
+  @override
+  String get edgeWarningBody =>
+      'Microsoft Teams, Outlook y otras apps de Microsoft 365 pueden abrir links directamente en Edge, ignorando tu navegador predeterminado. Esto es una decisión de diseño de Microsoft que LinkUnbound no puede evitar.';
+
+  @override
+  String get edgeWarningNote =>
+      'Puedes cambiar este comportamiento desde la configuración de cada app. Algunas organizaciones fuerzan Edge a través de políticas de grupo.';
+
+  @override
+  String get edgeWarningDismiss => 'Entendido, no mostrar de nuevo';
 }

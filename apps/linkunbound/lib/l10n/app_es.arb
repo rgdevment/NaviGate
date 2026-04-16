@@ -74,5 +74,10 @@
   "donateDescription": "LinkUnbound es gratis y siempre lo será. Si te ahorra tiempo, considera apoyar el desarrollo.",
   "sectionOtherTools": "OTRAS HERRAMIENTAS",
   "otherToolCopyPaste": "CopyPaste",
-  "otherToolCopyPasteDescription": "Gestor de portapapeles gratuito y de código abierto para Windows, macOS y Linux. Misma filosofía: sin anuncios, sin telemetría, todo local."
+  "otherToolCopyPasteDescription": "Gestor de portapapeles gratuito y de código abierto para Windows, macOS y Linux. Misma filosofía: sin anuncios, sin telemetría, todo local.",
+
+  "edgeWarningTitle": "Microsoft Edge detectado",
+  "edgeWarningBody": "Microsoft Teams, Outlook y otras apps de Microsoft 365 pueden abrir links directamente en Edge, ignorando tu navegador predeterminado. Esto es una decisión de diseño de Microsoft que LinkUnbound no puede evitar.",
+  "edgeWarningNote": "Puedes cambiar este comportamiento desde la configuración de cada app. Algunas organizaciones fuerzan Edge a través de políticas de grupo.",
+  "edgeWarningDismiss": "Entendido, no mostrar de nuevo"
 }
