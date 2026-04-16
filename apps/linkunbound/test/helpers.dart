@@ -93,6 +93,7 @@ makeFixtures({
   final configFile = File('${tempDir.path}/browsers.json');
   final rulesFile = File('${tempDir.path}/rules.json');
   final localeFile = File('${tempDir.path}/locale');
+  final edgeWarningFile = File('${tempDir.path}/edge_warning_dismissed');
   final iconsDir = Directory('${tempDir.path}/icons')..createSync();
 
   final browserService = BrowserService(
@@ -123,6 +124,7 @@ makeFixtures({
     iconExtractorProvider.overrideWithValue(FakeIconExtractor()),
     iconsDirProvider.overrideWithValue(iconsDir),
     localeFileProvider.overrideWithValue(localeFile),
+    edgeWarningFileProvider.overrideWithValue(edgeWarningFile),
     packageInfoProvider.overrideWith(
       (ref) async => PackageInfo(
         appName: 'LinkUnbound',

@@ -20,6 +20,10 @@ class GeneralPage extends ConsumerWidget {
     final isDefaultAsync = ref.watch(isDefaultBrowserProvider);
     final isStartupAsync = ref.watch(isStartupEnabledProvider);
     final iconsDir = ref.read(iconsDirProvider);
+    final edgeDismissed = ref.watch(edgeWarningDismissedProvider);
+    final hasEdge = browsers.any(
+      (b) => b.executablePath.toLowerCase().contains('msedge'),
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
@@ -27,6 +31,10 @@ class GeneralPage extends ConsumerWidget {
         ..._buildBrowsersSection(context, ref, browsers, iconsDir),
         const SizedBox(height: 20),
         ..._buildDefaultBrowserSection(context, isDefaultAsync),
+        if (hasEdge && !edgeDismissed) ...[
+          const SizedBox(height: 20),
+          ..._buildEdgeWarningSection(context, ref),
+        ],
         const SizedBox(height: 20),
         ..._buildStartupSection(context, ref, isStartupAsync),
         const SizedBox(height: 20),
@@ -71,6 +79,61 @@ class GeneralPage extends ConsumerWidget {
                 ),
                 child: Text(l10n.setDefault),
               ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildEdgeWarningSection(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return [
+      GroupCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20,
+                  color: colors.primary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.edgeWarningTitle,
+                    style: textTheme.titleSmall?.copyWith(
+                      color: colors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.edgeWarningBody, style: textTheme.bodySmall),
+            const SizedBox(height: 10),
+            Text(
+              l10n.edgeWarningNote,
+              style: textTheme.bodySmall?.copyWith(
+                fontStyle: FontStyle.italic,
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  ref.read(edgeWarningDismissedProvider.notifier).dismiss();
+                },
+                child: Text(l10n.edgeWarningDismiss),
+              ),
+            ),
           ],
         ),
       ),
@@ -220,6 +283,8 @@ class GeneralPage extends ConsumerWidget {
           },
           itemBuilder: (context, index) {
             final b = browsers[index];
+            final isEdge =
+                b.executablePath.toLowerCase().contains('msedge');
             return BrowserTile(
               key: ValueKey(b.id),
               name: b.name,
@@ -228,6 +293,15 @@ class GeneralPage extends ConsumerWidget {
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (isEdge)
+                    Tooltip(
+                      message: l10n.edgeWarningBody,
+                      child: Icon(
+                        Icons.warning_amber_rounded,
+                        size: 16,
+                        color: colors.error,
+                      ),
+                    ),
                   PopupMenuButton<String>(
                     onSelected: (action) async {
                       switch (action) {
@@ -544,3 +618,5 @@ class _FormField extends StatelessWidget {
     );
   }
 }
+
+

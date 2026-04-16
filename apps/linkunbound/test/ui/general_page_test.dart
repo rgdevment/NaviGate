@@ -241,6 +241,8 @@ void main() {
         buildTestApp(const GeneralPage(), overrides: f.overrides),
       );
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
       expect(find.text('English'), findsOneWidget);
@@ -252,6 +254,8 @@ void main() {
       await tester.pumpWidget(
         buildTestApp(const GeneralPage(), overrides: f.overrides),
       );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();
       await tester.tap(find.byType(DropdownButton<String>));
       await tester.pumpAndSettle();

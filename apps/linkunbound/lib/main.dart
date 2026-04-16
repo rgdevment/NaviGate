@@ -96,6 +96,9 @@ void main(List<String> args) async {
       iconsDirProvider.overrideWithValue(iconsDir),
       launchServiceProvider.overrideWithValue(launchService),
       localeFileProvider.overrideWithValue(File('${appDataDir.path}\\locale')),
+      edgeWarningFileProvider.overrideWithValue(
+        File('${appDataDir.path}\\edge_warning_dismissed'),
+      ),
     ],
   );
 

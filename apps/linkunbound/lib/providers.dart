@@ -33,6 +33,25 @@ final launchServiceProvider = Provider<LaunchService>(
 
 final localeFileProvider = Provider<File>((_) => throw _mustOverride());
 
+final edgeWarningFileProvider = Provider<File>((_) => throw _mustOverride());
+
+final edgeWarningDismissedProvider =
+    NotifierProvider<EdgeWarningNotifier, bool>(EdgeWarningNotifier.new);
+
+final class EdgeWarningNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    final file = ref.read(edgeWarningFileProvider);
+    return file.existsSync();
+  }
+
+  void dismiss() {
+    final file = ref.read(edgeWarningFileProvider);
+    file.writeAsStringSync('1');
+    state = true;
+  }
+}
+
 final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
   LocaleNotifier.new,
 );

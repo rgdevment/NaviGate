@@ -94,5 +94,10 @@
   "donateDescription": "LinkUnbound is free and always will be. If it saves you time, consider supporting development.",
   "sectionOtherTools": "OTHER TOOLS",
   "otherToolCopyPaste": "CopyPaste",
-  "otherToolCopyPasteDescription": "Free, open source clipboard manager for Windows, macOS and Linux. Same philosophy: no ads, no telemetry, everything local."
+  "otherToolCopyPasteDescription": "Free, open source clipboard manager for Windows, macOS and Linux. Same philosophy: no ads, no telemetry, everything local.",
+
+  "edgeWarningTitle": "Microsoft Edge detected",
+  "edgeWarningBody": "Microsoft Teams, Outlook, and other Microsoft 365 apps may open links directly in Edge, ignoring your default browser. This is a Microsoft design decision that LinkUnbound cannot override.",
+  "edgeWarningNote": "You can change this behavior from each app's settings. Some organizations enforce Edge through group policies.",
+  "edgeWarningDismiss": "Got it, don't show again"
 }

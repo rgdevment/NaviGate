@@ -217,4 +217,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get otherToolCopyPasteDescription =>
       'Free, open source clipboard manager for Windows, macOS and Linux. Same philosophy: no ads, no telemetry, everything local.';
+
+  @override
+  String get edgeWarningTitle => 'Microsoft Edge detected';
+
+  @override
+  String get edgeWarningBody =>
+      'Microsoft Teams, Outlook, and other Microsoft 365 apps may open links directly in Edge, ignoring your default browser. This is a Microsoft design decision that LinkUnbound cannot override.';
+
+  @override
+  String get edgeWarningNote =>
+      'You can change this behavior from each app\'s settings. Some organizations enforce Edge through group policies.';
+
+  @override
+  String get edgeWarningDismiss => 'Got it, don\'t show again';
 }
