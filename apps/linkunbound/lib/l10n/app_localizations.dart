@@ -230,11 +230,17 @@ abstract class AppLocalizations {
   /// **'Remove'**
   String get menuRemove;
 
-  /// No description provided for @foundBrowsersCount.
+  /// No description provided for @refreshResult.
   ///
   /// In en, this message translates to:
-  /// **'Found {count} browsers'**
-  String foundBrowsersCount(int count);
+  /// **'{added} added, {removed} removed'**
+  String refreshResult(int added, int removed);
+
+  /// No description provided for @refreshNoChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes detected'**
+  String get refreshNoChanges;
 
   /// No description provided for @editBrowserTitle.
   ///

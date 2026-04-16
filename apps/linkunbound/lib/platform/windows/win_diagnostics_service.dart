@@ -11,9 +11,6 @@ const _registryPaths = [
   r'Software\Classes\LinkUnboundURL',
   r'Software\Clients\StartMenuInternet\LinkUnbound',
   r'Software\LinkUnbound',
-  r'Software\RegisteredApplications',
-  r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice',
-  r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice',
 ];
 
 Future<String> exportDiagnostics({
@@ -73,7 +70,7 @@ void _writeSystemInfo(
     ..writeln('Generated: ${DateTime.now().toIso8601String()}')
     ..writeln()
     ..writeln('--- System ---')
-    ..writeln('OS: ${Platform.operatingSystemVersion}')
+    ..writeln('OS: ${_osVersion()}')
     ..writeln('Locale: ${Platform.localeName}')
     ..writeln()
     ..writeln('--- Application ---')
@@ -99,6 +96,16 @@ void _writeSystemInfo(
   }
 
   File('${staging.path}\\system_info.txt').writeAsStringSync(buf.toString());
+}
+
+String _osVersion() => parseWindowsVersion(Platform.operatingSystemVersion);
+
+String parseWindowsVersion(String raw) {
+  final buildMatch = RegExp(r'Build (\d+)').firstMatch(raw);
+  if (buildMatch == null) return raw;
+  final build = int.tryParse(buildMatch.group(1)!) ?? 0;
+  if (build >= 22000) return raw.replaceFirst('Windows 10', 'Windows 11');
+  return raw;
 }
 
 void _writeRegistryDump(Directory staging) {

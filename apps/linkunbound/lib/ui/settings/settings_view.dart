@@ -47,8 +47,8 @@ class _SettingsViewState extends ConsumerState<SettingsView>
           tabs: [
             l10n.tabGeneral,
             l10n.tabRules,
-            l10n.tabAbout,
             l10n.tabMaintenance,
+            l10n.tabAbout,
           ],
           onClose: () async {
             await windowManager.hide();
@@ -66,8 +66,8 @@ class _SettingsViewState extends ConsumerState<SettingsView>
             children: const [
               GeneralPage(),
               RulesPage(),
-              AboutPage(),
               MaintenancePage(),
+              AboutPage(),
             ],
           ),
         ),

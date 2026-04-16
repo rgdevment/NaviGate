@@ -360,7 +360,7 @@ class GeneralPage extends ConsumerWidget {
     WidgetRef ref,
     Directory iconsDir,
   ) async {
-    await ref.read(browsersProvider.notifier).refresh();
+    final result = await ref.read(browsersProvider.notifier).refresh();
     final iconExtractor = ref.read(iconExtractorProvider);
     for (final browser in ref.read(browsersProvider)) {
       try {
@@ -374,16 +374,16 @@ class GeneralPage extends ConsumerWidget {
     }
     ref.invalidate(browsersProvider);
     if (context.mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      final message = result.added > 0 || result.removed > 0
+          ? l10n.refreshResult(result.added, result.removed)
+          : l10n.refreshNoChanges;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            AppLocalizations.of(
-              context,
-            )!.foundBrowsersCount(ref.read(browsersProvider).length),
-          ),
+          content: Text(message),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
-          width: 250,
+          width: 280,
         ),
       );
     }

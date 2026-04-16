@@ -147,6 +147,186 @@ void main() {
       final chrome = service.browsers.firstWhere((b) => b.id == 'chrome');
       expect(chrome.extraArgs, contains('--incognito'));
     });
+
+    test('user-renamed browser preserves name after rescan', () async {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([
+          const Browser(
+            id: 'chrome',
+            name: 'Chrome',
+            executablePath: 'C:\\chrome.exe',
+            iconPath: 'icons/chrome.png',
+          ),
+        ]),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'chrome',
+          name: 'Chrome (Work)',
+          executablePath: 'C:\\chrome.exe',
+          iconPath: 'icons/chrome.png',
+        ),
+      );
+      await service.scanAndMerge();
+      expect(service.browsers.first.name, 'Chrome (Work)');
+    });
+
+    test('preserves user order after rescan', () async {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([
+          const Browser(
+            id: 'chrome',
+            name: 'Chrome',
+            executablePath: 'C:\\chrome.exe',
+            iconPath: 'icons/chrome.png',
+          ),
+          const Browser(
+            id: 'firefox',
+            name: 'Firefox',
+            executablePath: 'C:\\firefox.exe',
+            iconPath: 'icons/firefox.png',
+          ),
+        ]),
+      );
+      // User has them in reverse order
+      service.addBrowser(
+        const Browser(
+          id: 'firefox',
+          name: 'Firefox',
+          executablePath: 'C:\\firefox.exe',
+          iconPath: 'icons/firefox.png',
+        ),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'chrome',
+          name: 'Chrome',
+          executablePath: 'C:\\chrome.exe',
+          iconPath: 'icons/chrome.png',
+        ),
+      );
+      await service.scanAndMerge();
+      expect(service.browsers[0].id, 'firefox');
+      expect(service.browsers[1].id, 'chrome');
+    });
+
+    test('removes uninstalled browser', () async {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([
+          const Browser(
+            id: 'chrome',
+            name: 'Chrome',
+            executablePath: 'C:\\chrome.exe',
+            iconPath: 'icons/chrome.png',
+          ),
+        ]),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'chrome',
+          name: 'Chrome',
+          executablePath: 'C:\\chrome.exe',
+          iconPath: 'icons/chrome.png',
+        ),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'old-browser',
+          name: 'Old',
+          executablePath: 'C:\\old.exe',
+          iconPath: 'icons/old.png',
+        ),
+      );
+      final result = await service.scanAndMerge();
+      expect(service.browsers, hasLength(1));
+      expect(service.browsers.first.id, 'chrome');
+      expect(result.removed, 1);
+    });
+
+    test('appends newly detected browser at end', () async {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([
+          const Browser(
+            id: 'chrome',
+            name: 'Chrome',
+            executablePath: 'C:\\chrome.exe',
+            iconPath: 'icons/chrome.png',
+          ),
+          const Browser(
+            id: 'edge',
+            name: 'Edge',
+            executablePath: 'C:\\edge.exe',
+            iconPath: 'icons/edge.png',
+          ),
+        ]),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'chrome',
+          name: 'Chrome',
+          executablePath: 'C:\\chrome.exe',
+          iconPath: 'icons/chrome.png',
+        ),
+      );
+      final result = await service.scanAndMerge();
+      expect(service.browsers, hasLength(2));
+      expect(service.browsers.last.id, 'edge');
+      expect(result.added, 1);
+    });
+
+    test('returns zero counts when no changes', () async {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([
+          const Browser(
+            id: 'chrome',
+            name: 'Chrome',
+            executablePath: 'C:\\chrome.exe',
+            iconPath: 'icons/chrome.png',
+          ),
+        ]),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'chrome',
+          name: 'Chrome',
+          executablePath: 'C:\\chrome.exe',
+          iconPath: 'icons/chrome.png',
+        ),
+      );
+      final result = await service.scanAndMerge();
+      expect(result.added, 0);
+      expect(result.removed, 0);
+    });
+
+    test('updates executablePath from detection', () async {
+      final service = BrowserService(
+        configFile: configFile,
+        browserDetector: _FakeDetector([
+          const Browser(
+            id: 'chrome',
+            name: 'Chrome',
+            executablePath: 'D:\\new\\chrome.exe',
+            iconPath: 'icons/chrome-new.png',
+          ),
+        ]),
+      );
+      service.addBrowser(
+        const Browser(
+          id: 'chrome',
+          name: 'Chrome',
+          executablePath: 'C:\\chrome.exe',
+          iconPath: 'icons/chrome.png',
+        ),
+      );
+      await service.scanAndMerge();
+      expect(service.browsers.first.executablePath, 'D:\\new\\chrome.exe');
+      expect(service.browsers.first.iconPath, 'icons/chrome-new.png');
+    });
   });
 
   group('CRUD', () {
