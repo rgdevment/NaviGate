@@ -11,3 +11,4 @@ export 'src/services/launch_service.dart';
 export 'src/services/log_service.dart';
 export 'src/services/rule_service.dart';
 export 'src/services/update_service.dart';
+export 'src/url_utils.dart';
