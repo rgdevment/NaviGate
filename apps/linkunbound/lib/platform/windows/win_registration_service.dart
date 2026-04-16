@@ -34,7 +34,6 @@ final class WinRegistrationService implements RegistrationService {
     _writeStartMenuInternet(exe, quotedExe);
     _writeCapabilities(exe, quotedExe);
     _writeRegisteredApplications();
-    _writeEdgeProtocolRedirects(exe, quotedExe);
     _notifyShell();
 
     _log.info('Registered LinkUnbound as browser handler');
@@ -45,8 +44,6 @@ final class WinRegistrationService implements RegistrationService {
     _deleteKeyTree(r'Software\Classes\LinkUnboundURL');
     _deleteKeyTree(r'Software\Clients\StartMenuInternet\LinkUnbound');
     _deleteKeyTree(r'Software\LinkUnbound');
-    _deleteKeyTree(r'Software\Classes\microsoft-edge');
-    _deleteKeyTree(r'Software\Classes\microsoft-edge-https');
     _removeRegisteredApplication();
     _notifyShell();
 
@@ -207,16 +204,12 @@ final class WinRegistrationService implements RegistrationService {
     startMenu.close();
 
     final urlAssoc = caps.createKey('URLAssociations');
-    for (final protocol in [
-      'http',
-      'https',
-      'microsoft-edge',
-      'microsoft-edge-https',
-    ]) {
-      urlAssoc.createValue(
-        RegistryValue(protocol, RegistryValueType.string, 'LinkUnboundURL'),
-      );
-    }
+    urlAssoc.createValue(
+      const RegistryValue('http', RegistryValueType.string, 'LinkUnboundURL'),
+    );
+    urlAssoc.createValue(
+      const RegistryValue('https', RegistryValueType.string, 'LinkUnboundURL'),
+    );
     urlAssoc.close();
 
     final fileAssoc = caps.createKey('FileAssociations');
@@ -303,33 +296,5 @@ final class WinRegistrationService implements RegistrationService {
           'SHChangeNotify',
         );
     shChangeNotify(_shcneAssocChanged, _shcnfIdList, nullptr, nullptr);
-  }
-
-  void _writeEdgeProtocolRedirects(String exe, String quotedExe) {
-    final root = Registry.openPath(
-      RegistryHive.currentUser,
-      path: r'Software\Classes',
-      desiredAccessRights: AccessRights.allAccess,
-    );
-
-    for (final protocol in ['microsoft-edge', 'microsoft-edge-https']) {
-      final key = root.createKey(protocol);
-      key.createValue(
-        RegistryValue('', RegistryValueType.string, 'URL:$protocol'),
-      );
-      key.createValue(
-        const RegistryValue('URL Protocol', RegistryValueType.string, ''),
-      );
-
-      final command = key.createKey(r'shell\open\command');
-      command.createValue(
-        RegistryValue('', RegistryValueType.string, '$quotedExe "%1"'),
-      );
-      command.close();
-      key.close();
-    }
-
-    root.close();
-    _log.info('Registered microsoft-edge protocol redirects');
   }
 }
