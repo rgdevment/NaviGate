@@ -320,7 +320,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byTooltip('New version available — check for updates in Settings'), findsNothing);
+      expect(
+        find.byTooltip('New version available — check for updates in Settings'),
+        findsNothing,
+      );
     });
   });
 
