@@ -1,11 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:linkunbound/ui/settings/about_page.dart';
 
 import '../helpers.dart';
+
+void _mockUrlLauncher() {
+  const channel = MethodChannel('plugins.flutter.io/url_launcher_windows');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel, (_) async => true);
+}
 
 void main() {
   late Directory tempDir;
@@ -221,6 +228,20 @@ void main() {
       await tester.tap(find.text('Unregister'));
       await tester.pumpAndSettle();
       expect(find.byType(Dialog), findsNothing);
+    });
+  });
+
+  group('AboutPage — link taps', () {
+    testWidgets('tapping Buy me a coffee invokes launchUrl', (tester) async {
+      _mockUrlLauncher();
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(const AboutPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Buy me a coffee'));
+      await tester.pumpAndSettle();
+      expect(find.text('Buy me a coffee'), findsOneWidget);
     });
   });
 }

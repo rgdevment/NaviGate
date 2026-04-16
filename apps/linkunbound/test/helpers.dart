@@ -87,6 +87,7 @@ makeFixtures({
   List<Rule> rules = const [],
   bool isDefault = false,
   bool isStartupEnabled = false,
+  UpdateInfo? updateInfo,
 }) {
   final tempDir = dir ?? Directory.systemTemp.createTempSync('lu_test_');
   final configFile = File('${tempDir.path}/browsers.json');
@@ -130,7 +131,7 @@ makeFixtures({
         buildNumber: '1',
       ),
     ),
-    updateInfoProvider.overrideWith((ref) async => null),
+    updateInfoProvider.overrideWith((ref) async => updateInfo),
   ];
 
   return (

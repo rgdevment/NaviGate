@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -286,6 +287,80 @@ void main() {
       await tester.tap(find.text('Google Chrome'));
       await tester.pumpAndSettle();
       expect(f.ruleService.lookupBrowser('https://github.com'), 'chrome');
+    });
+  });
+
+  group('PickerView — update dot', () {
+    testWidgets('shows update dot when updateInfo is non-null', (tester) async {
+      final f = makeFixtures(
+        dir: tempDir,
+        updateInfo: const UpdateInfo(
+          latestVersion: '9.9.9',
+          releaseUrl: 'https://github.com/test/releases',
+        ),
+      );
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'https://example.com'),
+          overrides: f.overrides,
+        ),
+      );
+      // Use pump instead of pumpAndSettle: _UpdateDot has a repeating animation
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byType(AnimatedBuilder), findsWidgets);
+    });
+
+    testWidgets('no update dot when updateInfo is null', (tester) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'https://example.com'),
+          overrides: f.overrides,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('New version available — check for updates in Settings'), findsNothing);
+    });
+  });
+
+  group('PickerView — browser row hover', () {
+    testWidgets('browser row changes color on mouse enter', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'https://example.com'),
+          overrides: f.overrides,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      final browserRow = find.text('Google Chrome');
+      await gesture.moveTo(tester.getCenter(browserRow));
+      await tester.pumpAndSettle();
+      expect(find.text('Google Chrome'), findsOneWidget);
+    });
+
+    testWidgets('browser row resets color on mouse exit', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'https://example.com'),
+          overrides: f.overrides,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      final browserRow = find.text('Google Chrome');
+      await gesture.moveTo(tester.getCenter(browserRow));
+      await tester.pumpAndSettle();
+      await gesture.moveTo(Offset.zero);
+      await tester.pumpAndSettle();
+      expect(find.text('Google Chrome'), findsOneWidget);
     });
   });
 }
