@@ -166,5 +166,33 @@ void main() {
       expect(content, isNot(contains('secret.example.com')));
       expect(content, contains('https://<redacted>/1 segments'));
     });
+
+    test('redacts Windows file path', () {
+      expect(
+        redactUrls(r'open C:\Users\Mario\Desktop\file.pdf'),
+        equals('open <redacted-path>.pdf'),
+      );
+    });
+
+    test('redacts file path with backslashes', () {
+      expect(
+        redactUrls(r'open C:\tmp\file.html'),
+        equals('open <redacted-path>.html'),
+      );
+    });
+
+    test('redacts file:// URI', () {
+      expect(
+        redactUrls(r'open file:///C:\Users\Mario\doc.pdf'),
+        equals('open <redacted-path>.pdf'),
+      );
+    });
+
+    test('redacts file path without extension', () {
+      expect(
+        redactUrls(r'path C:\folder\subfolder'),
+        equals('path <redacted-path>'),
+      );
+    });
   });
 }

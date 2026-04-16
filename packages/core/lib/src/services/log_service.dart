@@ -5,14 +5,24 @@ import 'package:logging/logging.dart';
 const _maxLogSize = 2 * 1024 * 1024; // 2 MB
 
 final _urlPattern = RegExp(r'https?://[^\s,\]\)]+', caseSensitive: false);
+final _filePathPattern = RegExp(
+  r'file:///[a-zA-Z]:[\\/][^\s,\]\)]*|[a-zA-Z]:\\[^\s,\]\)]*',
+  caseSensitive: false,
+);
 
 String redactUrls(String text) {
-  return text.replaceAllMapped(_urlPattern, (match) {
+  var result = text.replaceAllMapped(_urlPattern, (match) {
     final url = match.group(0)!;
     final uri = Uri.tryParse(url);
     if (uri == null) return '<redacted-url>';
     return '${uri.scheme}://<redacted>/${uri.pathSegments.length} segments';
   });
+  result = result.replaceAllMapped(_filePathPattern, (match) {
+    final path = match.group(0)!;
+    final ext = RegExp(r'\.[a-zA-Z0-9]+$').firstMatch(path);
+    return '<redacted-path>${ext?[0] ?? ''}';
+  });
+  return result;
 }
 
 void initLogging(File logFile) {
