@@ -1,0 +1,124 @@
+import 'dart:io';
+
+import 'package:linkunbound_core/linkunbound_core.dart';
+import 'package:logging/logging.dart';
+import 'package:test/test.dart';
+
+void main() {
+  late Directory tempDir;
+
+  setUp(() {
+    tempDir = Directory.systemTemp.createTempSync('log_service_test_');
+  });
+
+  tearDown(() {
+    Logger.root.clearListeners();
+    Logger.root.level = Level.OFF;
+    if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+  });
+
+  group('initLogging — setup', () {
+    test('creates parent directory when it does not exist', () {
+      final logFile = File('${tempDir.path}/subdir/app.log');
+      expect(logFile.parent.existsSync(), isFalse);
+      initLogging(logFile);
+      expect(logFile.parent.existsSync(), isTrue);
+    });
+
+    test('sets Logger.root level to ALL', () {
+      final logFile = File('${tempDir.path}/app.log');
+      Logger.root.level = Level.OFF;
+      initLogging(logFile);
+      expect(Logger.root.level, Level.ALL);
+    });
+  });
+
+  group('initLogging — log record listener', () {
+    test('writes log message to file', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.info('hello-test-xyz');
+      expect(logFile.existsSync(), isTrue);
+      expect(logFile.readAsStringSync(), contains('hello-test-xyz'));
+    });
+
+    test('appends multiple messages to file', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.info('first-msg');
+      Logger.root.info('second-msg');
+      final content = logFile.readAsStringSync();
+      expect(content, contains('first-msg'));
+      expect(content, contains('second-msg'));
+    });
+
+    test('log entry includes level name', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.warning('warn-test');
+      expect(logFile.readAsStringSync(), contains('WARNING'));
+    });
+
+    test('log entry includes ISO timestamp', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.info('ts-test');
+      final content = logFile.readAsStringSync();
+      expect(content, matches(RegExp(r'\d{4}-\d{2}-\d{2}T')));
+    });
+
+    test('log entry includes error object when present', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.severe('severe-test', Exception('boom'));
+      expect(logFile.readAsStringSync(), contains('boom'));
+    });
+
+    test('log entry does not include error marker when no error', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.info('no-error-test');
+      final content = logFile.readAsStringSync();
+      expect(content, contains('no-error-test'));
+      expect(content, isNot(contains('\n  Exception')));
+    });
+
+    test('log entry includes stack trace when present', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      Logger.root.severe('trace-test', Exception('e'), StackTrace.current);
+      expect(logFile.readAsStringSync(), contains('trace-test'));
+    });
+  });
+
+  group('rotation', () {
+    test('no rotation when log file does not exist', () {
+      final logFile = File('${tempDir.path}/app.log');
+      initLogging(logFile);
+      expect(File('${logFile.path}.1').existsSync(), isFalse);
+    });
+
+    test('no rotation when file is below 2 MB', () {
+      final logFile = File('${tempDir.path}/app.log');
+      logFile.writeAsStringSync('small content');
+      initLogging(logFile);
+      expect(File('${logFile.path}.1').existsSync(), isFalse);
+    });
+
+    test('rotates log file when it exceeds 2 MB', () {
+      final logFile = File('${tempDir.path}/app.log');
+      logFile.writeAsBytesSync(List.filled(2 * 1024 * 1024 + 1, 65));
+      initLogging(logFile);
+      expect(File('${logFile.path}.1').existsSync(), isTrue);
+    });
+
+    test('deletes existing backup before rotating', () {
+      final logFile = File('${tempDir.path}/app.log');
+      logFile.writeAsBytesSync(List.filled(2 * 1024 * 1024 + 1, 65));
+      final backup = File('${logFile.path}.1');
+      backup.writeAsStringSync('stale');
+      initLogging(logFile);
+      expect(backup.lengthSync(), greaterThan(2 * 1024 * 1024));
+    });
+  });
+}
