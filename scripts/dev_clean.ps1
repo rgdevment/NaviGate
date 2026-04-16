@@ -69,16 +69,83 @@ if (-not $SkipRegistry) {
     Remove-RegistryPath "HKCU:\SOFTWARE\NaviGate"
     Remove-RegistryValue "HKCU:\SOFTWARE\RegisteredApplications" "NaviGate"
 
+    Write-Section "Registry: URL default browser (UserChoice)"
+
+    @("http", "https") | ForEach-Object {
+        $proto = $_
+        $ucPath = "HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\$proto\UserChoice"
+        $ucVal = Get-ItemProperty $ucPath -ErrorAction SilentlyContinue
+        if ($ucVal -and ($ucVal.ProgId -like '*LinkUnbound*' -or $ucVal.ProgId -like '*Navigate*' -or $ucVal.ProgId -like '*NaviGate*')) {
+            if ($DryRun) { Write-Step "Would remove: $ucPath (ProgId=$($ucVal.ProgId))" }
+            else {
+                try {
+                    Remove-Item $ucPath -Force -ErrorAction Stop
+                    Write-Done "Removed $proto UserChoice (was $($ucVal.ProgId))"
+                    $script:removed++
+                } catch {
+                    Write-Skip "Cannot remove $proto UserChoice (protected) — change default browser in Windows Settings"
+                }
+            }
+        }
+    }
+
+    Write-Section "Registry: File association UserChoice"
+
+    @(".html", ".htm") | ForEach-Object {
+        $ext = $_
+        $ucPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$ext\UserChoice"
+        $ucVal = Get-ItemProperty $ucPath -ErrorAction SilentlyContinue
+        if ($ucVal -and ($ucVal.ProgId -like '*LinkUnbound*' -or $ucVal.ProgId -like '*Navigate*' -or $ucVal.ProgId -like '*NaviGate*')) {
+            if ($DryRun) { Write-Step "Would remove: $ucPath (ProgId=$($ucVal.ProgId))" }
+            else {
+                try {
+                    Remove-Item $ucPath -Force -ErrorAction Stop
+                    Write-Done "Removed $ext UserChoice (was $($ucVal.ProgId))"
+                    $script:removed++
+                } catch {
+                    Write-Skip "Cannot remove $ext UserChoice (protected) — reassociate in Windows Settings"
+                }
+            }
+        }
+    }
+
+    Write-Section "Registry: OpenWithProgids"
+
+    @(".html", ".htm") | ForEach-Object {
+        $owpPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$_\OpenWithProgids"
+        if (Test-Path $owpPath) {
+            @("LinkUnboundURL", "NavigateURL", "NaviGateURL", "NaviGate.URL") | ForEach-Object {
+                $progId = $_
+                $val = Get-ItemProperty -Path $owpPath -Name $progId -ErrorAction SilentlyContinue
+                if ($null -ne $val.$progId) {
+                    if ($DryRun) { Write-Step "Would remove OpenWithProgids: $progId" }
+                    else {
+                        Remove-ItemProperty -Path $owpPath -Name $progId -Force -ErrorAction SilentlyContinue
+                        Write-Done "Removed OpenWithProgids: $progId"
+                        $script:removed++
+                    }
+                }
+            }
+        }
+    }
+
     Write-Section "Registry: URL association toasts"
 
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "LinkUnboundURL_http"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "LinkUnboundURL_https"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NavigateURL_http"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NavigateURL_https"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGate.URL_http"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGate.URL_https"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGateURL_http"
-    Remove-RegistryValue "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "NaviGateURL_https"
+    $toastsPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts"
+    if (Test-Path $toastsPath) {
+        Get-ItemProperty -Path $toastsPath -ErrorAction SilentlyContinue |
+            Get-Member -MemberType NoteProperty |
+            Where-Object { $_.Name -like '*LinkUnbound*' -or $_.Name -like '*Navigate*' -or $_.Name -like '*NaviGate*' } |
+            ForEach-Object {
+                $propName = $_.Name
+                if ($DryRun) { Write-Step "Would remove toast: $propName" }
+                else {
+                    Remove-ItemProperty -Path $toastsPath -Name $propName -Force -ErrorAction SilentlyContinue
+                    Write-Done "Removed toast: $propName"
+                    $script:removed++
+                }
+            }
+    }
 
     Write-Section "Registry: File extension associations"
 
@@ -125,6 +192,18 @@ if (-not $SkipRegistry) {
                 }
             }
     }
+
+    # Notify Windows shell that associations changed
+    Add-Type -TypeDefinition @"
+        using System;
+        using System.Runtime.InteropServices;
+        public class ShellNotify {
+            [DllImport("shell32.dll")]
+            public static extern void SHChangeNotify(int wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+            public static void NotifyAssocChanged() { SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero); }
+        }
+"@ -ErrorAction SilentlyContinue
+    try { [ShellNotify]::NotifyAssocChanged(); Write-Done "Shell notified of association changes" } catch {}
 }
 
 if (-not $SkipFiles) {
