@@ -182,34 +182,58 @@ void main(List<String> args) async {
 }
 
 void _handleUrl(String url, ProviderContainer container) {
+  final resolved = _unwrapSafeLink(url);
   final ruleService = container.read(ruleServiceProvider);
-  final matchedBrowserId = ruleService.lookupBrowser(url);
+  final matchedBrowserId = ruleService.lookupBrowser(resolved);
 
   if (matchedBrowserId != null) {
     final browsers = container.read(browserServiceProvider).browsers;
     final browser = browsers.where((b) => b.id == matchedBrowserId).firstOrNull;
     if (browser != null) {
-      _log.info('Rule match: $url → ${browser.name}');
+      _log.info('Rule match: $resolved → ${browser.name}');
       container.read(launchServiceProvider).launch(
             browser.executablePath,
-            url,
+            resolved,
             browser.extraArgs,
           );
       return;
     }
   }
 
-  container.read(appStateProvider.notifier).showPicker(url);
+  container.read(appStateProvider.notifier).showPicker(resolved);
 }
 
 String? _extractUrl(List<String> args) {
   for (final arg in args) {
     final uri = Uri.tryParse(arg);
     if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
-      return arg;
+      return _unwrapSafeLink(arg);
     }
   }
   return null;
+}
+
+String _unwrapSafeLink(String raw) {
+  final uri = Uri.tryParse(raw);
+  if (uri == null) return raw;
+
+  final host = uri.host.toLowerCase();
+  final isSafeLink = host.endsWith('.safelinks.protection.outlook.com') ||
+      host == 'statics.teams.cdn.office.net';
+  if (!isSafeLink) return raw;
+
+  final inner = uri.queryParameters['url'];
+  if (inner != null && inner.isNotEmpty) {
+    final decoded = Uri.decodeFull(inner);
+    final innerUri = Uri.tryParse(decoded);
+    if (innerUri != null &&
+        (innerUri.scheme == 'http' || innerUri.scheme == 'https')) {
+      _log.info('Unwrapped SafeLink: $decoded');
+      return decoded;
+    }
+  }
+
+  return raw;
 }
 
 Future<void> _initTray(

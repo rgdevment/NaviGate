@@ -17,6 +17,12 @@ final class WinBrowserDetector implements BrowserDetector {
     return browsers.values.toList();
   }
 
+  static const _blockedBrowsers = {
+    'iexplore',
+    'iexplore.exe',
+    'internet explorer',
+  };
+
   void _scanHive(RegistryHive hive, Map<String, Browser> browsers) {
     final RegistryKey root;
     try {
@@ -32,6 +38,7 @@ final class WinBrowserDetector implements BrowserDetector {
       for (final name in root.subkeyNames) {
         if (name == 'LinkUnbound') continue;
         if (browsers.containsKey(name.toLowerCase())) continue;
+        if (_blockedBrowsers.contains(name.toLowerCase())) continue;
 
         try {
           final browser = _readBrowser(hive, name);
