@@ -207,12 +207,16 @@ final class WinRegistrationService implements RegistrationService {
     startMenu.close();
 
     final urlAssoc = caps.createKey('URLAssociations');
-    urlAssoc.createValue(
-      const RegistryValue('http', RegistryValueType.string, 'LinkUnboundURL'),
-    );
-    urlAssoc.createValue(
-      const RegistryValue('https', RegistryValueType.string, 'LinkUnboundURL'),
-    );
+    for (final protocol in [
+      'http',
+      'https',
+      'microsoft-edge',
+      'microsoft-edge-https',
+    ]) {
+      urlAssoc.createValue(
+        RegistryValue(protocol, RegistryValueType.string, 'LinkUnboundURL'),
+      );
+    }
     urlAssoc.close();
 
     final fileAssoc = caps.createKey('FileAssociations');
