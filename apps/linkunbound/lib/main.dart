@@ -37,16 +37,7 @@ void main(List<String> args) async {
   final url = _extractUrl(args);
   _log.info('Started with args: $args, extracted URL: $url');
 
-  final client = WinPipeClient();
-  final delegateMessage = url != null
-      ? OpenUrlMessage(url)
-      : const ShowSettingsMessage();
-  WinInstance.allowForeground();
-
-  if (await client.send(delegateMessage)) {
-    _log.info('Delegated to existing instance, exiting');
-    exit(0);
-  }
+  if (await _tryDelegate(url)) exit(0);
 
   final instance = WinInstance();
   if (!instance.acquire()) {
@@ -76,19 +67,11 @@ void main(List<String> args) async {
   await browserService.load();
 
   if (isFirstBoot) {
-    await browserService.scanAndMerge();
-    await iconsDir.create(recursive: true);
-    for (final browser in browserService.browsers) {
-      try {
-        final outputPath = '${iconsDir.path}\\${browser.id}.png';
-        await iconExtractor.extractIcon(browser.executablePath, outputPath);
-      } on Exception catch (e) {
-        _log.warning('Icon extraction failed for ${browser.name}: $e');
-      }
-    }
-    await registrationService.register(Platform.resolvedExecutable);
-    _log.info(
-      'First boot: scanned ${browserService.browsers.length} browsers, registered',
+    await _firstBoot(
+      browserService,
+      iconExtractor,
+      iconsDir,
+      registrationService,
     );
   }
 
@@ -177,6 +160,42 @@ void main(List<String> args) async {
       _handleUrl(url, container);
     }
   });
+}
+
+Future<bool> _tryDelegate(String? url) async {
+  final client = WinPipeClient();
+  final message = url != null
+      ? OpenUrlMessage(url)
+      : const ShowSettingsMessage();
+  WinInstance.allowForeground();
+
+  if (await client.send(message)) {
+    _log.info('Delegated to existing instance, exiting');
+    return true;
+  }
+  return false;
+}
+
+Future<void> _firstBoot(
+  BrowserService browserService,
+  IconExtractor iconExtractor,
+  Directory iconsDir,
+  RegistrationService registrationService,
+) async {
+  await browserService.scanAndMerge();
+  await iconsDir.create(recursive: true);
+  for (final browser in browserService.browsers) {
+    try {
+      final outputPath = '${iconsDir.path}\\${browser.id}.png';
+      await iconExtractor.extractIcon(browser.executablePath, outputPath);
+    } on Exception catch (e) {
+      _log.warning('Icon extraction failed for ${browser.name}: $e');
+    }
+  }
+  await registrationService.register(Platform.resolvedExecutable);
+  _log.info(
+    'First boot: scanned ${browserService.browsers.length} browsers, registered',
+  );
 }
 
 void _handleUrl(String url, ProviderContainer container) {
