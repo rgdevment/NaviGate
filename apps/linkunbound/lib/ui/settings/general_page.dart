@@ -138,14 +138,38 @@ class GeneralPage extends ConsumerWidget {
         ),
         GroupCard(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-          child: Column(
-            children: browsers
-                .map(
-                  (b) => BrowserTile(
-                    name: b.name,
-                    iconPath: '${iconsDir.path}\\${b.id}.png',
-                    onTap: () => _showEditBrowserDialog(context, ref, b),
-                    trailing: PopupMenuButton<String>(
+          child: ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            itemCount: browsers.length,
+            onReorder: (oldIndex, newIndex) {
+              if (newIndex > oldIndex) newIndex--;
+              ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
+            },
+            proxyDecorator: (child, index, animation) {
+              return AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) => Material(
+                  color: colors.surfaceBright,
+                  borderRadius: BorderRadius.circular(6),
+                  elevation: 4,
+                  child: child,
+                ),
+                child: child,
+              );
+            },
+            itemBuilder: (context, index) {
+              final b = browsers[index];
+              return BrowserTile(
+                key: ValueKey(b.id),
+                name: b.name,
+                iconPath: '${iconsDir.path}\\${b.id}.png',
+                onTap: () => _showEditBrowserDialog(context, ref, b),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PopupMenuButton<String>(
                       onSelected: (action) async {
                         switch (action) {
                           case 'edit':
@@ -181,9 +205,18 @@ class GeneralPage extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ),
-                )
-                .toList(),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Icon(
+                        Icons.drag_handle,
+                        size: 18,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ],

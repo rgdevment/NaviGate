@@ -78,6 +78,13 @@ final class BrowserService {
     ];
   }
 
+  void reorder(int oldIndex, int newIndex) {
+    final list = [..._browsers];
+    final item = list.removeAt(oldIndex);
+    list.insert(newIndex.clamp(0, list.length), item);
+    _browsers = list;
+  }
+
   Future<void> reset() async {
     _browsers = [];
     if (configFile.existsSync()) {
