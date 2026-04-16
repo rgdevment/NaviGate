@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:linkunbound_core/linkunbound_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -35,6 +37,7 @@ class _SettingsViewState extends ConsumerState<SettingsView>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final updateAsync = ref.watch(updateInfoProvider);
 
     return Column(
       children: [
@@ -57,7 +60,56 @@ class _SettingsViewState extends ConsumerState<SettingsView>
             children: const [GeneralPage(), RulesPage(), AboutPage()],
           ),
         ),
+        if (updateAsync.valueOrNull case final update?)
+          _UpdateBanner(update: update, l10n: l10n),
       ],
+    );
+  }
+}
+
+class _UpdateBanner extends StatelessWidget {
+  const _UpdateBanner({required this.update, required this.l10n});
+
+  final UpdateInfo update;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.primary.withAlpha(20),
+        border: Border(top: BorderSide(color: colors.primary.withAlpha(40))),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.upgrade_rounded, size: 16, color: colors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.updateAvailable(update.latestVersion),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: colors.primary),
+            ),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              minimumSize: const Size(0, 28),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            onPressed: () => launchUrl(Uri.parse(update.releaseUrl)),
+            child: Text(
+              l10n.updateDownload,
+              style: TextStyle(fontSize: 12, color: colors.primary),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
