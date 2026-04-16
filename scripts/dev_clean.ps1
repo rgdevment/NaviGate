@@ -91,7 +91,7 @@ if (-not $SkipRegistry) {
 
     Write-Section "Registry: File association UserChoice"
 
-    @(".html", ".htm") | ForEach-Object {
+    @(".html", ".htm", ".pdf") | ForEach-Object {
         $ext = $_
         $ucPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$ext\UserChoice"
         $ucVal = Get-ItemProperty $ucPath -ErrorAction SilentlyContinue
@@ -111,7 +111,7 @@ if (-not $SkipRegistry) {
 
     Write-Section "Registry: OpenWithProgids"
 
-    @(".html", ".htm") | ForEach-Object {
+    @(".html", ".htm", ".pdf") | ForEach-Object {
         $owpPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$_\OpenWithProgids"
         if (Test-Path $owpPath) {
             @("LinkUnboundURL", "NavigateURL", "NaviGateURL", "NaviGate.URL") | ForEach-Object {

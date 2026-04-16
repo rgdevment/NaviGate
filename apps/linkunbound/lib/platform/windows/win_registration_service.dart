@@ -223,6 +223,9 @@ final class WinRegistrationService implements RegistrationService {
     fileAssoc.createValue(
       const RegistryValue('.html', RegistryValueType.string, 'LinkUnboundURL'),
     );
+    fileAssoc.createValue(
+      const RegistryValue('.pdf', RegistryValueType.string, 'LinkUnboundURL'),
+    );
     fileAssoc.close();
 
     caps.close();
