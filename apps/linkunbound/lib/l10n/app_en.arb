@@ -87,5 +87,12 @@
     }
   },
   "updateDownload": "Download",
-  "updateTooltip": "New version available — check for updates in Settings"
+  "updateTooltip": "New version available — check for updates in Settings",
+
+  "sectionSupport": "SUPPORT",
+  "donateLabel": "Buy me a coffee",
+  "donateDescription": "LinkUnbound is free and always will be. If it saves you time, consider supporting development.",
+  "sectionOtherTools": "OTHER TOOLS",
+  "otherToolCopyPaste": "CopyPaste",
+  "otherToolCopyPasteDescription": "Free, open source clipboard manager for Windows, macOS and Linux. Same philosophy: no ads, no telemetry, everything local."
 }

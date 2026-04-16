@@ -202,4 +202,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get updateTooltip =>
       'Nueva versión disponible — revisa las actualizaciones en Ajustes';
+
+  @override
+  String get sectionSupport => 'APÓYANOS';
+
+  @override
+  String get donateLabel => 'Invítame un café';
+
+  @override
+  String get donateDescription =>
+      'LinkUnbound es gratis y siempre lo será. Si te ahorra tiempo, considera apoyar el desarrollo.';
+
+  @override
+  String get sectionOtherTools => 'OTRAS HERRAMIENTAS';
+
+  @override
+  String get otherToolCopyPaste => 'CopyPaste';
+
+  @override
+  String get otherToolCopyPasteDescription =>
+      'Gestor de portapapeles gratuito y de código abierto para Windows, macOS y Linux. Misma filosofía: sin anuncios, sin telemetría, todo local.';
 }

@@ -67,5 +67,12 @@
 
   "updateAvailable": "Versión {version} disponible",
   "updateDownload": "Descargar",
-  "updateTooltip": "Nueva versión disponible — revisa las actualizaciones en Ajustes"
+  "updateTooltip": "Nueva versión disponible — revisa las actualizaciones en Ajustes",
+
+  "sectionSupport": "APÓYANOS",
+  "donateLabel": "Invítame un café",
+  "donateDescription": "LinkUnbound es gratis y siempre lo será. Si te ahorra tiempo, considera apoyar el desarrollo.",
+  "sectionOtherTools": "OTRAS HERRAMIENTAS",
+  "otherToolCopyPaste": "CopyPaste",
+  "otherToolCopyPasteDescription": "Gestor de portapapeles gratuito y de código abierto para Windows, macOS y Linux. Misma filosofía: sin anuncios, sin telemetría, todo local."
 }

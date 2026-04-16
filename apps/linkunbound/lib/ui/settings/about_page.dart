@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
@@ -50,6 +51,35 @@ class AboutPage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        SectionHeader(label: l10n.sectionSupport),
+        GroupCard(
+          child: _LinkRow(
+            icon: Icons.coffee_outlined,
+            label: l10n.donateLabel,
+            description: l10n.donateDescription,
+            color: const Color(0xFFFFDD00),
+            url: 'https://buymeacoffee.com/rgdevment',
+          ),
+        ),
+        const SizedBox(height: 20),
+        SectionHeader(label: l10n.sectionOtherTools),
+        GroupCard(
+          child: _LinkRow(
+            iconWidget: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Image.asset(
+                'assets/copypaste_icon.png',
+                width: 20,
+                height: 20,
+              ),
+            ),
+            label: l10n.otherToolCopyPaste,
+            description: l10n.otherToolCopyPasteDescription,
+            color: colors.primary,
+            url: 'https://github.com/rgdevment/CopyPaste',
           ),
         ),
         const SizedBox(height: 20),
@@ -175,6 +205,62 @@ class _ActionRow extends StatelessWidget {
               ),
             ),
             Icon(Icons.chevron_right, size: 18, color: color.withAlpha(120)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkRow extends StatelessWidget {
+  const _LinkRow({
+    this.icon,
+    this.iconWidget,
+    required this.label,
+    required this.description,
+    required this.color,
+    required this.url,
+  });
+
+  final IconData? icon;
+  final Widget? iconWidget;
+  final String label;
+  final String description;
+  final Color color;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(url)),
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            if (iconWidget != null)
+              iconWidget!
+            else
+              Icon(icon, size: 18, color: color),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: color),
+                  ),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.open_in_new, size: 16, color: color.withAlpha(120)),
           ],
         ),
       ),
