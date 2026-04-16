@@ -197,86 +197,82 @@ class GeneralPage extends ConsumerWidget {
       ),
       GroupCard(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 6 * 44.0),
+        child: SizedBox(
+          height: 5 * 44.0,
           child: ReorderableListView.builder(
-            shrinkWrap: true,
             buildDefaultDragHandles: false,
             itemCount: browsers.length,
-            onReorder: (oldIndex, newIndex) {
-              if (newIndex > oldIndex) newIndex--;
-              ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
-            },
-            proxyDecorator: (child, index, animation) {
-              return AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) => Material(
-                  color: colors.surfaceBright,
-                  borderRadius: BorderRadius.circular(6),
-                  elevation: 4,
-                  child: child,
-                ),
+          onReorder: (oldIndex, newIndex) {
+            if (newIndex > oldIndex) newIndex--;
+            ref.read(browsersProvider.notifier).reorder(oldIndex, newIndex);
+          },
+          proxyDecorator: (child, index, animation) {
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) => Material(
+                color: colors.surfaceBright,
+                borderRadius: BorderRadius.circular(6),
+                elevation: 4,
                 child: child,
-              );
-            },
-            itemBuilder: (context, index) {
-              final b = browsers[index];
-              return BrowserTile(
-                key: ValueKey(b.id),
-                name: b.name,
-                iconPath: '${iconsDir.path}\\${b.id}.png',
-                onTap: () => _showEditBrowserDialog(context, ref, b),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PopupMenuButton<String>(
-                      onSelected: (action) async {
-                        switch (action) {
-                          case 'edit':
-                            _showEditBrowserDialog(context, ref, b);
-                          case 'duplicate':
-                            await _duplicateBrowser(context, ref, b);
-                          case 'remove':
-                            ref.read(browsersProvider.notifier).remove(b.id);
-                        }
-                      },
-                      icon: Icon(
-                        Icons.more_vert,
-                        size: 16,
-                        color: colors.onSurfaceVariant,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Text(l10n.menuEdit),
-                        ),
-                        PopupMenuItem(
-                          value: 'duplicate',
-                          child: Text(l10n.menuDuplicate),
-                        ),
-                        PopupMenuItem(
-                          value: 'remove',
-                          child: Text(l10n.menuRemove),
-                        ),
-                      ],
+              ),
+              child: child,
+            );
+          },
+          itemBuilder: (context, index) {
+            final b = browsers[index];
+            return BrowserTile(
+              key: ValueKey(b.id),
+              name: b.name,
+              iconPath: '${iconsDir.path}\\${b.id}.png',
+              onTap: () => _showEditBrowserDialog(context, ref, b),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PopupMenuButton<String>(
+                    onSelected: (action) async {
+                      switch (action) {
+                        case 'edit':
+                          _showEditBrowserDialog(context, ref, b);
+                        case 'duplicate':
+                          await _duplicateBrowser(context, ref, b);
+                        case 'remove':
+                          ref.read(browsersProvider.notifier).remove(b.id);
+                      }
+                    },
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: 16,
+                      color: colors.onSurfaceVariant,
                     ),
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: Icon(
-                        Icons.drag_handle,
-                        size: 18,
-                        color: colors.onSurfaceVariant,
-                      ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
                     ),
-                  ],
-                ),
-              );
-            },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'edit', child: Text(l10n.menuEdit)),
+                      PopupMenuItem(
+                        value: 'duplicate',
+                        child: Text(l10n.menuDuplicate),
+                      ),
+                      PopupMenuItem(
+                        value: 'remove',
+                        child: Text(l10n.menuRemove),
+                      ),
+                    ],
+                  ),
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: Icon(
+                      Icons.drag_handle,
+                      size: 18,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
           ),
         ),
       ),

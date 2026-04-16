@@ -107,7 +107,7 @@ void main(List<String> args) async {
       case AppMode.hidden:
         await windowManager.hide();
       case AppMode.settings:
-        await windowManager.setSize(const Size(800, 650));
+        await windowManager.setSize(const Size(580, 700));
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
