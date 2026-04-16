@@ -80,9 +80,14 @@ void main(List<String> args) async {
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
   await windowManager.waitUntilReadyToShow(
-    const WindowOptions(titleBarStyle: TitleBarStyle.hidden, size: Size(1, 1)),
+    const WindowOptions(
+      titleBarStyle: TitleBarStyle.hidden,
+      size: Size(1, 1),
+      center: false,
+    ),
     () async {
-      await windowManager.hide();
+      await windowManager.setPosition(const Offset(-9999, -9999));
+      await windowManager.setSkipTaskbar(true);
     },
   );
 
@@ -161,10 +166,10 @@ void main(List<String> args) async {
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (isFirstBoot) {
-      container.read(appStateProvider.notifier).showSettings();
-    } else if (url != null) {
+    if (url != null) {
       _handleUrl(url, container);
+    } else if (!args.contains('--background')) {
+      container.read(appStateProvider.notifier).showSettings();
     }
   });
 }
@@ -225,6 +230,8 @@ void _handleUrl(String url, ProviderContainer container) {
   container.read(appStateProvider.notifier).showPicker(resolved);
 }
 
+final _windowsAbsPath = RegExp(r'^[a-zA-Z]:[\\/]');
+
 String? _extractUrl(List<String> args) {
   for (final arg in args) {
     final resolved = stripEdgeProtocol(arg);
@@ -232,6 +239,8 @@ String? _extractUrl(List<String> args) {
     if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
       return _unwrapSafeLink(resolved);
     }
+    if (uri != null && uri.scheme == 'file') return arg;
+    if (_windowsAbsPath.hasMatch(arg)) return arg;
   }
   return null;
 }

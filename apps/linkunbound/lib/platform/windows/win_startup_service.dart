@@ -19,7 +19,7 @@ final class WinStartupService implements StartupService {
       RegistryValue(
         _valueName,
         RegistryValueType.string,
-        '"${executablePath.replaceAll('/', '\\')}"',
+        '"${executablePath.replaceAll('/', '\\')}" --background',
       ),
     );
     key.close();

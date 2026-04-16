@@ -20,6 +20,10 @@ final class FakeRegistrationService implements RegistrationService {
 
   @override
   Future<bool> get isDefault async => isDefaultValue;
+
+  @override
+  Future<Set<String>> get defaultAssociations async =>
+      isDefaultValue ? {'http', 'https'} : {};
 }
 
 final class FakeStartupService implements StartupService {

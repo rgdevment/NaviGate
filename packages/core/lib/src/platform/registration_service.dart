@@ -4,4 +4,6 @@ abstract interface class RegistrationService {
   Future<void> unregister();
 
   Future<bool> get isDefault;
+
+  Future<Set<String>> get defaultAssociations;
 }
