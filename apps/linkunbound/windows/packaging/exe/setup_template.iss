@@ -1,5 +1,5 @@
 [Setup]
-AppId={{7B2F4A1E-9C3D-4E5F-A6B8-1D2E3F4A5B6C}}
+AppId={% raw %}{{7B2F4A1E-9C3D-4E5F-A6B8-1D2E3F4A5B6C}}{% endraw %}
 AppVersion={#AppVersion}
 AppName={#AppName}
 AppPublisher={#AppPublisher}
