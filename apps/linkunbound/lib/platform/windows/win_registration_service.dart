@@ -90,6 +90,10 @@ final class WinRegistrationService implements RegistrationService {
         r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice',
     'https':
         r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice',
+    '.htm':
+        r'Software\Microsoft\Windows\Shell\Associations\FileExts\.htm\UserChoice',
+    '.html':
+        r'Software\Microsoft\Windows\Shell\Associations\FileExts\.html\UserChoice',
     '.pdf':
         r'Software\Microsoft\Windows\Shell\Associations\FileExts\.pdf\UserChoice',
   };

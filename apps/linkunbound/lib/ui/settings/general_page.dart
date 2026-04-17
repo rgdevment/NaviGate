@@ -14,6 +14,8 @@ import '../shared/widgets/section_header.dart';
 class GeneralPage extends ConsumerWidget {
   const GeneralPage({super.key});
 
+  static const _allAssociations = ['http', 'https', '.htm', '.html', '.pdf'];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final browsers = ref.watch(browsersProvider);
@@ -90,16 +92,30 @@ class GeneralPage extends ConsumerWidget {
                   ),
               ],
             ),
-            if (associations.isNotEmpty)
-              Padding(
+            Padding(
                 padding: const EdgeInsets.only(left: 32, top: 4),
-                child: Text(
-                  associations
-                      .map((a) => a.replaceAll('.', '').toUpperCase())
-                      .join(' · '),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
+                child: Text.rich(
+                  TextSpan(
+                    children: _allAssociations.map((a) {
+                      final label = a.replaceAll('.', '').toUpperCase();
+                      final active = associations.contains(a);
+                      return TextSpan(
+                        text: label,
+                        style: TextStyle(
+                          color: active
+                              ? colors.onSurfaceVariant
+                              : colors.onSurfaceVariant.withValues(alpha: 0.35),
+                        ),
+                      );
+                    }).expand((span) => [
+                      span,
+                      TextSpan(
+                        text: ' · ',
+                        style: TextStyle(color: colors.onSurfaceVariant.withValues(alpha: 0.35)),
+                      ),
+                    ]).toList()..removeLast(),
                   ),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
           ],
