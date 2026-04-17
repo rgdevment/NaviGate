@@ -66,6 +66,12 @@ Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueN
 ; RegisteredApplications (only delete value, not the shared key)
 Root: HKLM; Subkey: "SOFTWARE\RegisteredApplications"; ValueName: "LinkUnbound"; ValueType: string; ValueData: "SOFTWARE\LinkUnbound\Capabilities"; Flags: uninsdeletevalue
 
+; HKCU cleanup — the app writes these at runtime; remove on uninstall
+Root: HKCU; Subkey: "SOFTWARE\Classes\LinkUnboundURL"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "SOFTWARE\LinkUnbound"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "SOFTWARE\RegisteredApplications"; ValueName: "LinkUnbound"; Flags: uninsdeletevalue dontcreatekey
+
 [Run]
 Filename: "{app}\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: nowait postinstall skipifsilent
 

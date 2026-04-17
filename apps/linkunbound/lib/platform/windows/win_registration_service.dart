@@ -91,11 +91,11 @@ final class WinRegistrationService implements RegistrationService {
     'https':
         r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice',
     '.htm':
-        r'Software\Microsoft\Windows\Shell\Associations\FileExts\.htm\UserChoice',
+        r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice',
     '.html':
-        r'Software\Microsoft\Windows\Shell\Associations\FileExts\.html\UserChoice',
+        r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice',
     '.pdf':
-        r'Software\Microsoft\Windows\Shell\Associations\FileExts\.pdf\UserChoice',
+        r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoice',
   };
 
   void _writeProgId(String exe, String quotedExe) {
