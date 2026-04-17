@@ -1,6 +1,6 @@
 name: linkunbound
 description: LinkUnbound — Browser picker for Windows. Intercepts link clicks and lets you choose which browser opens them.
-version: 1.0.0+1
+version: 1.0.0
 publish_to: none
 repository: https://github.com/rgdevment/LinkUnbound
 

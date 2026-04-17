@@ -14,6 +14,7 @@ jobs:
   extract-version:
     name: Extract Version
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.version.outputs.version }}
       prerelease: ${{ steps.version.outputs.prerelease }}
@@ -50,16 +51,29 @@ jobs:
     name: GitHub Release
     needs: [extract-version, build-windows]
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    timeout-minutes: 10
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Extract tag message
+        id: tag_message
+        run: |
+          MSG=$(git tag -l --format='%(contents:body)' "${{ github.ref_name }}" | sed '/-----BEGIN SSH SIGNATURE-----/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+          echo "TAG_BODY<<EOF" >> $GITHUB_OUTPUT
+          echo "$MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Download Windows artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
-          name: windows-release
+          name: release-windows
           path: artifacts/
 
       - name: List artifacts
@@ -70,6 +84,12 @@ jobs:
         with:
           tag_name: v${{ needs.extract-version.outputs.version }}
           name: LinkUnbound v${{ needs.extract-version.outputs.version }}
+          body: ${{ steps.tag_message.outputs.TAG_BODY }}
           prerelease: ${{ needs.extract-version.outputs.prerelease == 'true' }}
           generate_release_notes: true
-          files: artifacts/*
+          make_latest: true
+          files: |
+            artifacts/**/*_Setup.exe
+            artifacts/**/*_store.msix*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
