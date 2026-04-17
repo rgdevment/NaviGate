@@ -116,12 +116,11 @@ void main(List<String> args) async {
       case AppMode.hidden:
         await windowManager.hide();
       case AppMode.settings:
-        await windowManager.hide();
+        await windowManager.setSize(const Size(640, 700));
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
       case AppMode.picker:
-        await windowManager.hide();
         final browsers = container.read(browsersProvider);
         final winSize = PickerLayout.windowSize(browsers.length);
         final (cursorX, cursorY) = WinInstance.getCursorPosition();
