@@ -237,6 +237,10 @@ void main() {
     });
 
     testWidgets('shows Automatic option in dropdown', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final f = makeFixtures(dir: tempDir);
       await tester.pumpWidget(
         buildTestApp(const GeneralPage(), overrides: f.overrides),
@@ -246,6 +250,10 @@ void main() {
     });
 
     testWidgets('opening dropdown shows all language options', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final f = makeFixtures(dir: tempDir);
       await tester.pumpWidget(
         buildTestApp(const GeneralPage(), overrides: f.overrides),
@@ -260,6 +268,10 @@ void main() {
     });
 
     testWidgets('selecting English updates locale', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final f = makeFixtures(dir: tempDir);
       await tester.pumpWidget(
         buildTestApp(const GeneralPage(), overrides: f.overrides),
