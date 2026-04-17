@@ -1,34 +1,36 @@
 [Setup]
-AppId={% raw %}{{7B2F4A1E-9C3D-4E5F-A6B8-1D2E3F4A5B6C}}{% endraw %}
-AppVersion={#AppVersion}
-AppName={#AppName}
-AppPublisher={#AppPublisher}
-AppPublisherURL=https://github.com/rgdevment/LinkUnbound
-AppSupportURL=https://github.com/rgdevment/LinkUnbound/issues
-DefaultDirName={#AppInstallDir}
+AppId={{APP_ID}}
+AppVersion={{APP_VERSION}}
+AppName={{DISPLAY_NAME}}
+AppPublisher={{PUBLISHER_NAME}}
+AppPublisherURL={{PUBLISHER_URL}}
+AppSupportURL={{PUBLISHER_URL}}
+DefaultDirName={{INSTALL_DIR_NAME}}
 DisableProgramGroupPage=yes
-OutputBaseFilename={#OutputBaseFilename}
-SetupIconFile={#SetupIconFile}
+OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
+SetupIconFile={{SETUP_ICON_FILE}}
 Compression=lzma
 SolidCompression=yes
-PrivilegesRequired={#PrivilegesRequired}
+PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+{% for locale in LOCALES %}
+{% if locale == 'en' %}Name: "english"; MessagesFile: "compiler:Default.isl"{% endif %}
+{% if locale == 'es' %}Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"{% endif %}
+{% endfor %}
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#DirSourceApp}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{{SOURCE_DIR}}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{{DISPLAY_NAME}}"; Filename: "{app}\{{EXECUTABLE_NAME}}"
+Name: "{autodesktop}\{{DISPLAY_NAME}}"; Filename: "{app}\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 
 [Registry]
 ; ProgID — URL handler
@@ -37,21 +39,21 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL"; ValueName: "EditFlags"; V
 Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL"; ValueName: "FriendlyTypeName"; ValueType: string; ValueData: "LinkUnbound URL"
 Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\Application"; ValueName: "ApplicationName"; ValueType: string; ValueData: "LinkUnbound"
 Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\Application"; ValueName: "ApplicationDescription"; ValueType: string; ValueData: "Browser picker for Windows"
-Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\Application"; ValueName: "ApplicationIcon"; ValueType: string; ValueData: """{app}\{#AppExeName}"",0"
-Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\DefaultIcon"; ValueType: string; ValueData: """{app}\{#AppExeName}"",0"
-Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\shell\open\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"" ""%1"""
+Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\Application"; ValueName: "ApplicationIcon"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"",0"
+Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\DefaultIcon"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"",0"
+Root: HKLM; Subkey: "SOFTWARE\Classes\LinkUnboundURL\shell\open\command"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"" ""%1"""
 
 ; StartMenuInternet — browser declaration
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound"; ValueType: string; ValueData: "LinkUnbound"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\DefaultIcon"; ValueType: string; ValueData: """{app}\{#AppExeName}"",0"
-Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\shell\open\command"; ValueType: string; ValueData: """{app}\{#AppExeName}"""
-Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\InstallInfo"; ValueName: "ReinstallCommand"; ValueType: string; ValueData: """{app}\{#AppExeName}"""
+Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\DefaultIcon"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"",0"
+Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\shell\open\command"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"""
+Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\InstallInfo"; ValueName: "ReinstallCommand"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"""
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\LinkUnbound\InstallInfo"; ValueName: "IconsVisible"; ValueType: dword; ValueData: "1"
 
 ; Capabilities
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities"; ValueName: "ApplicationName"; ValueType: string; ValueData: "LinkUnbound"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities"; ValueName: "ApplicationDescription"; ValueType: string; ValueData: "Browser picker for Windows"
-Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities"; ValueName: "ApplicationIcon"; ValueType: string; ValueData: """{app}\{#AppExeName}"",0"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities"; ValueName: "ApplicationIcon"; ValueType: string; ValueData: """{app}\{{EXECUTABLE_NAME}}"",0"
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\Startmenu"; ValueName: "StartMenuInternet"; ValueType: string; ValueData: "LinkUnbound"
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\URLAssociations"; ValueName: "http"; ValueType: string; ValueData: "LinkUnboundURL"
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\URLAssociations"; ValueName: "https"; ValueType: string; ValueData: "LinkUnboundURL"
@@ -63,7 +65,7 @@ Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueN
 Root: HKLM; Subkey: "SOFTWARE\RegisteredApplications"; ValueName: "LinkUnbound"; ValueType: string; ValueData: "SOFTWARE\LinkUnbound\Capabilities"; Flags: uninsdeletevalue
 
 [Run]
-Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
 const
