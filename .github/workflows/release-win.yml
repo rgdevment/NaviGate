@@ -1,111 +1,171 @@
 name: Release Windows
 
 on:
-  workflow_call:
-    inputs:
-      version:
-        required: true
-        type: string
+    workflow_call:
+        inputs:
+            version:
+                required: true
+                type: string
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "Version to use (e.g. 1.0.0). Defaults to 1.0.0-dev"
+                required: false
+                default: "1.0.0-dev"
+
+permissions:
+    contents: read
 
 jobs:
-  build:
-    name: Windows Build
-    runs-on: windows-latest
+    release-windows:
+        runs-on: windows-latest
+        timeout-minutes: 30
+        name: Build Windows
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Parse version
-        id: version
-        shell: pwsh
-        run: |
-          $v = "${{ inputs.version }}"
-          $clean = $v -replace '-.*$', ''
-          $parts = $clean.Split('.')
-          $major = if ($parts.Length -ge 1) { $parts[0] } else { '0' }
-          $minor = if ($parts.Length -ge 2) { $parts[1] } else { '0' }
-          $patch = if ($parts.Length -ge 3) { $parts[2] } else { '0' }
-          $msixVersion = "$major.$minor.$patch.0"
-          $prerelease = if ($v -match '-') { 'true' } else { 'false' }
-
-          "msix_version=$msixVersion" | Out-File -Append $env:GITHUB_OUTPUT
-          "prerelease=$prerelease" | Out-File -Append $env:GITHUB_OUTPUT
-
-          Write-Host "Version: $v"
-          Write-Host "MSIX Version: $msixVersion"
-          Write-Host "Prerelease: $prerelease"
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Install fastforge
-        run: dart pub global activate fastforge
-
-      - name: Install Inno Setup
-        run: choco install innosetup -y --no-progress
-
-      - name: Update pubspec version
-        shell: pwsh
-        working-directory: apps/linkunbound
-        run: |
-          $content = Get-Content pubspec.yaml -Raw
-          $content = $content -replace 'version: .*', "version: ${{ inputs.version }}+1"
-          Set-Content pubspec.yaml $content
-
-      - name: Build standalone EXE (Inno Setup)
-        working-directory: apps/linkunbound
-        run: fastforge package --platform windows --targets exe
-
-      - name: Sign installer
-        if: env.PFX_BASE64 != ''
         env:
-          PFX_BASE64: ${{ secrets.PFX_BASE64 }}
-          PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
-        shell: pwsh
-        working-directory: apps/linkunbound
-        run: |
-          $pfxBytes = [Convert]::FromBase64String($env:PFX_BASE64)
-          $pfxPath = Join-Path $env:RUNNER_TEMP "cert.pfx"
-          [IO.File]::WriteAllBytes($pfxPath, $pfxBytes)
+            PFX_BASE64: ${{ secrets.PFX_BASE64 }}
+            PFX_PASSWORD: ${{ secrets.PFX_PASSWORD }}
 
-          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" |
-            Sort-Object FullName -Descending | Select-Object -First 1
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
 
-          $installer = Get-ChildItem "dist\*-setup.exe" | Select-Object -First 1
-          if (-not $installer) { throw "No installer found in dist/" }
+            - name: Resolve version
+              id: get_version
+              shell: pwsh
+              run: |
+                  $version = "${{ inputs.version }}"
 
-          & $signtool.FullName sign /f $pfxPath /p $env:PFX_PASSWORD /fd SHA256 `
-            /tr "http://timestamp.digicert.com" /td SHA256 $installer.FullName
+                  $isPrerelease = if ($version -match '-') { 'true' } else { 'false' }
+                  $baseVersion = $version -replace '-.*', ''
+                  $parts = $baseVersion.Split('.')
+                  $version4 = switch ($parts.Count) {
+                    1 { "$baseVersion.0.0.0" }
+                    2 { "$baseVersion.0.0" }
+                    3 { "$baseVersion.0" }
+                    default { $baseVersion }
+                  }
+                  echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+                  echo "VERSION4=$version4" >> $env:GITHUB_OUTPUT
+                  echo "IS_PRERELEASE=$isPrerelease" >> $env:GITHUB_OUTPUT
+                  Write-Host "Version: $version  (MSIX: $version4)  (PreRelease: $isPrerelease)"
 
-          Remove-Item $pfxPath -Force
+            - uses: subosito/flutter-action@v2
+              with:
+                  channel: stable
 
-      - name: Rename installer
-        shell: pwsh
-        working-directory: apps/linkunbound
-        run: |
-          $installer = Get-ChildItem "dist\*-setup.exe" | Select-Object -First 1
-          $newName = "LinkUnbound_${{ inputs.version }}_x64_Setup.exe"
-          Rename-Item $installer.FullName $newName
+            - name: Install Fastforge
+              run: dart pub global activate fastforge
 
-      - name: Build MSIX (Store)
-        if: steps.version.outputs.prerelease == 'false'
-        working-directory: apps/linkunbound
-        run: fastforge package --platform windows --targets msix
+            - name: Install Inno Setup
+              run: choco install innosetup --no-progress
 
-      - name: Rename MSIX
-        if: steps.version.outputs.prerelease == 'false'
-        shell: pwsh
-        working-directory: apps/linkunbound
-        run: |
-          $msix = Get-ChildItem "dist\*.msix" | Select-Object -First 1
-          if ($msix) {
-            $newName = "LinkUnbound_${{ inputs.version }}_x64_store.msix"
-            Rename-Item $msix.FullName $newName
-          }
+            - name: Get dependencies
+              working-directory: apps/linkunbound
+              run: flutter pub get
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-release
-          path: apps/linkunbound/dist/LinkUnbound_*
+            - name: Update pubspec version from tag
+              shell: pwsh
+              run: |
+                  $version = "${{ steps.get_version.outputs.VERSION }}"
+                  $pubspec = "apps/linkunbound/pubspec.yaml"
+                  (Get-Content $pubspec) -replace '^version:\s+.*', "version: $version" | Set-Content $pubspec
+                  Write-Host "Updated pubspec.yaml version to: $version"
+
+            - name: Build standalone (exe installer)
+              shell: pwsh
+              run: |
+                  Push-Location apps/linkunbound
+                  fastforge package `
+                    --platform windows `
+                    --targets exe `
+                    --build-dart-define "STORE_BUILD=false"
+                  Pop-Location
+
+            - name: Decode signing certificate
+              if: env.PFX_BASE64 != ''
+              shell: pwsh
+              run: |
+                  $bytes = [Convert]::FromBase64String($env:PFX_BASE64)
+                  Set-Content -Path signingCert.pfx -Value $bytes -AsByteStream
+
+            - name: Sign standalone installer
+              if: env.PFX_BASE64 != ''
+              shell: pwsh
+              run: |
+                  $pfxPath = Join-Path $PWD 'signingCert.pfx'
+                  $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" `
+                    -Recurse -Filter "signtool.exe" |
+                    Where-Object { $_.FullName -like "*x64*" } |
+                    Sort-Object FullName -Descending |
+                    Select-Object -First 1
+                  if (-not $signtool) { Write-Error "Signtool not found"; exit 1 }
+
+                  $distDir = "apps/linkunbound/dist"
+                  Get-ChildItem -Path $distDir -Include *.exe -Recurse | ForEach-Object {
+                    & $signtool.FullName sign /f $pfxPath /p $env:PFX_PASSWORD `
+                      /tr http://timestamp.digicert.com /td sha256 /fd sha256 $_.FullName
+                  }
+
+            - name: Rename standalone installer
+              shell: pwsh
+              run: |
+                  $version = "${{ steps.get_version.outputs.VERSION }}"
+                  $distDir = "apps/linkunbound/dist"
+                  $setup = Get-ChildItem -Path $distDir -Recurse -Filter "*-setup.exe" | Select-Object -First 1
+                  if ($setup) {
+                    $newName = "LinkUnbound_${version}_x64_Setup.exe"
+                    $newPath = Join-Path $setup.DirectoryName $newName
+                    Move-Item -Path $setup.FullName -Destination $newPath
+                    Write-Host "Renamed to: $newName"
+                  }
+
+            - name: Build store MSIX
+              if: steps.get_version.outputs.IS_PRERELEASE != 'true'
+              shell: pwsh
+              run: |
+                  Push-Location apps/linkunbound
+                  fastforge package `
+                    --platform windows `
+                    --targets msix `
+                    --build-dart-define "STORE_BUILD=true"
+                  Pop-Location
+
+            - name: Move and rename store MSIX
+              if: steps.get_version.outputs.IS_PRERELEASE != 'true'
+              shell: pwsh
+              run: |
+                  $version = "${{ steps.get_version.outputs.VERSION }}"
+                  $distDir = "apps/linkunbound/dist"
+
+                  $extensions = @("*.msixupload", "*.msixbundle", "*.msix")
+                  $searchDirs = @("apps/linkunbound/dist", "apps/linkunbound/build")
+                  $found = $null
+                  foreach ($ext in $extensions) {
+                    $found = $searchDirs | ForEach-Object {
+                      if (Test-Path $_) { Get-ChildItem -Path $_ -Recurse -Filter $ext }
+                    } | Select-Object -First 1
+                    if ($found) { break }
+                  }
+
+                  if ($found) {
+                    $newName = "LinkUnbound_${version}_x64_store$($found.Extension)"
+                    $newPath = Join-Path $distDir $newName
+                    New-Item -ItemType Directory -Path $distDir -Force | Out-Null
+                    Move-Item -Path $found.FullName -Destination $newPath
+                    Write-Host "Moved $($found.Name) to: $newPath"
+                  } else {
+                    Write-Warning "No MSIX package found"
+                    Write-Host "--- All files under dist and build ---"
+                    @("apps/linkunbound/dist", "apps/linkunbound/build") | ForEach-Object {
+                      if (Test-Path $_) { Get-ChildItem -Path $_ -Recurse -File | ForEach-Object { Write-Host $_.FullName } }
+                    }
+                  }
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v6
+              with:
+                  name: release-windows
+                  path: apps/linkunbound/dist/
+                  retention-days: 5
