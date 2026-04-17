@@ -82,7 +82,7 @@ void main(List<String> args) async {
   await windowManager.waitUntilReadyToShow(
     const WindowOptions(
       titleBarStyle: TitleBarStyle.hidden,
-      size: Size(1, 1),
+      size: Size(640, 700),
       center: false,
     ),
     () async {
@@ -116,17 +116,12 @@ void main(List<String> args) async {
       case AppMode.hidden:
         await windowManager.hide();
       case AppMode.settings:
-        await windowManager.setSize(const Size(640, 700));
+        await windowManager.hide();
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
-        // Allow Impeller to finish compositing after the resize before
-        // making the window visible.  Without this delay the first frame
-        // in AOT/release builds can show corrupted graphics.
-        await Future.delayed(const Duration(milliseconds: 250));
-        await windowManager.show();
-        await windowManager.focus();
       case AppMode.picker:
+        await windowManager.hide();
         final browsers = container.read(browsersProvider);
         final winSize = PickerLayout.windowSize(browsers.length);
         final (cursorX, cursorY) = WinInstance.getCursorPosition();
@@ -145,8 +140,6 @@ void main(List<String> args) async {
         await windowManager.setPosition(Offset(x, y));
         await windowManager.setSkipTaskbar(true);
         await windowManager.setAlwaysOnTop(true);
-        await windowManager.show();
-        await windowManager.focus();
     }
   });
 
