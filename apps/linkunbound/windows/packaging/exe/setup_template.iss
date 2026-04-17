@@ -9,6 +9,7 @@ DefaultDirName={{INSTALL_DIR_NAME}}
 DisableProgramGroupPage=yes
 OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
 SetupIconFile={{SETUP_ICON_FILE}}
+UninstallDisplayIcon={app}\{{EXECUTABLE_NAME}}
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
