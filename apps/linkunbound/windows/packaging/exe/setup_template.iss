@@ -2,6 +2,7 @@
 AppId={{APP_ID}}
 AppVersion={{APP_VERSION}}
 AppName={{DISPLAY_NAME}}
+UninstallDisplayName={{DISPLAY_NAME}}
 AppPublisher={{PUBLISHER_NAME}}
 AppPublisherURL={{PUBLISHER_URL}}
 AppSupportURL={{PUBLISHER_URL}}
@@ -9,7 +10,7 @@ DefaultDirName={{INSTALL_DIR_NAME}}
 DisableProgramGroupPage=yes
 OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
 SetupIconFile={{SETUP_ICON_FILE}}
-UninstallDisplayIcon={app}\{{EXECUTABLE_NAME}}
+UninstallDisplayIcon={app}\{{EXECUTABLE_NAME}},0
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
