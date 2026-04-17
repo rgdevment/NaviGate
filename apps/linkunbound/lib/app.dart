@@ -46,6 +46,16 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
     final appState = ref.watch(appStateProvider);
     final locale = ref.watch(localeProvider);
 
+    // Show window after the new widget has been painted, not before.
+    ref.listen<AppState>(appStateProvider, (prev, next) {
+      if (prev?.mode == next.mode) return;
+      if (next.mode == AppMode.hidden) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    });
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
@@ -53,7 +63,7 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: switch (appState.mode) {
-        AppMode.hidden => const SizedBox.shrink(),
+        AppMode.hidden => const ColoredBox(color: Color(0xFF1E1E2E)),
         AppMode.settings => const SettingsWindow(),
         AppMode.picker => PickerWindow(url: appState.pendingUrl ?? ''),
       },
