@@ -120,6 +120,10 @@ void main(List<String> args) async {
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
+        // Allow Impeller to finish compositing after the resize before
+        // making the window visible.  Without this delay the first frame
+        // in AOT/release builds can show corrupted graphics.
+        await Future.delayed(const Duration(milliseconds: 250));
         await windowManager.show();
         await windowManager.focus();
       case AppMode.picker:
