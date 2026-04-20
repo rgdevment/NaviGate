@@ -171,4 +171,3 @@ jobs:
                   name: release-windows
                   path: apps/linkunbound/dist/
                   retention-days: 5
-                  retention-days: 5
