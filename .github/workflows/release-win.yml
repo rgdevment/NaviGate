@@ -1,4 +1,4 @@
-name: Release Windows
+name: Release (Windows)
 
 on:
     workflow_call:
@@ -80,7 +80,8 @@ jobs:
                   fastforge package `
                     --platform windows `
                     --targets exe `
-                    --build-dart-define "STORE_BUILD=false"
+                    --build-dart-define "STORE_BUILD=false" `
+                    --build-dart-define "APP_VERSION=${{ steps.get_version.outputs.VERSION }}"
                   Pop-Location
 
             - name: Decode signing certificate
@@ -129,7 +130,8 @@ jobs:
                   fastforge package `
                     --platform windows `
                     --targets msix `
-                    --build-dart-define "STORE_BUILD=true"
+                    --build-dart-define "STORE_BUILD=true" `
+                    --build-dart-define "APP_VERSION=${{ steps.get_version.outputs.VERSION }}"
                   Pop-Location
 
             - name: Move and rename store MSIX
@@ -168,4 +170,5 @@ jobs:
               with:
                   name: release-windows
                   path: apps/linkunbound/dist/
+                  retention-days: 5
                   retention-days: 5

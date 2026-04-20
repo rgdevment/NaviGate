@@ -1,95 +1,133 @@
 name: Release
 
 on:
-  push:
-    tags: ['v*']
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g. 1.0.0 or 1.0.0-beta.1)'
-        required: true
-        default: '1.0.0-dev'
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "Version to release (e.g. 1.0.0 or 1.0.0-beta.1)"
+                required: false
+                default: "1.0.0-dev"
+
+permissions:
+    contents: write
 
 jobs:
-  extract-version:
-    name: Extract Version
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      prerelease: ${{ steps.version.outputs.prerelease }}
+    extract-version:
+        runs-on: ubuntu-latest
+        name: Extract Version
+        outputs:
+            version: ${{ steps.get_version.outputs.VERSION }}
+        steps:
+            - name: Resolve version
+              id: get_version
+              run: |
+                  if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+                    VERSION="${{ github.event.inputs.version }}"
+                  elif [[ "$GITHUB_REF" =~ refs/tags/v(.+) ]]; then
+                    VERSION="${BASH_REMATCH[1]}"
+                  else
+                    VERSION="1.0.0"
+                  fi
+                  echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+                  echo "Resolved version: $VERSION"
 
-    steps:
-      - name: Extract version from tag or input
-        id: version
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/v}"
-          fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
-          if [[ "$VERSION" == *-* ]]; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          echo "Version: $VERSION"
-          echo "Prerelease: $(if [[ "$VERSION" == *-* ]]; then echo true; else echo false; fi)"
-
-  build-windows:
-    name: Build Windows
-    needs: extract-version
-    uses: ./.github/workflows/release-win.yml
-    with:
-      version: ${{ needs.extract-version.outputs.version }}
-    secrets: inherit
-
-  github-release:
-    name: GitHub Release
-    needs: [extract-version, build-windows]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    timeout-minutes: 10
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v6
+    build-windows:
+        needs: extract-version
+        uses: ./.github/workflows/release-win.yml
         with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
+            version: ${{ needs.extract-version.outputs.version }}
+        secrets: inherit
 
-      - name: Extract tag message
-        id: tag_message
-        run: |
-          MSG=$(git tag -l --format='%(contents:body)' "${{ github.ref_name }}" | sed '/-----BEGIN SSH SIGNATURE-----/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
-          echo "TAG_BODY<<EOF" >> $GITHUB_OUTPUT
-          echo "$MSG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+    github-release:
+        runs-on: ubuntu-latest
+        needs: [extract-version, build-windows]
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        timeout-minutes: 10
+        name: Create GitHub Release
 
-      - name: Download Windows artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: release-windows
-          path: artifacts/
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
+                  fetch-depth: 0
 
-      - name: List artifacts
-        run: ls -la artifacts/
+            - name: Extract tag message
+              id: tag_message
+              run: |
+                  MSG=$(git tag -l --format='%(contents:body)' "${{ github.ref_name }}" | sed '/-----BEGIN SSH SIGNATURE-----/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+                  echo "TAG_BODY<<EOF" >> $GITHUB_OUTPUT
+                  echo "$MSG" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.extract-version.outputs.version }}
-          name: LinkUnbound v${{ needs.extract-version.outputs.version }}
-          body: ${{ steps.tag_message.outputs.TAG_BODY }}
-          prerelease: ${{ needs.extract-version.outputs.prerelease == 'true' }}
-          generate_release_notes: true
-          make_latest: true
-          files: |
-            artifacts/**/*_Setup.exe
-            artifacts/**/*_store.msix*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Download all artifacts
+              uses: actions/download-artifact@v7
+              with:
+                  path: artifacts
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  body: ${{ steps.tag_message.outputs.TAG_BODY }}
+                  generate_release_notes: true
+                  prerelease: ${{ contains(github.ref_name, '-') }}
+                  make_latest: true
+                  files: |
+                      artifacts/release-windows/**/*_Setup.exe
+                      artifacts/release-windows/**/*_store.msix*
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # publish-to-store:
+    #     runs-on: windows-latest
+    #     needs: [extract-version, github-release]
+    #     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(needs.extract-version.outputs.version, '-')
+    #     timeout-minutes: 15
+    #     name: Publish to Microsoft Store
+    #
+    #     steps:
+    #         - uses: actions/checkout@v6
+    #           with:
+    #               ref: ${{ github.ref_name }}
+    #               fetch-depth: 0
+    #
+    #         - name: Install Microsoft Store Developer CLI
+    #           uses: microsoft/microsoft-store-apppublisher@v1.3
+    #
+    #         - name: Download Windows artifacts
+    #           uses: actions/download-artifact@v7
+    #           with:
+    #               name: release-windows
+    #               path: artifacts/windows
+    #
+    #         - name: Find MSIX package
+    #           id: find_msix
+    #           shell: bash
+    #           run: |
+    #               MSIX=$(find artifacts/windows -name "*.msixupload" | head -1)
+    #               [ -z "$MSIX" ] && MSIX=$(find artifacts/windows -name "*.msixbundle" | head -1)
+    #               [ -z "$MSIX" ] && MSIX=$(find artifacts/windows -name "*.msix" | head -1)
+    #               if [ -z "$MSIX" ]; then
+    #                 echo "Error: No MSIX package found in release-windows artifact"
+    #                 find artifacts/windows -type f
+    #                 exit 1
+    #               fi
+    #               echo "MSIX_PATH=$MSIX" >> $GITHUB_OUTPUT
+    #               echo "Found: $MSIX"
+    #
+    #         - name: Configure Microsoft Store CLI
+    #           shell: bash
+    #           run: |
+    #               msstore reconfigure \
+    #                 --tenantId "${{ secrets.STORE_TENANT_ID }}" \
+    #                 --sellerId "${{ secrets.STORE_SELLER_ID }}" \
+    #                 --clientId "${{ secrets.STORE_CLIENT_ID }}" \
+    #                 --clientSecret "${{ secrets.STORE_CLIENT_SECRET }}"
+    #
+    #         - name: Publish to Microsoft Store
+    #           shell: bash
+    #           run: |
+    #               msstore publish "${{ steps.find_msix.outputs.MSIX_PATH }}" \
+    #                 --appId "${{ vars.STORE_APP_ID }}"
