@@ -62,10 +62,14 @@ jobs:
                   echo "$MSG" >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
 
-            - name: Download all artifacts
+            - name: Download Windows artifacts
               uses: actions/download-artifact@v7
               with:
-                  path: artifacts
+                  name: release-windows
+                  path: artifacts/windows
+
+            - name: List artifacts
+              run: find artifacts/ -type f
 
             - name: Create GitHub Release
               uses: softprops/action-gh-release@v2
@@ -75,8 +79,8 @@ jobs:
                   prerelease: ${{ contains(github.ref_name, '-') }}
                   make_latest: true
                   files: |
-                      artifacts/release-windows/**/*_Setup.exe
-                      artifacts/release-windows/**/*_store.msix*
+                      artifacts/windows/**/*_Setup.exe
+                      artifacts/windows/**/*_store.msix*
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
