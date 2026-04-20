@@ -34,16 +34,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.0
 
-msix_config:
-  display_name: LinkUnbound - Browser Picker
-  publisher_display_name: RGDevment
-  publisher: CN=AC154EDC-DBFC-482B-AF3B-A1A6FF12DA84
-  identity_name: rgdevment.LinkUnbound-BrowserPicker
-  store: true
-  capabilities: internetClient
-  languages: en-us, es-es
-  logo_path: assets/app_icon.png
-
 flutter:
   generate: true
   uses-material-design: true

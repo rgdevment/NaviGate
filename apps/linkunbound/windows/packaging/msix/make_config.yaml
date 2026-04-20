@@ -1,7 +1,9 @@
 display_name: LinkUnbound - Browser Picker
+publisher_display_name: RGDevment
 publisher: CN=AC154EDC-DBFC-482B-AF3B-A1A6FF12DA84
 identity_name: rgdevment.LinkUnbound-BrowserPicker
-store: "true"
-capabilities: internetClient
-languages: en-us, es-es
 logo_path: assets/app_icon.png
+store: "true"
+build_windows: "false"
+languages: en-us, es-es
+capabilities: internetClient
