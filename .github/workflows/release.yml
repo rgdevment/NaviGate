@@ -57,7 +57,7 @@ jobs:
             - name: Extract tag message
               id: tag_message
               run: |
-                  MSG=$(git tag -l --format='%(contents:body)' "${{ github.ref_name }}" | sed '/-----BEGIN SSH SIGNATURE-----/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+                  MSG=$(git tag -l --format='%(contents:subject)%0a%0a%(contents:body)' "${{ github.ref_name }}" | sed '/-----BEGIN SSH SIGNATURE-----/,$d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
                   echo "TAG_BODY<<EOF" >> $GITHUB_OUTPUT
                   echo "$MSG" >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
