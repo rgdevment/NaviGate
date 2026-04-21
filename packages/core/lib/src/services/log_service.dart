@@ -40,17 +40,23 @@ void initLogging(File logFile, {Level fileLevel = Level.INFO}) {
   }
 
   Logger.root.level = Level.ALL;
-  _logSubscription = Logger.root.onRecord.listen((record) {
-    if (record.level < fileLevel) return;
-    final message = redactUrls(record.message);
-    final line =
-        '${record.time.toIso8601String()} '
+  // Windows GUI subsystem binaries (flutter build windows --release) have no
+  // valid stdio handles, and even `stderr.hasTerminal` can lie; a single
+  // write then crashes the main zone asynchronously. On Windows we therefore
+  // skip console output entirely and rely on the file sink.
+  var useStderr = !Platform.isWindows;     '${record.time.toIso8601String()} '
         '[${record.level.name}] '
         '${record.loggerName}: '
         '$message'
         '${record.error != null ? '\n  ${record.error}' : ''}'
         '${record.stackTrace != null ? '\n  ${record.stackTrace}' : ''}';
-    stderr.writeln(line);
+    if (useStderr) {
+      try {
+        stderr.writeln(line);
+      } on Object {
+        useStderr = false;
+      }
+    }
     try {
       logFile.writeAsStringSync('$line\n', mode: FileMode.append);
     } on FileSystemException {

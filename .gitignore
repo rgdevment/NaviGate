@@ -50,6 +50,10 @@ linked_*.ds
 unlinked.ds
 unlinked_spec.ds
 
+# fastforge / distributor output
+dist/
+**/dist/
+
 # Android related
 **/android/**/gradle-wrapper.jar
 .gradle/

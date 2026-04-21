@@ -48,3 +48,9 @@ flutter:
     - assets/copypaste_icon.png
     - assets/LinkUnbound_tray_32.png
     - assets/LinkUnbound_tray_64.png
+
+msix_config:
+  startup_task:
+    task_id: LinkUnboundStartup
+    enabled: true
+    parameters: --background
