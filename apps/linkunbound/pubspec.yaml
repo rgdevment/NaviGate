@@ -43,3 +43,5 @@ flutter:
     - assets/app_icon.ico
     - assets/app_icon.png
     - assets/copypaste_icon.png
+    - assets/LinkUnbound_tray_32.png
+    - assets/LinkUnbound_tray_64.png

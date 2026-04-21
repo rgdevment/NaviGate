@@ -28,9 +28,9 @@ final class MacOsTrayController implements TrayController, tm.TrayListener {
       _listenerAttached = true;
     }
 
-    // The bundled icon is a colored app icon. `isTemplate: false` keeps it as
-    // a regular image; switch to `true` once a B&W template asset is shipped.
-    await tm.trayManager.setIcon(iconPath);
+    // The bundled icon is a white silhouette (template), so let macOS auto-tint
+    // it for light/dark menu bar appearance.
+    await tm.trayManager.setIcon(iconPath, isTemplate: true);
     await tm.trayManager.setToolTip(tooltip);
   }
 
