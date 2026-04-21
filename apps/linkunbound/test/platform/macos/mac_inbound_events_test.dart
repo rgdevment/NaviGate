@@ -11,9 +11,7 @@ const _channel = MethodChannel('linkunbound/inbound_events');
 const _codec = StandardMethodCodec();
 
 Future<void> _dispatchPlatformCall(String method, [dynamic arguments]) async {
-  final ByteData? data = _codec.encodeMethodCall(
-    MethodCall(method, arguments),
-  );
+  final ByteData? data = _codec.encodeMethodCall(MethodCall(method, arguments));
 
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage(_channel.name, data, (_) {});
@@ -56,7 +54,11 @@ void main() {
     final future = expectLater(
       events.events,
       emits(
-        isA<OpenUrlEvent>().having((event) => event.url, 'url', 'https://example.com'),
+        isA<OpenUrlEvent>().having(
+          (event) => event.url,
+          'url',
+          'https://example.com',
+        ),
       ),
     );
 

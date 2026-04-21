@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
@@ -23,6 +25,7 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
   late final Animation<double> _fadeAnim;
   late final Animation<double> _scaleAnim;
   bool _active = false;
+  Timer? _activeTimer;
 
   @override
   void initState() {
@@ -38,14 +41,15 @@ class _PickerWindowState extends ConsumerState<PickerWindow>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) _active = true;
+    _activeTimer = Timer(const Duration(milliseconds: 200), () {
+      if (mounted) setState(() => _active = true);
     });
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
+    _activeTimer?.cancel();
     _animController.dispose();
     super.dispose();
   }

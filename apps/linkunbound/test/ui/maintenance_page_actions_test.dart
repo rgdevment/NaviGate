@@ -13,7 +13,8 @@ import '../helpers.dart';
 const _chrome = Browser(
   id: 'chrome',
   name: 'Google Chrome',
-  executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  executablePath:
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   iconPath: 'chrome.png',
 );
 
@@ -98,17 +99,18 @@ void main() {
   testWidgets('confirming reset rescans browsers and re-extracts icons', (
     tester,
   ) async {
-    final browserService = BrowserService(
-      configFile: File('${tempDir.path}/browsers.json'),
-      browserDetector: FakeBrowserDetector([_chrome]),
-    )..addBrowser(
-      const Browser(
-        id: 'old',
-        name: 'Old Browser',
-        executablePath: '/tmp/old-browser',
-        iconPath: 'old.png',
-      ),
-    );
+    final browserService =
+        BrowserService(
+          configFile: File('${tempDir.path}/browsers.json'),
+          browserDetector: FakeBrowserDetector([_chrome]),
+        )..addBrowser(
+          const Browser(
+            id: 'old',
+            name: 'Old Browser',
+            executablePath: '/tmp/old-browser',
+            iconPath: 'old.png',
+          ),
+        );
     final ruleService = RuleService(
       rulesFile: File('${tempDir.path}/rules.json'),
     );
