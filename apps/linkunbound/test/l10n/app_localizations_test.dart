@@ -114,11 +114,11 @@ void main() {
 
     testWidgets('of returns localization from widget tree', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          locale: Locale('es'),
+        MaterialApp(
+          locale: const Locale('es'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(builder: _LocalizedText.new),
+          home: Builder(builder: (_) => const _LocalizedText()),
         ),
       );
 

@@ -120,13 +120,10 @@ final class _RecordingLaunchService implements LaunchService {
 }
 
 final class _FakeCursorLocator implements CursorLocator {
-  _FakeCursorLocator({
-    this.cursor = const (300.0, 200.0),
-    this.screen = const (1280.0, 900.0),
-  });
+  _FakeCursorLocator();
 
-  final (double, double) cursor;
-  final (double, double) screen;
+  final (double, double) cursor = const (300.0, 200.0);
+  final (double, double) screen = const (1280.0, 900.0);
 
   @override
   Future<(double, double)> cursorPosition() async => cursor;
@@ -170,7 +167,6 @@ final class _FakeTrayController implements TrayController {
 final class _FakeBindings implements PlatformBindings {
   _FakeBindings({
     required this.rootDir,
-    this.initial,
     List<Browser> detectedBrowsers = const [],
   }) : browserDetector = _FakeBrowserDetector(detectedBrowsers),
        iconExtractor = _RecordingIconExtractor(),
@@ -186,7 +182,7 @@ final class _FakeBindings implements PlatformBindings {
   }
 
   final Directory rootDir;
-  final InboundEvent? initial;
+  final InboundEvent? initial = null;
   final StreamController<InboundEvent> _events;
 
   @override
