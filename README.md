@@ -2,7 +2,7 @@
 
 # LinkUnbound
 
-**A free, open source browser picker for Windows. Choose which browser opens every link.**
+**A free, open source browser picker for Windows and macOS. Choose which browser opens every link.**
 
 No ads. No telemetry. No accounts. Everything local.
 
@@ -20,6 +20,7 @@ No ads. No telemetry. No accounts. Everything local.
     <img src="https://img.shields.io/github/v/release/rgdevment/LinkUnbound?include_prereleases&style=flat-square&label=Latest&color=0078D4" alt="Latest Release"/>
   </a>
   <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=flat-square" alt="Platform: Windows"/>
+  <img src="https://img.shields.io/badge/Platform-macOS-000000?style=flat-square&logo=apple" alt="Platform: macOS"/>
   <a href="#license">
     <img src="https://img.shields.io/github/license/rgdevment/LinkUnbound?style=flat-square&color=lightgrey" alt="License GPL-3.0"/>
   </a>
@@ -102,14 +103,24 @@ For responsible disclosure and security contact info, see [SECURITY.md](SECURITY
 
 ### Requirements
 
-- Windows 10 or 11
+- Windows 10 or 11, **or** macOS 13 (Ventura) or newer
 - At least two browsers installed
 
 ### Installation
 
 **Microsoft Store** (coming soon) — one click, auto-updates, no security warnings.
 
-**Standalone installer** — download from [GitHub Releases](https://github.com/rgdevment/LinkUnbound/releases/latest).
+**Windows standalone installer** — download from [GitHub Releases](https://github.com/rgdevment/LinkUnbound/releases/latest).
+
+**macOS** — install via Homebrew (signed and notarized):
+
+```bash
+brew tap rgdevment/tap
+brew install --cask linkunbound          # stable
+brew install --cask linkunbound-beta     # pre-release
+```
+
+Or download the `.dmg` directly from [GitHub Releases](https://github.com/rgdevment/LinkUnbound/releases/latest).
 
 <details>
 <summary><strong>Windows standalone: security warnings</strong></summary>
@@ -124,9 +135,18 @@ Since LinkUnbound is an independent open source project, the installer uses a se
 
 ### Setup
 
+**Windows:**
+
 1. Run `linkunbound.exe`
 2. On first launch, LinkUnbound scans your installed browsers and registers itself
 3. In the settings window, click **Set as default** — Windows Settings opens, select LinkUnbound
+4. Done — every link now goes through LinkUnbound
+
+**macOS:**
+
+1. Launch **LinkUnbound** from Applications (or Spotlight)
+2. Open **Settings** from the menu bar icon → click **Set as default**
+3. macOS prompts you to choose the default browser → select LinkUnbound
 4. Done — every link now goes through LinkUnbound
 
 ---
