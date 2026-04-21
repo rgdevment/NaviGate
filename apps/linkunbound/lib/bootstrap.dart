@@ -174,15 +174,15 @@ Future<void> _firstBoot({
 }
 
 void _handleUrl(String url, ProviderContainer container) {
-  // `file://` is the macOS "Open With" / Finder double-click path. Validate
-  // strictly and bypass the SafeLink unwrap and the rules engine — local
-  // files don't have a host to match rules against, so v1 always shows the
-  // picker for them.
-  if (url.startsWith('file://')) {
+  // Local file targets (macOS Finder "Open With" → file://, Windows shell
+  // → C:\path\foo.html). Validate strictly and bypass the SafeLink unwrap
+  // and the rules engine — local files don't have a host to match rules
+  // against, so v1 always shows the picker for them.
+  if (looksLikeLocalFile(url)) {
     final resolved = resolveLocalWebFile(url);
     if (resolved == null) {
       _log.warning(
-        'Rejected file:// URL (missing/invalid/unsupported extension): '
+        'Rejected local-file URL (missing/invalid/unsupported extension): '
         '${_redactForLog(url)}',
       );
       return;
@@ -212,18 +212,23 @@ void _handleUrl(String url, ProviderContainer container) {
   container.read(appStateProvider.notifier).showPicker(resolved);
 }
 
-/// Returns a log-safe representation of an inbound URL. For `file://` URLs we
-/// only keep the basename + parent dir (avoids leaking `$HOME` in shared
-/// diagnostic bundles); for `http(s)://` we keep the full URL.
+/// Returns a log-safe representation of an inbound URL. For local-file
+/// targets we only keep the basename + parent dir (avoids leaking `$HOME` /
+/// `C:\Users\…` in shared diagnostic bundles); for `http(s)://` we keep the
+/// full URL.
 String _redactForLog(String raw) {
-  if (!raw.startsWith('file://')) return raw;
-  final uri = Uri.tryParse(raw);
-  if (uri == null) return 'file://<unparseable>';
-  try {
-    return 'file://${redactPath(uri.toFilePath())}';
-  } on UnsupportedError {
-    return 'file://<unparseable>';
+  if (!looksLikeLocalFile(raw)) return raw;
+  if (raw.startsWith('file://')) {
+    final uri = Uri.tryParse(raw);
+    if (uri == null) return 'file://<unparseable>';
+    try {
+      return 'file://${redactPath(uri.toFilePath())}';
+    } on UnsupportedError {
+      return 'file://<unparseable>';
+    }
   }
+  // Native Windows absolute path (e.g. C:\Users\foo\bar.html).
+  return redactPath(raw);
 }
 
 String _unwrapSafeLink(String raw) {

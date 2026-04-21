@@ -35,23 +35,47 @@ final class BrowserDetectorChannel {
       candidateURLs.append(contentsOf: workspace.urlsForApplications(toOpen: httpsURL))
     }
 
-    // True browsers register themselves as VIEWERS for the `public.html`
-    // UTI so the Finder can route .html files to them. Apps like iTerm,
-    // Terminal, VS Code or Slack declare http/https URL-scheme handlers
-    // (so `open https://…` works internally) but never claim to *display*
-    // HTML — so they're absent from this set. This is a structural signal,
-    // not a hand-maintained blacklist.
-    let htmlViewers: Set<String> = {
-      guard let html = UTType("public.html") else { return [] }
-      let urls = workspace.urlsForApplications(toOpen: html)
-      var ids: Set<String> = []
-      for url in urls {
-        if let id = Bundle(url: url)?.bundleIdentifier {
-          ids.insert(id.lowercased())
-        }
+    // True browsers register themselves as the *primary* handler for the
+    // http/https URL schemes — i.e. their `CFBundleURLTypes` entry that
+    // contains "http"/"https" has either no `LSHandlerRank` (defaults to
+    // "Default") or `LSHandlerRank = Owner`. Apps like iTerm, Hyper, Warp,
+    // Office, etc. instead declare `LSHandlerRank = Alternate`, meaning
+    // "I can open it if asked, but I'm not the canonical handler". This is
+    // the structural signal we use to keep them out of the picker.
+    let isHandlerRank: (URL) -> Bool = { appURL in
+      guard
+        let plistURL = Bundle(url: appURL)?.url(
+          forResource: "Info",
+          withExtension: "plist"
+        ),
+        let data = try? Data(contentsOf: plistURL),
+        let plist = try? PropertyListSerialization.propertyList(
+          from: data,
+          options: [],
+          format: nil
+        ) as? [String: Any],
+        let urlTypes = plist["CFBundleURLTypes"] as? [[String: Any]]
+      else {
+        // No URL types declared — be conservative and accept (Safari is
+        // delivered without a parseable plist on some systems).
+        return true
       }
-      return ids
-    }()
+
+      for entry in urlTypes {
+        let schemes = (entry["CFBundleURLSchemes"] as? [String] ?? []).map {
+          $0.lowercased()
+        }
+        guard schemes.contains("http") || schemes.contains("https") else {
+          continue
+        }
+        let rank = (entry["LSHandlerRank"] as? String)?.lowercased() ?? "default"
+        // "Default" / "Owner" => primary handler. "Alternate" / "None" => skip.
+        return rank == "default" || rank == "owner"
+      }
+      // No http/https entry found in the Info.plist (the candidate appeared
+      // because it declared the scheme dynamically). Treat as non-browser.
+      return false
+    }
 
     // Only surface real, user-installed browsers from standard application
     // directories. This excludes Chrome-for-Testing, Playwright/Puppeteer
@@ -67,7 +91,7 @@ final class BrowserDetectorChannel {
       guard let bundle = Bundle(url: appURL),
             let bundleId = bundle.bundleIdentifier,
             bundleId != ownBundleId,
-            htmlViewers.contains(bundleId.lowercased()),
+            isHandlerRank(appURL),
             !seen.contains(bundleId)
       else { continue }
 
