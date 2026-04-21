@@ -327,6 +327,91 @@ void main() {
     });
   });
 
+  group('PickerView — local file URLs', () {
+    testWidgets('file:// URL shows file icon instead of link icon', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'file:///home/user/documents/report.pdf'),
+          overrides: f.overrides,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.insert_drive_file_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.link), findsNothing);
+    });
+
+    testWidgets('file:// URL shows filename as primary domain text', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'file:///home/user/documents/report.pdf'),
+          overrides: f.overrides,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('report.pdf'), findsOneWidget);
+    });
+
+    testWidgets('file:// URL with deep path shows …/parent/file in secondary', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(
+          const PickerView(url: 'file:///home/user/documents/report.pdf'),
+          overrides: f.overrides,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('…/documents/report.pdf'), findsOneWidget);
+    });
+
+    testWidgets(
+      'file:// URL with single-segment path shows …/file in secondary',
+      (tester) async {
+        final f = makeFixtures(dir: tempDir);
+        await tester.pumpWidget(
+          buildTestApp(
+            const PickerView(url: 'file:///report.pdf'),
+            overrides: f.overrides,
+          ),
+        );
+        await tester.pumpAndSettle();
+        // domain = 'report.pdf'; secondary = '…/report.pdf'
+        expect(find.text('…/report.pdf'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'launching with always-open and file:// URL does not save a rule',
+      (tester) async {
+        final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+        await tester.pumpWidget(
+          buildTestApp(
+            const PickerView(url: 'file:///home/user/report.pdf'),
+            overrides: f.overrides,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(Checkbox));
+        await tester.pump();
+        await tester.tap(find.text('Google Chrome'));
+        await tester.pumpAndSettle();
+        // file:// URLs have no host → guard in _launch prevents rule creation
+        expect(f.launchService.launches, contains('chrome.exe'));
+        expect(
+          f.ruleService.lookupBrowser('file:///home/user/report.pdf'),
+          isNull,
+        );
+      },
+    );
+  });
+
   group('PickerView — browser row hover', () {
     testWidgets('browser row changes color on mouse enter', (tester) async {
       final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
