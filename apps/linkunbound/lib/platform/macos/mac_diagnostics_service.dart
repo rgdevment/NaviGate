@@ -119,9 +119,7 @@ Future<void> _writeLaunchServicesDump(Directory staging) async {
     buf.writeln('<error: $e>');
   }
 
-  File(
-    '${staging.path}/launch_services.txt',
-  ).writeAsStringSync(buf.toString());
+  File('${staging.path}/launch_services.txt').writeAsStringSync(buf.toString());
 }
 
 void _copyDataSnapshots(Directory appDataDir, Directory staging) {

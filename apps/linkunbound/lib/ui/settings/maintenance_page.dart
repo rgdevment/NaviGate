@@ -69,10 +69,7 @@ class MaintenancePage extends ConsumerWidget {
           ref.read(packageInfoProvider).valueOrNull?.version ?? 'unknown';
 
       if (Platform.isMacOS) {
-        await exportMacDiagnostics(
-          appDataDir: appDataDir,
-          appVersion: version,
-        );
+        await exportMacDiagnostics(appDataDir: appDataDir, appVersion: version);
       } else {
         await exportDiagnostics(appDataDir: appDataDir, appVersion: version);
       }

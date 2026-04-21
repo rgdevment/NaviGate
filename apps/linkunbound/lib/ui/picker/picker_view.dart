@@ -60,11 +60,7 @@ class _PickerViewState extends ConsumerState<PickerView> {
       },
       child: Column(
         children: [
-          _UrlHeader(
-            url: widget.url,
-            domain: domain,
-            isLocalFile: isLocalFile,
-          ),
+          _UrlHeader(url: widget.url, domain: domain, isLocalFile: isLocalFile),
           Divider(height: 0.5, color: colors.outline.withAlpha(50)),
           Expanded(
             child: ListView.builder(
