@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
+import 'dart:async';
 
 import 'l10n/app_localizations.dart';
 import 'providers.dart';
@@ -17,7 +18,8 @@ final class NavigateApp extends ConsumerStatefulWidget {
 
 final class _NavigateAppState extends ConsumerState<NavigateApp>
     with WindowListener {
-  DateTime? _pickerShownAt;
+  Timer? _blurGuardTimer;
+  bool _pickerBlurReady = false;
 
   @override
   void initState() {
@@ -27,6 +29,7 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
 
   @override
   void dispose() {
+    _blurGuardTimer?.cancel();
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -47,12 +50,7 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
   void onWindowBlur() {
     final mode = ref.read(appStateProvider).mode;
     if (mode != AppMode.picker) return;
-    final shownAt = _pickerShownAt;
-    if (shownAt == null) return;
-    if (DateTime.now().difference(shownAt) <
-        const Duration(milliseconds: 400)) {
-      return;
-    }
+    if (!_pickerBlurReady) return;
     ref.read(appStateProvider.notifier).hide();
   }
 
@@ -63,10 +61,14 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
 
     ref.listen<AppState>(appStateProvider, (prev, next) {
       if (prev?.mode == next.mode) return;
+      _blurGuardTimer?.cancel();
       if (next.mode == AppMode.picker) {
-        _pickerShownAt = DateTime.now();
+        _pickerBlurReady = false;
+        _blurGuardTimer = Timer(const Duration(milliseconds: 400), () {
+          _pickerBlurReady = true;
+        });
       } else {
-        _pickerShownAt = null;
+        _pickerBlurReady = false;
       }
       if (next.mode == AppMode.hidden) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
