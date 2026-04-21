@@ -9,6 +9,12 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get exit => 'Exit';
+
+  @override
+  String get traySettings => 'Settings';
+
+  @override
   String get copyUrl => 'Copy URL';
 
   @override
@@ -42,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionStartup => 'STARTUP';
 
   @override
-  String get launchAtStartup => 'Launch at Windows startup';
+  String get launchAtStartup => 'Launch at system startup';
 
   @override
   String get sectionLanguage => 'LANGUAGE';

@@ -89,6 +89,18 @@ void main() {
       Logger.root.severe('trace-test', Exception('e'), StackTrace.current);
       expect(logFile.readAsStringSync(), contains('trace-test'));
     });
+
+    test(
+      'silently swallows FileSystemException when log directory is removed mid-session',
+      () {
+        final logFile = File('${tempDir.path}/app.log');
+        initLogging(logFile);
+        // Delete the directory after initLogging so the write will fail.
+        tempDir.deleteSync(recursive: true);
+        // Must not throw — the catch block drops the write silently.
+        expect(() => Logger.root.info('after-removal'), returnsNormally);
+      },
+    );
   });
 
   group('rotation', () {

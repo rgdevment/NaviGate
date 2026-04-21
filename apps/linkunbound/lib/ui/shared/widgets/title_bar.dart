@@ -1,21 +1,29 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
+
+import '../../../l10n/app_localizations.dart';
 
 class TitleBar extends StatelessWidget {
   const TitleBar({
     required this.tabController,
     required this.tabs,
     required this.onClose,
+    this.onExit,
     super.key,
   });
 
   final TabController tabController;
   final List<String> tabs;
   final VoidCallback onClose;
+  final VoidCallback? onExit;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final isMac = Platform.isMacOS;
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onPanStart: (_) => windowManager.startDragging(),
@@ -24,6 +32,8 @@ class TitleBar extends StatelessWidget {
         color: colors.surface,
         child: Row(
           children: [
+            // macOS traffic lights are hidden via WindowChannel; reserve a
+            // small left padding to align the title with the rest of the UI.
             const SizedBox(width: 12),
             Image.asset(
               'assets/app_icon.png',
@@ -65,7 +75,33 @@ class TitleBar extends StatelessWidget {
                 tabs: tabs.map((t) => Tab(height: 32, text: t)).toList(),
               ),
             ),
-            _CloseButton(onClose: onClose),
+            // On macOS the red traffic-light button hides the window;
+            // expose an explicit "Exit" button so the user can fully quit
+            // (matches the tray menu, since the dock icon is suppressed).
+            if (!isMac) _CloseButton(onClose: onClose),
+            if (isMac) ...[
+              if (onExit != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: TextButton.icon(
+                    onPressed: onExit,
+                    icon: const Icon(Icons.power_settings_new, size: 14),
+                    label: Text(l10n?.exit ?? 'Exit'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.onSurfaceVariant,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      minimumSize: const Size(0, 28),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                const SizedBox(width: 12),
+            ],
           ],
         ),
       ),

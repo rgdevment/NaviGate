@@ -33,7 +33,7 @@ We believe in:
 2. If it's new, open an issue with:
    - Clear description of the problem
    - Steps to reproduce
-   - LinkUnbound version and Windows version
+   - LinkUnbound version and OS version (Windows 10/11 or macOS)
    - Screenshots if applicable
 
 ### Contribute Code
@@ -75,7 +75,7 @@ linkunbound_workspace/
   apps/
     linkunbound/        # Flutter app — UI, platform implementations, providers
       lib/
-        platform/       # Windows-specific implementations
+        platform/       # Windows and macOS-specific implementations
         ui/             # Picker, Settings, shared widgets
         providers.dart  # Riverpod providers
         main.dart       # Entry point
@@ -96,7 +96,8 @@ linkunbound_workspace/
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (stable channel)
 - [Melos](https://melos.invertase.dev/) (`dart pub global activate melos`)
-- Windows 10 or 11 (for running the app)
+- For Windows builds: Windows 10/11 with Visual Studio 2022 (Desktop development with C++)
+- For macOS builds: macOS 13 (Ventura) or newer with Xcode 15+ (open `apps/linkunbound/macos/Runner.xcworkspace` to edit Swift sources, native channels, signing or entitlements)
 
 ### Getting Started
 
@@ -110,7 +111,8 @@ melos bootstrap
 
 ```sh
 cd apps/linkunbound
-flutter run -d windows
+flutter run -d windows   # on Windows
+flutter run -d macos     # on macOS
 ```
 
 ### Common Commands

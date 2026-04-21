@@ -4,12 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
-import 'package:logging/logging.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
-
-final _log = Logger('PickerView');
 
 class PickerView extends ConsumerStatefulWidget {
   const PickerView({required this.url, super.key});
@@ -29,9 +26,13 @@ class _PickerViewState extends ConsumerState<PickerView> {
     final browsers = ref.watch(browsersProvider);
     final iconsDir = ref.read(iconsDirProvider);
     final uri = Uri.tryParse(widget.url);
-    final domain = uri?.host ?? widget.url;
-
-    _log.info('Building: ${browsers.length} browsers, domain=$domain');
+    final isLocalFile = uri?.scheme == 'file';
+    // For local files show just the filename in the bold line — the full
+    // path is privacy-sensitive (it can leak `$HOME`/project paths) and is
+    // already redacted in logs. Hover the row to copy the URL if needed.
+    final domain = isLocalFile
+        ? (uri!.pathSegments.isNotEmpty ? uri.pathSegments.last : widget.url)
+        : (uri?.host ?? widget.url);
 
     return Focus(
       autofocus: true,
@@ -54,7 +55,7 @@ class _PickerViewState extends ConsumerState<PickerView> {
       },
       child: Column(
         children: [
-          _UrlHeader(url: widget.url, domain: domain),
+          _UrlHeader(url: widget.url, domain: domain, isLocalFile: isLocalFile),
           Divider(height: 0.5, color: colors.outline.withAlpha(50)),
           Expanded(
             child: ListView.builder(
@@ -62,7 +63,7 @@ class _PickerViewState extends ConsumerState<PickerView> {
               itemCount: browsers.length,
               itemBuilder: (context, index) => _BrowserRow(
                 browser: browsers[index],
-                iconPath: '${iconsDir.path}\\${browsers[index].id}.png',
+                iconPath: '${iconsDir.path}/${browsers[index].id}.png',
                 shortcut: index < 9 ? '${index + 1}' : null,
                 onTap: () => _launch(browsers[index], iconsDir),
               ),
@@ -110,19 +111,32 @@ class _PickerViewState extends ConsumerState<PickerView> {
 }
 
 class _UrlHeader extends StatelessWidget {
-  const _UrlHeader({required this.url, required this.domain});
+  const _UrlHeader({
+    required this.url,
+    required this.domain,
+    required this.isLocalFile,
+  });
   final String url;
   final String domain;
+  final bool isLocalFile;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    // For local files, show only the parent directory in the secondary line
+    // (`…/parent/file.html`) instead of the full path — same redaction rule
+    // we use for logs. Hover on the copy button to copy the full URL.
+    final secondary = isLocalFile ? _redactedFilePath(url) : url;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 10),
       child: Row(
         children: [
-          Icon(Icons.link, size: 16, color: colors.primary),
+          Icon(
+            isLocalFile ? Icons.insert_drive_file_outlined : Icons.link,
+            size: 16,
+            color: colors.primary,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -138,7 +152,7 @@ class _UrlHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  url,
+                  secondary,
                   style: TextStyle(
                     fontSize: 11,
                     color: colors.onSurfaceVariant,
@@ -160,6 +174,17 @@ class _UrlHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Returns `…/parent/file.html` for a `file://` URL — strips `$HOME` and
+/// project paths from the visible UI.
+String _redactedFilePath(String fileUrl) {
+  final uri = Uri.tryParse(fileUrl);
+  if (uri == null) return fileUrl;
+  final segs = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+  if (segs.isEmpty) return fileUrl;
+  if (segs.length == 1) return '…/${segs.last}';
+  return '…/${segs[segs.length - 2]}/${segs.last}';
 }
 
 class _BrowserRow extends StatefulWidget {

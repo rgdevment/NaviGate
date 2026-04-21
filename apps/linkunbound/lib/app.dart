@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
+import 'dart:async';
 
 import 'l10n/app_localizations.dart';
 import 'providers.dart';
@@ -17,6 +18,9 @@ final class NavigateApp extends ConsumerStatefulWidget {
 
 final class _NavigateAppState extends ConsumerState<NavigateApp>
     with WindowListener {
+  Timer? _blurGuardTimer;
+  bool _pickerBlurReady = false;
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +29,7 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
 
   @override
   void dispose() {
+    _blurGuardTimer?.cancel();
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -42,13 +47,29 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
   }
 
   @override
+  void onWindowBlur() {
+    final mode = ref.read(appStateProvider).mode;
+    if (mode != AppMode.picker) return;
+    if (!_pickerBlurReady) return;
+    ref.read(appStateProvider.notifier).hide();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider);
     final locale = ref.watch(localeProvider);
 
-    // Show window after the new widget has been painted, not before.
     ref.listen<AppState>(appStateProvider, (prev, next) {
       if (prev?.mode == next.mode) return;
+      _blurGuardTimer?.cancel();
+      if (next.mode == AppMode.picker) {
+        _pickerBlurReady = false;
+        _blurGuardTimer = Timer(const Duration(milliseconds: 400), () {
+          _pickerBlurReady = true;
+        });
+      } else {
+        _pickerBlurReady = false;
+      }
       if (next.mode == AppMode.hidden) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await windowManager.show();

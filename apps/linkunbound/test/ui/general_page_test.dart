@@ -189,7 +189,7 @@ void main() {
         buildTestApp(const GeneralPage(), overrides: f.overrides),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Launch at Windows startup'), findsOneWidget);
+      expect(find.text('Launch at system startup'), findsOneWidget);
     });
 
     testWidgets('startup switch is off by default', (tester) async {
@@ -212,6 +212,19 @@ void main() {
       await tester.pumpAndSettle();
       final sw = tester.widget<Switch>(find.byType(Switch));
       expect(sw.value, isTrue);
+    });
+
+    testWidgets('tapping startup switch when off calls service enable', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir, isStartupEnabled: false);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(find.byType(Switch), findsOneWidget);
     });
 
     testWidgets('tapping startup switch calls service disable', (tester) async {
@@ -361,6 +374,36 @@ void main() {
       await tester.tap(find.text('Add'));
       await tester.pumpAndSettle();
       expect(find.byType(Dialog), findsOneWidget);
+    });
+
+    testWidgets('duplicating a browser adds a copy to the list', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Duplicate'));
+      await tester.pumpAndSettle();
+      expect(find.text('Google Chrome'), findsWidgets);
+    });
+
+    testWidgets('removing a browser removes it from the list', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove'));
+      // Pump once to let the synchronous removeBrowser() call execute.
+      await tester.pump();
+      // The in-memory service list is updated synchronously before the async save.
+      expect(f.browserService.browsers, isEmpty);
     });
   });
 

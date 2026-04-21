@@ -144,14 +144,14 @@ final class _NativePipe {
       .lookupFunction<_CancelIoExNative, _CancelIoExDart>('CancelIoEx');
 }
 
-final class WinPipeServer implements PipeServer {
-  final _controller = StreamController<PipeMessage>.broadcast();
+final class WinPipeServer implements InboundEventServer {
+  final _controller = StreamController<InboundEvent>.broadcast();
   Isolate? _isolate;
   ReceivePort? _receivePort;
   int _pipeHandle = 0;
 
   @override
-  Stream<PipeMessage> get messages => _controller.stream;
+  Stream<InboundEvent> get events => _controller.stream;
 
   @override
   Future<void> start() async {
@@ -161,10 +161,10 @@ final class WinPipeServer implements PipeServer {
     _receivePort!.listen((data) {
       if (data is String) {
         try {
-          final message = PipeMessage.decode(data);
-          _controller.add(message);
+          final event = InboundEvent.decode(data);
+          _controller.add(event);
         } on FormatException catch (e) {
-          _log.warning('Invalid pipe message: $e');
+          _log.warning('Invalid inbound event: $e');
         }
       } else if (data is int) {
         _pipeHandle = data;
@@ -256,9 +256,9 @@ final class WinPipeServer implements PipeServer {
   }
 }
 
-final class WinPipeClient implements PipeClient {
+final class WinPipeClient implements InboundEventClient {
   @override
-  Future<bool> send(PipeMessage message) async {
+  Future<bool> send(InboundEvent event) async {
     final pipeName = _pipeName.toNativeUtf16();
     final handle = _NativePipe.createFile(
       pipeName,
@@ -277,7 +277,7 @@ final class WinPipeClient implements PipeClient {
     }
 
     try {
-      final data = utf8.encode(message.encode());
+      final data = utf8.encode(event.encode());
       final buffer = calloc<Uint8>(data.length);
       for (var i = 0; i < data.length; i++) {
         buffer[i] = data[i];
