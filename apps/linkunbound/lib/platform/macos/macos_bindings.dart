@@ -105,6 +105,9 @@ final class MacOsBindings implements PlatformBindings {
   String get trayIconPath => 'assets/LinkUnbound_tray_64.png';
 
   @override
+  bool get startsHidden => false;
+
+  @override
   Future<bool> tryDelegate(InboundEvent? event) async => false;
 
   @override

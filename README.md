@@ -30,7 +30,7 @@ No ads. No telemetry. No accounts. Everything local.
 
 ---
 
-**LinkUnbound** is a free, open source **browser picker** and **browser chooser** for Windows. Every link you click — in Teams, Outlook, Slack, a PDF, wherever — gets intercepted. If there's a domain rule, the assigned browser opens instantly. If not, a small **browser selection popup** appears near your cursor and lets you choose.
+**LinkUnbound** is a free, open source **browser picker** and **browser chooser** for Windows and macOS. Every link you click — in Teams, Outlook, Slack, a PDF, wherever — gets intercepted. If there's a domain rule, the assigned browser opens instantly. If not, a small **browser selection popup** appears near your cursor and lets you choose.
 
 This isn't a company product. I'm a developer who needed a way to pick which browser opens each link, built it for myself, and decided to share it. No ads, no telemetry, no subscriptions, no data collection — just a lightweight **browser routing tool** that lives on your machine and nowhere else.
 
@@ -56,11 +56,11 @@ This isn't a company product. I'm a developer who needed a way to pick which bro
 
 ## What It Does
 
-- **Registers as default browser** in Windows — intercepts every link click system-wide
+- **Registers as default browser** — intercepts every link click system-wide on Windows and macOS
 - **Shows a floating picker** near your cursor to choose a browser
 - **Saves per-domain rules** — "always open this domain in X"
 - **Resolves redirects** and Microsoft SafeLinks before matching rules
-- **Runs silently** in the system tray — launches on startup, stays out of the way
+- **Runs silently** in the system tray (or menu bar on macOS) — launches on startup, stays out of the way
 - **Detects installed browsers** automatically — or add custom ones manually
 - **Supports multiple languages** — English and Spanish, with automatic detection
 
@@ -70,7 +70,7 @@ This isn't a company product. I'm a developer who needed a way to pick which bro
 
 **LinkUnbound is:**
 
-- A **local-first browser picker** and **default browser manager** for Windows
+- A **local-first browser picker** and **default browser manager** for Windows and macOS
 - A lightweight **browser routing utility** that works offline
 - An **open source** tool you can trust — GPL v3, inspect every line, fork it, contribute
 
@@ -176,12 +176,14 @@ Rules are created from the picker ("Always open here") and managed in the Rules 
 
 ## Architecture
 
-One exe, two modes:
+One binary, two modes:
 
-- `linkunbound.exe` (no args) → settings + tray (resident process)
-- `linkunbound.exe "https://..."` (link click) → sends URL via named pipe to resident, or operates standalone
+- `linkunbound` (no args) → settings + tray/menu bar (resident process)
+- `linkunbound "https://..."` (link click) → routes the URL to the resident process and exits, or operates standalone
 
-The resident process listens on a named pipe. Second instances send the URL and exit immediately. A Windows mutex prevents duplicate resident processes.
+**Windows.** A named pipe (`\\.\pipe\LinkUnbound`) links second instances to the resident process. A Windows mutex prevents duplicate residents. Default-browser registration goes through `IApplicationAssociationRegistration`.
+
+**macOS.** Single-instance launching is handled by Launch Services; URLs arrive through `application:openURLs:` (Apple Events) which are forwarded to Dart via a `MethodChannel`. Default-browser registration uses `LSSetDefaultHandlerForURLScheme`. The app runs as `LSUIElement` so it lives in the menu bar instead of the Dock.
 
 ---
 
@@ -197,10 +199,10 @@ No. LinkUnbound does not track or transmit anything. URLs are processed in memor
 No. LinkUnbound works fully offline. The only network request is a lightweight update check against the GitHub Releases API — no user data sent. The app works perfectly without a connection.
 
 **Where is my data stored?**
-Everything is in `%APPDATA%\LinkUnbound\` — browser list (`browsers.json`), domain rules (`rules.json`), navigation log (`navigate.log`), and extracted icons.
+Everything stays on your machine — `%APPDATA%\LinkUnbound\` on Windows, `~/Library/Application Support/LinkUnbound/` on macOS. Browser list (`browsers.json`), domain rules (`rules.json`), navigation log (`navigate.log`), and extracted icons.
 
 **Does it work with any browser?**
-Yes. LinkUnbound detects all browsers registered in Windows. You can also add custom browsers manually with any executable path and arguments.
+Yes. LinkUnbound detects all browsers registered with the operating system. You can also add custom browsers manually with any executable path and arguments.
 
 **Can I use it with Microsoft SafeLinks?**
 Yes. LinkUnbound resolves SafeLinks and other redirect wrappers before matching domain rules, so your rules work on the actual destination URL.
@@ -255,7 +257,7 @@ I build free, open source tools focused on privacy and productivity. If you like
 
 ## License
 
-**LinkUnbound** — A free, open source browser picker for Windows.
+**LinkUnbound** — A free, open source browser picker for Windows and macOS.
 Copyright (C) 2026 Mario Hidalgo G. (rgdevment)
 
 This program comes with ABSOLUTELY NO WARRANTY.
@@ -264,4 +266,4 @@ Distributed under the **GNU General Public License v3.0**. See [LICENSE](LICENSE
 
 ---
 
-I built LinkUnbound because I was tired of Windows not letting me choose which browser opens a link. This is a personal tool, built from a real need, shared because others might need it too. Free to use, free to inspect, free forever.
+I built LinkUnbound because I was tired of my OS not letting me choose which browser opens a link. This is a personal tool, built from a real need, shared because others might need it too. Free to use, free to inspect, free forever.

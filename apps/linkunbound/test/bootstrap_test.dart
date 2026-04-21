@@ -254,6 +254,9 @@ final class _FakeBindings implements PlatformBindings {
   int tryDelegateCalls = 0;
 
   @override
+  bool startsHidden = false;
+
+  @override
   Directory get appDataDir => Directory('${rootDir.path}/app-data');
 
   @override
@@ -431,7 +434,7 @@ void main() {
   testWidgets('background launch stays hidden until tray activation', (
     tester,
   ) async {
-    final bindings = _FakeBindings(rootDir: tempDir);
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
     addTearDown(bindings.close);
 
     await boot(tester, bindings, const ['--background']);
@@ -450,7 +453,7 @@ void main() {
   testWidgets('matching rule launches browser instead of opening picker', (
     tester,
   ) async {
-    final bindings = _FakeBindings(rootDir: tempDir);
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
     addTearDown(bindings.close);
     await tester.runAsync(
       () => bindings.seed(
@@ -476,7 +479,7 @@ void main() {
   testWidgets('safe links are unwrapped before rule-based launch', (
     tester,
   ) async {
-    final bindings = _FakeBindings(rootDir: tempDir);
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
     addTearDown(bindings.close);
     await tester.runAsync(
       () => bindings.seed(
@@ -505,7 +508,7 @@ void main() {
     final bindings = _FakeBindings(
       rootDir: tempDir,
       detectedBrowsers: const [_chrome],
-    );
+    )..startsHidden = true;
     addTearDown(bindings.close);
     final htmlFile = File('${tempDir.path}/preview.html')
       ..writeAsStringSync('<html></html>');
@@ -527,7 +530,7 @@ void main() {
   });
 
   testWidgets('unsupported local file is ignored', (tester) async {
-    final bindings = _FakeBindings(rootDir: tempDir);
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
     addTearDown(bindings.close);
     final txtFile = File('${tempDir.path}/notes.txt')..writeAsStringSync('hi');
 
@@ -541,7 +544,7 @@ void main() {
   });
 
   testWidgets('ShowSettingsEvent opens settings window', (tester) async {
-    final bindings = _FakeBindings(rootDir: tempDir);
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
     addTearDown(bindings.close);
 
     await boot(tester, bindings, const ['--background']);

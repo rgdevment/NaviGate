@@ -36,6 +36,7 @@ final class WindowsBindings implements PlatformBindings {
     required this.localeFile,
     required this.edgeWarningFile,
     required this.initialEvent,
+    required this.startsHidden,
     required WinInstance instance,
     required WinPipeServer pipeServer,
   }) : _instance = instance,
@@ -63,6 +64,7 @@ final class WindowsBindings implements PlatformBindings {
       localeFile: File('${appDataDir.path}\\locale'),
       edgeWarningFile: File('${appDataDir.path}\\edge_warning_dismissed'),
       initialEvent: _parseInitialEvent(args),
+      startsHidden: args.contains('--background'),
       instance: WinInstance(),
       pipeServer: WinPipeServer(),
     );
@@ -98,6 +100,8 @@ final class WindowsBindings implements PlatformBindings {
   final File edgeWarningFile;
   @override
   final InboundEvent? initialEvent;
+  @override
+  final bool startsHidden;
 
   final WinInstance _instance;
   final WinPipeServer _pipeServer;
