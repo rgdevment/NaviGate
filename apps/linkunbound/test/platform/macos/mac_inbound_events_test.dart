@@ -33,12 +33,33 @@ void main() {
         .setMockMethodCallHandler(_channel, null);
   });
 
-  test('start sends ready only once', () async {
+  test('start does not send ready until a listener subscribes', () async {
     final events = MacInboundEvents();
+    addTearDown(events.stop);
 
     await events.start();
+    // Give microtasks a chance to run; ready must NOT have been sent yet.
+    await Future<void>.delayed(Duration.zero);
+    expect(outboundCalls, isEmpty);
+
+    final sub = events.events.listen((_) {});
+    addTearDown(sub.cancel);
+    await Future<void>.delayed(Duration.zero);
+    expect(outboundCalls, ['ready']);
+  });
+
+  test('ready is sent only once across multiple listeners', () async {
+    final events = MacInboundEvents();
+    addTearDown(events.stop);
+
     await events.start();
-    await events.stop();
+    await events.start(); // start is idempotent
+
+    final sub1 = events.events.listen((_) {});
+    final sub2 = events.events.listen((_) {});
+    addTearDown(sub1.cancel);
+    addTearDown(sub2.cancel);
+    await Future<void>.delayed(Duration.zero);
 
     expect(outboundCalls, ['ready']);
   });
