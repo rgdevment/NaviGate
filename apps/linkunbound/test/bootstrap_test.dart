@@ -446,8 +446,10 @@ void main() {
     await tester.pump();
 
     expect(find.byType(SettingsWindow), findsOneWidget);
-    expect(macWindowSpy.methods, contains('setSettingsMode'));
-    expect(macWindowSpy.methods, contains('activate'));
+    if (Platform.isMacOS) {
+      expect(macWindowSpy.methods, contains('setSettingsMode'));
+      expect(macWindowSpy.methods, contains('activate'));
+    }
   });
 
   testWidgets('matching rule launches browser instead of opening picker', (
@@ -526,7 +528,9 @@ void main() {
     await tester.pump();
 
     expect(find.byType(PickerWindow), findsOneWidget);
-    expect(macWindowSpy.methods, contains('setPickerMode'));
+    if (Platform.isMacOS) {
+      expect(macWindowSpy.methods, contains('setPickerMode'));
+    }
   });
 
   testWidgets('unsupported local file is ignored', (tester) async {
@@ -558,6 +562,8 @@ void main() {
     await tester.pump();
 
     expect(find.byType(SettingsWindow), findsOneWidget);
-    expect(macWindowSpy.methods, contains('setSettingsMode'));
+    if (Platform.isMacOS) {
+      expect(macWindowSpy.methods, contains('setSettingsMode'));
+    }
   });
 }

@@ -54,6 +54,16 @@ unlinked_spec.ds
 dist/
 **/dist/
 
+# Local pub cache (when PUB_CACHE is redirected into the repo)
+**/Pub/
+**/Pub/Cache/
+**/.pub-cache/
+
+# Flutter tool state
+**/.flutter_tool_state
+**/.flutter
+**/.flutter/
+
 # Android related
 **/android/**/gradle-wrapper.jar
 .gradle/
