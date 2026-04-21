@@ -174,17 +174,10 @@ Future<void> _firstBoot({
 }
 
 void _handleUrl(String url, ProviderContainer container) {
-  // Local file targets (macOS Finder "Open With" → file://, Windows shell
-  // → C:\path\foo.html). Validate strictly and bypass the SafeLink unwrap
-  // and the rules engine — local files don't have a host to match rules
-  // against, so v1 always shows the picker for them.
   if (looksLikeLocalFile(url)) {
     final resolved = resolveLocalWebFile(url);
     if (resolved == null) {
-      _log.warning(
-        'Rejected local-file URL (missing/invalid/unsupported extension): '
-        '${_redactForLog(url)}',
-      );
+      _log.warning('Rejected local file: ${_redactForLog(url)}');
       return;
     }
     _log.info('Local file accepted: ${redactPath(resolved)}');
@@ -212,10 +205,6 @@ void _handleUrl(String url, ProviderContainer container) {
   container.read(appStateProvider.notifier).showPicker(resolved);
 }
 
-/// Returns a log-safe representation of an inbound URL. For local-file
-/// targets we only keep the basename + parent dir (avoids leaking `$HOME` /
-/// `C:\Users\…` in shared diagnostic bundles); for `http(s)://` we keep the
-/// full URL.
 String _redactForLog(String raw) {
   if (!looksLikeLocalFile(raw)) return raw;
   if (raw.startsWith('file://')) {
@@ -227,7 +216,6 @@ String _redactForLog(String raw) {
       return 'file://<unparseable>';
     }
   }
-  // Native Windows absolute path (e.g. C:\Users\foo\bar.html).
   return redactPath(raw);
 }
 

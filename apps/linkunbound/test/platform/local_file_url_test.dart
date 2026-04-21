@@ -18,7 +18,6 @@ void main() {
     test('returns absolute path for valid .html', () {
       final f = File('${tmp.path}/page.html')..writeAsStringSync('<html/>');
       final url = Uri.file(f.path).toString();
-      // resolveSymbolicLinks may canonicalize /var → /private/var on macOS.
       expect(resolveLocalWebFile(url), endsWith('page.html'));
     });
 
@@ -88,9 +87,6 @@ void main() {
       if (Platform.isWindows) {
         expect(looksLikeLocalFile(r'C:\Users\me\foo.html'), isTrue);
       } else {
-        // On POSIX bare absolute paths are NOT treated as local-file URLs by
-        // the inbound dispatcher (the OS hands us a `file://` URL instead);
-        // the helper enforces that distinction.
         expect(looksLikeLocalFile('/tmp/foo.html'), isFalse);
       }
     });
