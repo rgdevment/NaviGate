@@ -142,16 +142,14 @@ void main(List<String> args) async {
     }
   });
 
-  pipeServer.messages.listen((message) {
-    switch (message) {
-      case OpenUrlMessage(:final url):
+  pipeServer.events.listen((event) {
+    switch (event) {
+      case OpenUrlEvent(:final url):
         _log.info('Pipe received: open_url $url');
         _handleUrl(url, container);
-      case ShowSettingsMessage():
+      case ShowSettingsEvent():
         _log.info('Pipe received: show_settings');
         container.read(appStateProvider.notifier).showSettings();
-      case PingMessage():
-        _log.fine('Pipe received: ping');
     }
   });
 
@@ -172,12 +170,12 @@ void main(List<String> args) async {
 
 Future<bool> _tryDelegate(String? url) async {
   final client = WinPipeClient();
-  final message = url != null
-      ? OpenUrlMessage(url)
-      : const ShowSettingsMessage();
+  final event = url != null
+      ? OpenUrlEvent(url)
+      : const ShowSettingsEvent();
   WinInstance.allowForeground();
 
-  if (await client.send(message)) {
+  if (await client.send(event)) {
     _log.info('Delegated to existing instance, exiting');
     return true;
   }

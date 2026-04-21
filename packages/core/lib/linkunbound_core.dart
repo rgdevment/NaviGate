@@ -3,7 +3,7 @@ export 'src/models/browser_config.dart';
 export 'src/models/rule.dart';
 export 'src/platform/browser_detector.dart';
 export 'src/platform/icon_extractor.dart';
-export 'src/platform/pipe_service.dart';
+export 'src/platform/inbound_event.dart';
 export 'src/platform/registration_service.dart';
 export 'src/platform/startup_service.dart';
 export 'src/services/browser_service.dart';
