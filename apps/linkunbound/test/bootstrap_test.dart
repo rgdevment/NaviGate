@@ -327,7 +327,7 @@ void main() {
     }
   });
 
-  Future<void> _boot(
+  Future<void> boot(
     WidgetTester tester,
     _FakeBindings bindings,
     List<String> args,
@@ -349,7 +349,7 @@ void main() {
     );
     addTearDown(bindings.close);
 
-    await _boot(tester, bindings, const []);
+    await boot(tester, bindings, const []);
 
     expect(bindings.claimCalls, 1);
     expect(bindings.tryDelegateCalls, 1);
@@ -374,7 +374,7 @@ void main() {
     final bindings = _FakeBindings(rootDir: tempDir);
     addTearDown(bindings.close);
 
-    await _boot(tester, bindings, const ['--background']);
+    await boot(tester, bindings, const ['--background']);
 
     expect(find.byType(SettingsWindow), findsNothing);
 
@@ -397,7 +397,7 @@ void main() {
       rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
     );
 
-    await _boot(tester, bindings, const ['--background']);
+    await boot(tester, bindings, const ['--background']);
     await bindings.emit(const OpenUrlEvent('https://example.com/docs'));
     await tester.pump();
     await tester.pump();
@@ -421,7 +421,7 @@ void main() {
       rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
     );
 
-    await _boot(tester, bindings, const ['--background']);
+    await boot(tester, bindings, const ['--background']);
     await bindings.emit(
       OpenUrlEvent(
         'https://nam12.safelinks.protection.outlook.com/?url=${Uri.encodeComponent('https://example.com/report?id=7')}',
@@ -446,7 +446,7 @@ void main() {
     final htmlFile = File('${tempDir.path}/preview.html')
       ..writeAsStringSync('<html></html>');
 
-    await _boot(tester, bindings, const ['--background']);
+    await boot(tester, bindings, const ['--background']);
     await bindings.emit(OpenUrlEvent(htmlFile.uri.toString()));
     await tester.pump();
     await tester.pump();
@@ -460,7 +460,7 @@ void main() {
     addTearDown(bindings.close);
     final txtFile = File('${tempDir.path}/notes.txt')..writeAsStringSync('hi');
 
-    await _boot(tester, bindings, const ['--background']);
+    await boot(tester, bindings, const ['--background']);
     await bindings.emit(OpenUrlEvent(txtFile.uri.toString()));
     await tester.pump();
     await tester.pump();

@@ -158,9 +158,9 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (bindings.initialEvent == null && !args.contains('--background')) {
-      container.read(appStateProvider.notifier).showSettings();
-    }
+    if (args.contains('--background')) return;
+    if (container.read(appStateProvider).mode != AppMode.hidden) return;
+    container.read(appStateProvider.notifier).showSettings();
   });
 }
 

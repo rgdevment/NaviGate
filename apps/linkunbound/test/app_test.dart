@@ -58,7 +58,7 @@ void main() {
     }
   });
 
-  Future<ProviderContainer> _pumpApp(
+  Future<ProviderContainer> pumpApp(
     WidgetTester tester, {
     UpdateInfo? updateInfo,
     Future<void> Function()? onExit,
@@ -83,7 +83,7 @@ void main() {
   }
 
   testWidgets('starts hidden by default', (tester) async {
-    await _pumpApp(tester);
+    await pumpApp(tester);
 
     expect(find.byType(SettingsWindow), findsNothing);
     expect(find.byType(PickerWindow), findsNothing);
@@ -99,7 +99,7 @@ void main() {
   testWidgets('showSettings renders the settings window and focuses it', (
     tester,
   ) async {
-    final container = await _pumpApp(tester);
+    final container = await pumpApp(tester);
     windowSpy.clear();
 
     container.read(appStateProvider.notifier).showSettings();
@@ -112,12 +112,13 @@ void main() {
   });
 
   testWidgets('immediate blur after showing picker is ignored', (tester) async {
-    final container = await _pumpApp(tester);
+    final container = await pumpApp(tester);
     final dynamic state = tester.state(find.byType(NavigateApp));
 
     container.read(appStateProvider.notifier).showPicker('https://example.com');
     await tester.pump();
     await tester.pump();
+    // ignore: avoid_dynamic_calls
     state.onWindowBlur();
     await tester.pump();
 
@@ -125,12 +126,13 @@ void main() {
   });
 
   testWidgets('blur hides picker after the grace period', (tester) async {
-    final container = await _pumpApp(tester);
+    final container = await pumpApp(tester);
     final dynamic state = tester.state(find.byType(NavigateApp));
 
     container.read(appStateProvider.notifier).showPicker('https://example.com');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+    // ignore: avoid_dynamic_calls
     state.onWindowBlur();
     await tester.pump();
 
@@ -139,7 +141,7 @@ void main() {
   });
 
   testWidgets('window close hides the app and resets state', (tester) async {
-    final container = await _pumpApp(tester);
+    final container = await pumpApp(tester);
     final dynamic state = tester.state(find.byType(NavigateApp));
 
     container.read(appStateProvider.notifier).showSettings();
@@ -147,6 +149,7 @@ void main() {
     await tester.pump();
     windowSpy.clear();
 
+    // ignore: avoid_dynamic_calls
     await state.onWindowClose();
     await tester.pump();
 
@@ -158,7 +161,7 @@ void main() {
     tester,
   ) async {
     var exitCalls = 0;
-    await _pumpApp(
+    await pumpApp(
       tester,
       updateInfo: const UpdateInfo(
         latestVersion: '2.0.0',
