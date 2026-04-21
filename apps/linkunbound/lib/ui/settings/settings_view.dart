@@ -66,7 +66,8 @@ class _SettingsViewState extends ConsumerState<SettingsView>
           },
           onExit: Platform.isMacOS
               ? () async {
-                  await ref.read(exitAppProvider)();
+                  await windowManager.hide();
+                  ref.read(appStateProvider.notifier).hide();
                 }
               : null,
         ),

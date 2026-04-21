@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
@@ -11,7 +8,7 @@ const _channel = MethodChannel('linkunbound/inbound_events');
 const _codec = StandardMethodCodec();
 
 Future<void> _dispatchPlatformCall(String method, [dynamic arguments]) async {
-  final ByteData? data = _codec.encodeMethodCall(MethodCall(method, arguments));
+  final ByteData data = _codec.encodeMethodCall(MethodCall(method, arguments));
 
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage(_channel.name, data, (_) {});
