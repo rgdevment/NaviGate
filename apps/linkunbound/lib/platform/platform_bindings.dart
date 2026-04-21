@@ -14,13 +14,26 @@ abstract class PlatformBindings {
   TrayController get trayController;
   CursorLocator get cursorLocator;
 
+  /// Event derived from process arguments (Windows: argv URL; macOS: always null).
+  InboundEvent? get initialEvent;
+
+  /// Stream of inbound events from the OS once this process is the resident.
+  /// Includes the [initialEvent] (if any) followed by subsequent OS events.
   Stream<InboundEvent> get inboundEvents;
 
-  Future<bool> tryDelegate(InboundEvent event);
+  /// Try to forward [event] to an existing resident instance.
+  /// Returns true if delegation succeeded and the caller should exit.
+  Future<bool> tryDelegate(InboundEvent? event);
 
-  Future<void> claim();
+  /// Become the resident instance (single-instance lock + start listening).
+  /// Returns false if another resident already exists and could not be reached.
+  Future<bool> claim();
 
+  /// Release single-instance resources.
   Future<void> release();
+
+  String get executablePath;
+  String get trayIconPath;
 
   Directory get appDataDir;
   Directory get iconsDir;
