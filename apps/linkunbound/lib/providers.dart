@@ -40,9 +40,7 @@ final appDataDirProvider = Provider<Directory>((_) => throw _mustOverride());
 /// Async callback that releases platform resources and terminates the process.
 /// Overridden at startup with `bindings.release()` + `exit(0)`.
 typedef ExitAppCallback = Future<void> Function();
-final exitAppProvider = Provider<ExitAppCallback>(
-  (_) => throw _mustOverride(),
-);
+final exitAppProvider = Provider<ExitAppCallback>((_) => throw _mustOverride());
 
 final edgeWarningDismissedProvider =
     NotifierProvider<EdgeWarningNotifier, bool>(EdgeWarningNotifier.new);

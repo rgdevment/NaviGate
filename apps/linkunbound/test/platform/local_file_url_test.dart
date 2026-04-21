@@ -24,7 +24,10 @@ void main() {
     test('accepts .htm and .xhtml', () {
       final htm = File('${tmp.path}/a.htm')..writeAsStringSync('x');
       final xhtml = File('${tmp.path}/b.xhtml')..writeAsStringSync('x');
-      expect(resolveLocalWebFile(Uri.file(htm.path).toString()), endsWith('a.htm'));
+      expect(
+        resolveLocalWebFile(Uri.file(htm.path).toString()),
+        endsWith('a.htm'),
+      );
       expect(
         resolveLocalWebFile(Uri.file(xhtml.path).toString()),
         endsWith('b.xhtml'),

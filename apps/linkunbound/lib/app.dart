@@ -55,7 +55,8 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
     // Ignore blur bursts within the first ~400 ms of showing the picker —
     // those come from the window not yet being key, not from a real focus
     // change by the user.
-    if (DateTime.now().difference(shownAt) < const Duration(milliseconds: 400)) {
+    if (DateTime.now().difference(shownAt) <
+        const Duration(milliseconds: 400)) {
       return;
     }
     ref.read(appStateProvider.notifier).hide();
