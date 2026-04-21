@@ -6,7 +6,29 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
+  markdown:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: |
+            *.md
+            .github/**/*.md
+          config: ".markdownlint.yaml"
+        continue-on-error: true
+
   quality:
     name: Quality
     runs-on: ubuntu-latest
@@ -17,6 +39,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: ${{ runner.os }}-pub-
 
       - name: Install melos
         run: dart pub global activate melos
@@ -29,6 +59,12 @@ jobs:
 
       - name: Analyze
         run: melos analyze
+
+      - name: Check auto-fixable issues
+        run: |
+          OUTPUT=$(dart fix --dry-run . 2>&1)
+          echo "$OUTPUT"
+          echo "$OUTPUT" | grep -q "Nothing to fix!" || { echo "::error::Auto-fixable issues found. Run 'dart fix --apply' and commit."; exit 1; }
 
       - name: Run core tests with coverage
         working-directory: packages/core
@@ -90,6 +126,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: ${{ runner.os }}-pub-
 
       - name: Resolve dependencies
         run: |
@@ -117,9 +161,19 @@ jobs:
             -Dsonar.coverage.exclusions=**/main.dart,**/app.dart,**/platform/**,**/update_service.dart,**/picker_window.dart,**/settings_window.dart,**/settings_view.dart,**/title_bar.dart
 
   build:
-    name: Build (Windows)
+    name: Build (${{ matrix.name }})
     needs: quality
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+            build_cmd: flutter build windows --release
+          - os: macos-15
+            name: macOS
+            build_cmd: flutter build macos --release
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +181,21 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Build Windows release
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: ${{ runner.os }}-pub-
+
+      - name: Install melos
+        run: dart pub global activate melos
+
+      - name: Bootstrap workspace
+        run: melos bootstrap
+
+      - name: Build ${{ matrix.name }} release
         working-directory: apps/linkunbound
-        run: flutter build windows --release
+        run: ${{ matrix.build_cmd }}

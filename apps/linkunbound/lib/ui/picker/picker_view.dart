@@ -4,12 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
-import 'package:logging/logging.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
-
-final _log = Logger('PickerView');
 
 class PickerView extends ConsumerStatefulWidget {
   const PickerView({required this.url, super.key});
@@ -36,8 +33,6 @@ class _PickerViewState extends ConsumerState<PickerView> {
     final domain = isLocalFile
         ? (uri!.pathSegments.isNotEmpty ? uri.pathSegments.last : widget.url)
         : (uri?.host ?? widget.url);
-
-    _log.info('Building: ${browsers.length} browsers, isLocal=$isLocalFile');
 
     return Focus(
       autofocus: true,
