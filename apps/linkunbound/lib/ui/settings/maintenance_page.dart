@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/macos/mac_diagnostics_service.dart';
 import '../../platform/windows/win_diagnostics_service.dart';
+import '../../platform/windows/win_package_context.dart';
 import '../../providers.dart';
 import '../shared/widgets/base_dialog.dart';
 import '../shared/widgets/group_card.dart';
@@ -18,6 +19,7 @@ class MaintenancePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final showUnregister = !isRunningInMsix();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
@@ -41,14 +43,16 @@ class MaintenancePage extends ConsumerWidget {
                 color: colors.error,
                 onTap: () => _confirmReset(context, ref),
               ),
-              Divider(height: 1, color: colors.outline.withAlpha(40)),
-              _ActionRow(
-                icon: Icons.delete_outline,
-                label: l10n.unregisterLabel,
-                description: l10n.unregisterDescription,
-                color: colors.error,
-                onTap: () => _confirmUnregister(context, ref),
-              ),
+              if (showUnregister) ...[
+                Divider(height: 1, color: colors.outline.withAlpha(40)),
+                _ActionRow(
+                  icon: Icons.delete_outline,
+                  label: l10n.unregisterLabel,
+                  description: l10n.unregisterDescription,
+                  color: colors.error,
+                  onTap: () => _confirmUnregister(context, ref),
+                ),
+              ],
             ],
           ),
         ),

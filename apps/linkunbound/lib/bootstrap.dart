@@ -89,10 +89,19 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
         titleBarStyle: TitleBarStyle.hidden,
         size: Size(640, 700),
         center: false,
+        // Force a fully opaque background so compositors that lack Mica /
+        // DWM acrylic (Windows 10 integrated GPUs, Remote Desktop) don't try
+        // to render a transparent frame and crash the Flutter engine.
+        backgroundColor: Color(0xFF1E1E1E),
       ),
       () async {
         await windowManager.setSkipTaskbar(true);
         if (!Platform.isMacOS) {
+          try {
+            await windowManager.setHasShadow(false);
+          } on Object catch (e) {
+            _log.fine('setHasShadow not supported: $e');
+          }
           await windowManager.setPosition(const Offset(-9999, -9999));
           await windowManager.hide();
         }
