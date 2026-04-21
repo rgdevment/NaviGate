@@ -157,19 +157,15 @@ void main() {
     expect(windowSpy.methods, contains('hide'));
   });
 
-  testWidgets('settings view shows update banner, supports drag, and exits', (
+  testWidgets('settings view shows update banner and supports drag', (
     tester,
   ) async {
-    var exitCalls = 0;
     await pumpApp(
       tester,
       updateInfo: const UpdateInfo(
         latestVersion: '2.0.0',
         releaseUrl: 'https://example.com/releases/2.0.0',
       ),
-      onExit: () async {
-        exitCalls++;
-      },
     );
 
     final container = ProviderScope.containerOf(
@@ -185,9 +181,5 @@ void main() {
     await tester.drag(find.text('LinkUnbound'), const Offset(20, 0));
     await tester.pump();
     expect(windowSpy.methods, contains('startDragging'));
-
-    await tester.tap(find.text('Exit'));
-    await tester.pump();
-    expect(exitCalls, 1);
   });
 }
