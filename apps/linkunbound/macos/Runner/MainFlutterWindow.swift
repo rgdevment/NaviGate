@@ -26,6 +26,12 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
+    // Wire native → Dart inbound events bridge.
+    let inboundEvents = InboundEventsChannel(messenger: flutterViewController.engine.binaryMessenger)
+    if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
+      appDelegate.attachInboundEvents(inboundEvents)
+    }
+
     super.awakeFromNib()
   }
 }
