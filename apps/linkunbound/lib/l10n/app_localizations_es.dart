@@ -50,7 +50,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sectionStartup => 'INICIO';
 
   @override
-  String get launchAtStartup => 'Iniciar con Windows';
+  String get launchAtStartup => 'Iniciar con el sistema';
 
   @override
   String get sectionLanguage => 'IDIOMA';

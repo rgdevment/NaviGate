@@ -3,14 +3,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 
-/// Receives inbound events forwarded from the macOS `AppDelegate`.
-///
-/// Native side (`InboundEventsChannel.swift`) calls `event` on the
-/// `linkunbound/inbound_events` MethodChannel. We acknowledge readiness via
-/// `ready` so events queued before Flutter was alive get flushed.
-///
-/// The internal controller is single-subscription so events emitted between
-/// `start()` and `events.listen(...)` are buffered instead of dropped.
 class MacInboundEvents implements InboundEventServer {
   MacInboundEvents() : _channel = const MethodChannel(_channelName);
 
@@ -35,7 +27,7 @@ class MacInboundEvents implements InboundEventServer {
   @override
   Future<void> stop() async {
     _channel.setMethodCallHandler(null);
-    await _controller.close();
+    if (!_controller.isClosed) await _controller.close();
   }
 
   Future<void> _onMethodCall(MethodCall call) async {
@@ -45,7 +37,7 @@ class MacInboundEvents implements InboundEventServer {
     try {
       _controller.add(InboundEvent.fromJson(args));
     } on FormatException {
-      // Unknown action; ignore (forward-compat).
+      // ignore unknown actions for forward-compat
     }
   }
 }

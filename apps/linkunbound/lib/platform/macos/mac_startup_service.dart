@@ -6,7 +6,6 @@ class MacStartupService implements StartupService {
 
   @override
   Future<void> enable(String executablePath) async {
-    // executablePath is ignored on macOS — SMAppService uses the main bundle.
     await _channel.invokeMethod<void>('enable');
   }
 

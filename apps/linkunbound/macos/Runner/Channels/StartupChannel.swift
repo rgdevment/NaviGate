@@ -1,7 +1,6 @@
 import FlutterMacOS
 import ServiceManagement
 
-/// `linkunbound/startup` — register the app as a login item via SMAppService (macOS 13+).
 final class StartupChannel {
   static let channelName = "linkunbound/startup"
 

@@ -87,7 +87,7 @@ final class LocaleNotifier extends Notifier<Locale?> {
 enum AppMode { hidden, settings, picker }
 
 final class AppState {
-  const AppState({this.mode = AppMode.hidden, this.pendingUrl});
+  AppState({this.mode = AppMode.hidden, this.pendingUrl});
   final AppMode mode;
   final String? pendingUrl;
 }
@@ -98,14 +98,14 @@ final appStateProvider = NotifierProvider<AppStateNotifier, AppState>(
 
 final class AppStateNotifier extends Notifier<AppState> {
   @override
-  AppState build() => const AppState();
+  AppState build() => AppState();
 
-  void showSettings() => state = const AppState(mode: AppMode.settings);
+  void showSettings() => state = AppState(mode: AppMode.settings);
 
   void showPicker(String url) =>
       state = AppState(mode: AppMode.picker, pendingUrl: url);
 
-  void hide() => state = const AppState();
+  void hide() => state = AppState();
 }
 
 final browsersProvider = NotifierProvider<BrowsersNotifier, List<Browser>>(

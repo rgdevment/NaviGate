@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @launchAtStartup.
   ///
   /// In en, this message translates to:
-  /// **'Launch at Windows startup'**
+  /// **'Launch at system startup'**
   String get launchAtStartup;
 
   /// No description provided for @sectionLanguage.

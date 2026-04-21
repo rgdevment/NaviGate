@@ -62,6 +62,7 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
     () async {
       await windowManager.setPosition(const Offset(-9999, -9999));
       await windowManager.setSkipTaskbar(true);
+      await windowManager.hide();
     },
   );
 
@@ -91,7 +92,14 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   final macWindow = Platform.isMacOS ? MacWindowChannel() : null;
 
   container.listen<AppState>(appStateProvider, (prev, next) async {
-    if (prev?.mode == next.mode) return;
+    if (prev?.mode == next.mode) {
+      if (next.mode == AppMode.settings) {
+        await windowManager.show();
+        await windowManager.focus();
+        await macWindow?.activate();
+      }
+      return;
+    }
     switch (next.mode) {
       case AppMode.hidden:
         await windowManager.hide();
@@ -101,6 +109,9 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
+        await windowManager.show();
+        await windowManager.focus();
+        await macWindow?.activate();
       case AppMode.picker:
         await macWindow?.setPickerMode();
         final browsers = container.read(browsersProvider);
@@ -122,6 +133,8 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
         await windowManager.setPosition(Offset(x, y));
         await windowManager.setSkipTaskbar(true);
         await windowManager.setAlwaysOnTop(true);
+        await windowManager.show();
+        await macWindow?.activate();
     }
   });
 
