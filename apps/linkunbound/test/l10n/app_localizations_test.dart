@@ -93,7 +93,10 @@ void main() {
     test('supports English and Spanish only', () {
       expect(AppLocalizations.delegate.isSupported(const Locale('en')), isTrue);
       expect(AppLocalizations.delegate.isSupported(const Locale('es')), isTrue);
-      expect(AppLocalizations.delegate.isSupported(const Locale('fr')), isFalse);
+      expect(
+        AppLocalizations.delegate.isSupported(const Locale('fr')),
+        isFalse,
+      );
     });
 
     test('loads Spanish strings', () async {
@@ -115,9 +118,7 @@ void main() {
           locale: Locale('es'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
-            builder: _LocalizedText.new,
-          ),
+          home: Builder(builder: _LocalizedText.new),
         ),
       );
 

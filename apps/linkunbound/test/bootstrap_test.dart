@@ -19,7 +19,8 @@ const _macWindowChannel = MethodChannel('linkunbound/window');
 const _chrome = Browser(
   id: 'chrome',
   name: 'Google Chrome',
-  executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  executablePath:
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   iconPath: 'chrome.png',
 );
 
@@ -110,13 +111,11 @@ final class _RecordingLaunchService implements LaunchService {
     String url,
     List<String> extraArgs,
   ) async {
-    calls.add(
-      (
-        executablePath: executablePath,
-        url: url,
-        extraArgs: List<String>.from(extraArgs),
-      ),
-    );
+    calls.add((
+      executablePath: executablePath,
+      url: url,
+      extraArgs: List<String>.from(extraArgs),
+    ));
   }
 }
 
@@ -358,12 +357,16 @@ void main() {
 
     expect(bindings.claimCalls, 1);
     expect(bindings.tryDelegateCalls, 1);
-    expect(bindings.registrationService.registerCalls, [bindings.executablePath]);
+    expect(bindings.registrationService.registerCalls, [
+      bindings.executablePath,
+    ]);
     expect(bindings.iconExtractor.calls, hasLength(1));
     expect(bindings.iconExtractor.calls.single.$1, _chrome.executablePath);
     expect(bindings.trayController.initCalls, 1);
     expect(
-      bindings.trayController.menuItems.map((item) => item.label).whereType<String>(),
+      bindings.trayController.menuItems
+          .map((item) => item.label)
+          .whereType<String>(),
       containsAll(['Settings', 'Exit']),
     );
     expect(find.byType(SettingsWindow), findsOneWidget);
@@ -404,7 +407,10 @@ void main() {
     await tester.pump();
 
     expect(bindings.launchService.calls, hasLength(1));
-    expect(bindings.launchService.calls.single.executablePath, _chrome.executablePath);
+    expect(
+      bindings.launchService.calls.single.executablePath,
+      _chrome.executablePath,
+    );
     expect(bindings.launchService.calls.single.url, 'https://example.com/docs');
     expect(find.byType(PickerWindow), findsNothing);
   });
@@ -436,7 +442,10 @@ void main() {
   });
 
   testWidgets('valid local html file opens the picker', (tester) async {
-    final bindings = _FakeBindings(rootDir: tempDir, detectedBrowsers: const [_chrome]);
+    final bindings = _FakeBindings(
+      rootDir: tempDir,
+      detectedBrowsers: const [_chrome],
+    );
     addTearDown(bindings.close);
     final htmlFile = File('${tempDir.path}/preview.html')
       ..writeAsStringSync('<html></html>');

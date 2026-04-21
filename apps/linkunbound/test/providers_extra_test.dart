@@ -113,40 +113,46 @@ void main() {
   });
 
   group('async providers', () {
-    test('isDefaultBrowserProvider resolves from registration service', () async {
-      final registration = _CountingRegistrationService(
-        isDefaultValue: true,
-        associations: {'http', 'https'},
-      );
-      final container = ProviderContainer(
-        overrides: [
-          registrationServiceProvider.overrideWithValue(registration),
-        ],
-      );
-      addTearDown(container.dispose);
+    test(
+      'isDefaultBrowserProvider resolves from registration service',
+      () async {
+        final registration = _CountingRegistrationService(
+          isDefaultValue: true,
+          associations: {'http', 'https'},
+        );
+        final container = ProviderContainer(
+          overrides: [
+            registrationServiceProvider.overrideWithValue(registration),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      expect(await container.read(isDefaultBrowserProvider.future), isTrue);
-      expect(registration.isDefaultReads, 1);
-    });
+        expect(await container.read(isDefaultBrowserProvider.future), isTrue);
+        expect(registration.isDefaultReads, 1);
+      },
+    );
 
-    test('defaultAssociationsProvider resolves from registration service', () async {
-      final registration = _CountingRegistrationService(
-        isDefaultValue: false,
-        associations: {'.html', 'http'},
-      );
-      final container = ProviderContainer(
-        overrides: [
-          registrationServiceProvider.overrideWithValue(registration),
-        ],
-      );
-      addTearDown(container.dispose);
+    test(
+      'defaultAssociationsProvider resolves from registration service',
+      () async {
+        final registration = _CountingRegistrationService(
+          isDefaultValue: false,
+          associations: {'.html', 'http'},
+        );
+        final container = ProviderContainer(
+          overrides: [
+            registrationServiceProvider.overrideWithValue(registration),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      expect(
-        await container.read(defaultAssociationsProvider.future),
-        {'.html', 'http'},
-      );
-      expect(registration.defaultAssociationsReads, 1);
-    });
+        expect(await container.read(defaultAssociationsProvider.future), {
+          '.html',
+          'http',
+        });
+        expect(registration.defaultAssociationsReads, 1);
+      },
+    );
 
     test('isStartupEnabledProvider resolves from startup service', () async {
       final startup = _CountingStartupService(true);
