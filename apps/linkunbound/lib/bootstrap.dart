@@ -7,6 +7,9 @@ import 'package:logging/logging.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
+import 'l10n/app_localizations.dart';
+import 'platform/local_file_url.dart';
+import 'platform/macos/mac_window_channel.dart';
 import 'platform/platform_bindings.dart';
 import 'platform/tray_controller.dart';
 import 'providers.dart';
@@ -76,10 +79,16 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
       localeFileProvider.overrideWithValue(bindings.localeFile),
       edgeWarningFileProvider.overrideWithValue(bindings.edgeWarningFile),
       appDataDirProvider.overrideWithValue(bindings.appDataDir),
+      exitAppProvider.overrideWithValue(() async {
+        await bindings.release();
+        exit(0);
+      }),
     ],
   );
 
   container.read(updateInfoProvider);
+
+  final macWindow = Platform.isMacOS ? MacWindowChannel() : null;
 
   container.listen<AppState>(appStateProvider, (prev, next) async {
     if (prev?.mode == next.mode) return;
@@ -87,11 +96,13 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
       case AppMode.hidden:
         await windowManager.hide();
       case AppMode.settings:
+        await macWindow?.setSettingsMode();
         await windowManager.setSize(const Size(640, 700));
         await windowManager.center();
         await windowManager.setSkipTaskbar(false);
         await windowManager.setAlwaysOnTop(false);
       case AppMode.picker:
+        await macWindow?.setPickerMode();
         final browsers = container.read(browsersProvider);
         final winSize = PickerLayout.windowSize(browsers.length);
         final (cursorX, cursorY) = await bindings.cursorLocator
@@ -117,7 +128,7 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   bindings.inboundEvents.listen((event) {
     switch (event) {
       case OpenUrlEvent(:final url):
-        _log.info('Inbound: open_url $url');
+        _log.info('Inbound: open_url ${_redactForLog(url)}');
         _handleUrl(url, container);
       case ShowSettingsEvent():
         _log.info('Inbound: show_settings');
@@ -163,6 +174,25 @@ Future<void> _firstBoot({
 }
 
 void _handleUrl(String url, ProviderContainer container) {
+  // `file://` is the macOS "Open With" / Finder double-click path. Validate
+  // strictly and bypass the SafeLink unwrap and the rules engine — local
+  // files don't have a host to match rules against, so v1 always shows the
+  // picker for them.
+  if (url.startsWith('file://')) {
+    final resolved = resolveLocalWebFile(url);
+    if (resolved == null) {
+      _log.warning(
+        'Rejected file:// URL (missing/invalid/unsupported extension): '
+        '${_redactForLog(url)}',
+      );
+      return;
+    }
+    _log.info('Local file accepted: ${redactPath(resolved)}');
+    final fileUri = Uri.file(resolved).toString();
+    container.read(appStateProvider.notifier).showPicker(fileUri);
+    return;
+  }
+
   final resolved = _unwrapSafeLink(url);
   final ruleService = container.read(ruleServiceProvider);
   final matchedBrowserId = ruleService.lookupBrowser(resolved);
@@ -171,7 +201,7 @@ void _handleUrl(String url, ProviderContainer container) {
     final browsers = container.read(browserServiceProvider).browsers;
     final browser = browsers.where((b) => b.id == matchedBrowserId).firstOrNull;
     if (browser != null) {
-      _log.info('Rule match: $resolved → ${browser.name}');
+      _log.info('Rule match: ${_redactForLog(resolved)} → ${browser.name}');
       container
           .read(launchServiceProvider)
           .launch(browser.executablePath, resolved, browser.extraArgs);
@@ -180,6 +210,20 @@ void _handleUrl(String url, ProviderContainer container) {
   }
 
   container.read(appStateProvider.notifier).showPicker(resolved);
+}
+
+/// Returns a log-safe representation of an inbound URL. For `file://` URLs we
+/// only keep the basename + parent dir (avoids leaking `$HOME` in shared
+/// diagnostic bundles); for `http(s)://` we keep the full URL.
+String _redactForLog(String raw) {
+  if (!raw.startsWith('file://')) return raw;
+  final uri = Uri.tryParse(raw);
+  if (uri == null) return 'file://<unparseable>';
+  try {
+    return 'file://${redactPath(uri.toFilePath())}';
+  } on UnsupportedError {
+    return 'file://<unparseable>';
+  }
 }
 
 String _unwrapSafeLink(String raw) {
@@ -220,17 +264,24 @@ Future<void> _initTray(
     () => container.read(appStateProvider.notifier).showSettings(),
   );
 
+  // Resolve the active locale once so the tray menu matches the user's
+  // configured language (the tray runs outside the MaterialApp tree, so
+  // `AppLocalizations.of(context)` isn't available here).
+  final locale = container.read(localeProvider);
+  final l10n = await AppLocalizations.delegate.load(
+    locale ?? const Locale('en'),
+  );
+
   await bindings.trayController.setMenu([
     TrayMenuItem(
-      label: 'Settings',
+      label: l10n.traySettings,
       onClick: () => container.read(appStateProvider.notifier).showSettings(),
     ),
     const TrayMenuItem.separator(),
     TrayMenuItem(
-      label: 'Exit',
+      label: l10n.exit,
       onClick: () async {
-        await bindings.release();
-        exit(0);
+        await container.read(exitAppProvider)();
       },
     ),
   ]);

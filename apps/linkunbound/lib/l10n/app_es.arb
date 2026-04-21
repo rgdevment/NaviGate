@@ -1,6 +1,8 @@
 {
   "@@locale": "es",
 
+  "exit": "Salir",
+  "traySettings": "Configuración",
   "copyUrl": "Copiar URL",
   "alwaysOpenHere": "Abrir siempre aquí",
 

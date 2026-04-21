@@ -3,8 +3,13 @@ import FlutterMacOS
 
 @main
 class AppDelegate: FlutterAppDelegate {
+  /// Strong reference that keeps every native channel alive for the app lifetime.
   /// Set by `MainFlutterWindow` once the FlutterViewController is ready.
-  var inboundEvents: InboundEventsChannel?
+  var channels: LinkUnboundChannels?
+
+  /// Convenience accessor; the inbound bridge is the channel the AppDelegate
+  /// itself talks to when forwarding `application(_:open:)`/`reopen` events.
+  var inboundEvents: InboundEventsChannel? { channels?.inboundEvents }
 
   /// URLs received before the channel exists are kept here and replayed after wiring.
   private var preBootUrls: [String] = []
@@ -38,13 +43,14 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
 
-  /// Called by `MainFlutterWindow` once the channel has been initialised.
-  func attachInboundEvents(_ channel: InboundEventsChannel) {
-    inboundEvents = channel
-    preBootUrls.forEach(channel.enqueueOpenUrl)
+  /// Called by `MainFlutterWindow` once the channels have been initialised.
+  func attachChannels(_ channels: LinkUnboundChannels) {
+    self.channels = channels
+    let inbound = channels.inboundEvents
+    preBootUrls.forEach(inbound.enqueueOpenUrl)
     preBootUrls.removeAll()
     if preBootShouldShowSettings {
-      channel.enqueueShowSettings()
+      inbound.enqueueShowSettings()
       preBootShouldShowSettings = false
     }
   }
