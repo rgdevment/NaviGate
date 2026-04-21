@@ -35,6 +35,8 @@ abstract class PlatformBindings {
   String get executablePath;
   String get trayIconPath;
 
+  bool get startsHidden;
+
   Directory get appDataDir;
   Directory get iconsDir;
   File get browsersFile;

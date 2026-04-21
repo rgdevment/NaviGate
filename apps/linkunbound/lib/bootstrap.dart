@@ -158,7 +158,7 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (args.contains('--background')) return;
+    if (bindings.startsHidden) return;
     if (container.read(appStateProvider).mode != AppMode.hidden) return;
     container.read(appStateProvider.notifier).showSettings();
   });
@@ -201,7 +201,7 @@ void _handleUrl(String url, ProviderContainer container) {
     return;
   }
 
-  final resolved = _unwrapSafeLink(url);
+  final resolved = unwrapSafeLink(url);
   final ruleService = container.read(ruleServiceProvider);
   final matchedBrowserId = ruleService.lookupBrowser(resolved);
 
@@ -232,30 +232,6 @@ String _redactForLog(String raw) {
     }
   }
   return redactPath(raw);
-}
-
-String _unwrapSafeLink(String raw) {
-  final uri = Uri.tryParse(raw);
-  if (uri == null) return raw;
-
-  final host = uri.host.toLowerCase();
-  final isSafeLink =
-      host.endsWith('.safelinks.protection.outlook.com') ||
-      host == 'statics.teams.cdn.office.net';
-  if (!isSafeLink) return raw;
-
-  final inner = uri.queryParameters['url'];
-  if (inner != null && inner.isNotEmpty) {
-    final decoded = Uri.decodeFull(inner);
-    final innerUri = Uri.tryParse(decoded);
-    if (innerUri != null &&
-        (innerUri.scheme == 'http' || innerUri.scheme == 'https')) {
-      _log.info('Unwrapped SafeLink: $decoded');
-      return decoded;
-    }
-  }
-
-  return raw;
 }
 
 Future<void> _initTray(

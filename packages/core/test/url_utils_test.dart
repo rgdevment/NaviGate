@@ -56,4 +56,58 @@ void main() {
       expect(stripEdgeProtocol(input), 'https://example.com/p?a=1&b=2#section');
     });
   });
+
+  group('unwrapSafeLink', () {
+    test('returns input unchanged when not a safe link', () {
+      expect(
+        unwrapSafeLink('https://example.com/page'),
+        'https://example.com/page',
+      );
+    });
+
+    test('returns input when host is unrelated', () {
+      expect(
+        unwrapSafeLink('https://other.example.com/?url=https://x.com'),
+        'https://other.example.com/?url=https://x.com',
+      );
+    });
+
+    test('unwraps Outlook SafeLink', () {
+      const inner = 'https://example.com/report?id=7';
+      final wrapped =
+          'https://nam12.safelinks.protection.outlook.com/'
+          '?url=${Uri.encodeComponent(inner)}';
+      expect(unwrapSafeLink(wrapped), inner);
+    });
+
+    test('unwraps Teams CDN redirector', () {
+      const inner = 'https://teams.example.com/document?id=1';
+      final wrapped =
+          'https://statics.teams.cdn.office.net/'
+          '?url=${Uri.encodeComponent(inner)}';
+      expect(unwrapSafeLink(wrapped), inner);
+    });
+
+    test('returns original when inner url parameter is missing', () {
+      const wrapped = 'https://nam12.safelinks.protection.outlook.com/?other=1';
+      expect(unwrapSafeLink(wrapped), wrapped);
+    });
+
+    test('returns original when inner url is empty', () {
+      const wrapped = 'https://nam12.safelinks.protection.outlook.com/?url=';
+      expect(unwrapSafeLink(wrapped), wrapped);
+    });
+
+    test('returns original when inner scheme is not http(s)', () {
+      final wrapped =
+          'https://nam12.safelinks.protection.outlook.com/'
+          '?url=${Uri.encodeComponent('javascript:alert(1)')}';
+      expect(unwrapSafeLink(wrapped), wrapped);
+    });
+
+    test('returns original when input is not parseable', () {
+      const malformed = 'http://[::1';
+      expect(unwrapSafeLink(malformed), malformed);
+    });
+  });
 }

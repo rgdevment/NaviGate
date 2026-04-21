@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated:** April 16, 2026
+**Last updated:** April 21, 2026
 
 ---
 
@@ -65,7 +65,9 @@ Browser icons are extracted locally from installed browser executables and store
 
 ## Where Is Everything Stored?
 
-All data is stored locally under your user profile:
+All data is stored locally under your user profile.
+
+**Windows** — `%APPDATA%\LinkUnbound\`:
 
 | Data     | Location                                    |
 | :------- | :------------------------------------------ |
@@ -74,7 +76,16 @@ All data is stored locally under your user profile:
 | Log      | `%APPDATA%\LinkUnbound\navigate.log`        |
 | Icons    | `%APPDATA%\LinkUnbound\icons\`              |
 
-These folders are protected by your Windows user account permissions. Other users on the same computer cannot access them under normal conditions.
+**macOS** — `~/Library/Application Support/LinkUnbound/`:
+
+| Data     | Location                                                         |
+| :------- | :--------------------------------------------------------------- |
+| Browsers | `~/Library/Application Support/LinkUnbound/browsers.json`        |
+| Rules    | `~/Library/Application Support/LinkUnbound/rules.json`           |
+| Log      | `~/Library/Application Support/LinkUnbound/navigate.log`         |
+| Icons    | `~/Library/Application Support/LinkUnbound/icons/`               |
+
+These folders are protected by your operating system's user account permissions. Other users on the same computer cannot access them under normal conditions.
 
 ---
 
@@ -143,8 +154,16 @@ Settings → **Maintenance** tab provides:
 
 ### Complete Removal
 
+**Windows:**
+
 1. Uninstall LinkUnbound (via Settings → Apps or the standalone uninstaller).
 2. Delete the data folder: `%APPDATA%\LinkUnbound\`
+
+**macOS:**
+
+1. Drag `LinkUnbound.app` from `/Applications` to the Trash (or `brew uninstall --cask linkunbound`).
+2. Delete the data folder: `~/Library/Application Support/LinkUnbound/`
+3. Optional: remove preferences (`~/Library/Preferences/cl.apirest.linkunbound.plist`) and saved app state (`~/Library/Saved Application State/cl.apirest.linkunbound.savedState/`).
 
 After these steps, no LinkUnbound data remains on your system.
 
@@ -156,11 +175,11 @@ LinkUnbound includes an optional **Export diagnostics** feature (Settings → Ma
 
 ### What the ZIP Contains
 
-| File              | Content                                                       |
-| :---------------- | :------------------------------------------------------------ |
-| `system_info.txt` | OS version, locale, app version, executable path, data files  |
-| `registry.txt`    | LinkUnbound's own Windows registry entries                    |
-| `navigate.log`    | Last 200 lines of the navigation log (URLs already redacted)  |
+| File              | Content                                                                                       |
+| :---------------- | :-------------------------------------------------------------------------------------------- |
+| `system_info.txt` | OS version, locale, app version, executable path, data files                                  |
+| `registry.txt`    | LinkUnbound's own Windows registry entries (Windows only)                                     |
+| `navigate.log`    | Last 200 lines of the navigation log (URLs already redacted)                                  |
 
 ### What the ZIP Does NOT Contain
 
