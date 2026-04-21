@@ -60,9 +60,11 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
       center: false,
     ),
     () async {
-      await windowManager.setPosition(const Offset(-9999, -9999));
       await windowManager.setSkipTaskbar(true);
-      await windowManager.hide();
+      if (!Platform.isMacOS) {
+        await windowManager.setPosition(const Offset(-9999, -9999));
+        await windowManager.hide();
+      }
     },
   );
 
