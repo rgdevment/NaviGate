@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
-import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
+import 'platform/cursor_locator.dart';
+import 'platform/tray_controller.dart';
 import 'platform/windows/win_browser_detector.dart';
 import 'platform/windows/win_icon_extractor.dart';
 import 'platform/windows/win_instance.dart';
@@ -15,6 +16,7 @@ import 'platform/windows/win_launch_service.dart';
 import 'platform/windows/win_pipe_server.dart';
 import 'platform/windows/win_registration_service.dart';
 import 'platform/windows/win_startup_service.dart';
+import 'platform/windows/windows_tray_controller.dart';
 import 'providers.dart';
 import 'ui/picker/picker_layout.dart';
 
@@ -55,6 +57,7 @@ void main(List<String> args) async {
   final registrationService = WinRegistrationService();
   final startupService = WinStartupService();
   final launchService = WinLaunchService();
+  const cursorLocator = ScreenRetrieverCursorLocator();
 
   final pipeServer = WinPipeServer();
   try {
@@ -123,8 +126,8 @@ void main(List<String> args) async {
       case AppMode.picker:
         final browsers = container.read(browsersProvider);
         final winSize = PickerLayout.windowSize(browsers.length);
-        final (cursorX, cursorY) = WinInstance.getCursorPosition();
-        final (screenW, screenH) = WinInstance.getScreenSize();
+        final (cursorX, cursorY) = await cursorLocator.cursorPosition();
+        final (screenW, screenH) = await cursorLocator.screenSize();
         final x = (cursorX - winSize.width / 2).clamp(
           8.0,
           screenW - winSize.width - 8,
@@ -268,38 +271,30 @@ Future<void> _initTray(
   WinInstance instance,
   WinPipeServer pipeServer,
 ) async {
-  final tray = SystemTray();
-  await tray.initSystemTray(
+  final tray = WindowsTrayController();
+  await tray.init(
     title: 'LinkUnbound',
     iconPath: 'assets/app_icon.ico',
-    toolTip: 'LinkUnbound — Browser Picker',
+    tooltip: 'LinkUnbound — Browser Picker',
   );
 
-  final menu = Menu();
-  await menu.buildFrom([
-    MenuItemLabel(
+  tray.onActivated(
+    () => container.read(appStateProvider.notifier).showSettings(),
+  );
+
+  await tray.setMenu([
+    TrayMenuItem(
       label: 'Settings',
-      onClicked: (_) =>
-          container.read(appStateProvider.notifier).showSettings(),
+      onClick: () => container.read(appStateProvider.notifier).showSettings(),
     ),
-    MenuSeparator(),
-    MenuItemLabel(
+    const TrayMenuItem.separator(),
+    TrayMenuItem(
       label: 'Exit',
-      onClicked: (_) async {
+      onClick: () async {
         await pipeServer.stop();
         instance.release();
         exit(0);
       },
     ),
   ]);
-  await tray.setContextMenu(menu);
-
-  tray.registerSystemTrayEventHandler((eventName) {
-    switch (eventName) {
-      case kSystemTrayEventDoubleClick:
-        container.read(appStateProvider.notifier).showSettings();
-      case kSystemTrayEventRightClick:
-        tray.popUpContextMenu();
-    }
-  });
 }
