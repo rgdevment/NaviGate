@@ -17,7 +17,10 @@ abstract interface class TrayController {
 final class TrayMenuItem {
   const TrayMenuItem({this.label, this.onClick, this.isSeparator = false});
 
-  const TrayMenuItem.separator() : label = null, onClick = null, isSeparator = true;
+  const TrayMenuItem.separator()
+    : label = null,
+      onClick = null,
+      isSeparator = true;
 
   final String? label;
   final VoidCallback? onClick;

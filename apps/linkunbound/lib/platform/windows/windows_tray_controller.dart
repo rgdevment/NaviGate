@@ -38,7 +38,10 @@ final class WindowsTrayController implements TrayController {
         if (item.isSeparator)
           MenuSeparator()
         else
-          MenuItemLabel(label: item.label!, onClicked: (_) => item.onClick?.call()),
+          MenuItemLabel(
+            label: item.label!,
+            onClicked: (_) => item.onClick?.call(),
+          ),
     ]);
     await _tray.setContextMenu(menu);
   }
