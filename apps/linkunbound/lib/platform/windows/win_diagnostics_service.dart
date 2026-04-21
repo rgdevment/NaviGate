@@ -31,7 +31,8 @@ Future<String> exportDiagnostics({
     (registryDumper ?? _writeRegistryDump)(staging);
     _copyLogTail(appDataDir, staging);
 
-    final zipPath = '${appDataDir.path}\\linkunbound-diag-$timestamp.zip';
+    final zipPath =
+        '${appDataDir.path}${Platform.pathSeparator}linkunbound-diag-$timestamp.zip';
 
     try {
       final encoder = ZipFileEncoder()..create(zipPath);
@@ -93,7 +94,7 @@ void _writeSystemInfo(
   try {
     if (appDataDir.existsSync()) {
       for (final entity in appDataDir.listSync()) {
-        final name = entity.path.split('\\').last;
+        final name = entity.uri.pathSegments.where((s) => s.isNotEmpty).last;
         if (entity is File) {
           buf.writeln('  $name (${entity.lengthSync()} bytes)');
         } else if (entity is Directory) {
@@ -105,7 +106,9 @@ void _writeSystemInfo(
     buf.writeln('  <error listing files: $e>');
   }
 
-  File('${staging.path}\\system_info.txt').writeAsStringSync(buf.toString());
+  File(
+    '${staging.path}${Platform.pathSeparator}system_info.txt',
+  ).writeAsStringSync(buf.toString());
 }
 
 String _osVersion() => parseWindowsVersion(Platform.operatingSystemVersion);
@@ -129,7 +132,9 @@ void _writeRegistryDump(Directory staging) {
     buf.writeln();
   }
 
-  File('${staging.path}\\registry.txt').writeAsStringSync(buf.toString());
+  File(
+    '${staging.path}${Platform.pathSeparator}registry.txt',
+  ).writeAsStringSync(buf.toString());
 }
 
 void _dumpKey(String path, StringBuffer buf, {int depth = 0}) {
@@ -159,7 +164,9 @@ void _dumpKey(String path, StringBuffer buf, {int depth = 0}) {
 }
 
 void _copyLogTail(Directory appDataDir, Directory staging) {
-  final logFile = File('${appDataDir.path}\\navigate.log');
+  final logFile = File(
+    '${appDataDir.path}${Platform.pathSeparator}navigate.log',
+  );
   if (!logFile.existsSync()) return;
 
   try {
@@ -168,10 +175,12 @@ void _copyLogTail(Directory appDataDir, Directory staging) {
         ? lines.sublist(lines.length - _maxLogLines)
         : lines;
 
-    File('${staging.path}\\navigate.log').writeAsStringSync(tail.join('\n'));
+    File(
+      '${staging.path}${Platform.pathSeparator}navigate.log',
+    ).writeAsStringSync(tail.join('\n'));
   } on Exception catch (e) {
     File(
-      '${staging.path}\\navigate.log',
+      '${staging.path}${Platform.pathSeparator}navigate.log',
     ).writeAsStringSync('<error reading log: $e>');
   }
 }
