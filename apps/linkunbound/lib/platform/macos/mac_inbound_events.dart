@@ -10,7 +10,7 @@ class MacInboundEvents implements InboundEventServer {
 
   final MethodChannel _channel;
   final StreamController<InboundEvent> _controller =
-      StreamController<InboundEvent>();
+      StreamController<InboundEvent>.broadcast();
   bool _started = false;
 
   @override
@@ -26,6 +26,8 @@ class MacInboundEvents implements InboundEventServer {
 
   @override
   Future<void> stop() async {
+    if (!_started) return;
+    _started = false;
     _channel.setMethodCallHandler(null);
     if (!_controller.isClosed) await _controller.close();
   }
