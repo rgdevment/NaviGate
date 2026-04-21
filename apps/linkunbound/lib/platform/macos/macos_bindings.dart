@@ -35,9 +35,19 @@ final class MacOsBindings implements PlatformBindings {
   }) : _inboundServer = inboundServer;
 
   static Future<MacOsBindings> create() async {
-    final supportDir = await getApplicationSupportDirectory();
+    Directory supportDir;
+    try {
+      supportDir = await getApplicationSupportDirectory();
+    } on Object {
+      final home = Platform.environment['HOME'] ?? Directory.systemTemp.path;
+      supportDir = Directory('$home/Library/Application Support');
+    }
     final appDataDir = Directory('${supportDir.path}/LinkUnbound');
-    await appDataDir.create(recursive: true);
+    try {
+      await appDataDir.create(recursive: true);
+    } on FileSystemException {
+      // Best-effort; downstream services will surface specific failures.
+    }
 
     return MacOsBindings._(
       browserDetector: MacBrowserDetector(),

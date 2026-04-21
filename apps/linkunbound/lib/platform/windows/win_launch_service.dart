@@ -13,4 +13,3 @@ final class WinLaunchService implements LaunchService {
     await Process.start(executablePath, args, mode: ProcessStartMode.detached);
   }
 }
-
