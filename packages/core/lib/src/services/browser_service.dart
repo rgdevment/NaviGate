@@ -23,7 +23,6 @@ final class BrowserService {
       _browsers = [];
       return;
     }
-    _log.info('Loading browsers from ${configFile.path}');
     final content = await configFile.readAsString();
     final config = BrowserConfig.fromJson(
       jsonDecode(content) as Map<String, dynamic>,
@@ -32,7 +31,6 @@ final class BrowserService {
   }
 
   Future<void> save() async {
-    _log.info('Saving ${_browsers.length} browsers to ${configFile.path}');
     await configFile.parent.create(recursive: true);
     final config = BrowserConfig(browsers: _browsers);
     const encoder = JsonEncoder.withIndent('  ');
@@ -40,7 +38,6 @@ final class BrowserService {
   }
 
   Future<({int added, int removed})> scanAndMerge() async {
-    _log.info('Scanning for browsers');
     final detected = await browserDetector.detect();
     final detectedById = {for (final d in detected) d.id: d};
 
@@ -63,10 +60,12 @@ final class BrowserService {
         .toList();
 
     _browsers = [...kept, ...newBrowsers];
-    _log.info(
-      'Scan complete: ${newBrowsers.length} added, $removedCount removed, '
-      '${kept.length} kept',
-    );
+    if (newBrowsers.isNotEmpty || removedCount > 0) {
+      _log.info(
+        'Browsers updated: ${newBrowsers.length} added, '
+        '$removedCount removed, ${kept.length} kept',
+      );
+    }
     return (added: newBrowsers.length, removed: removedCount);
   }
 
@@ -97,6 +96,6 @@ final class BrowserService {
     if (configFile.existsSync()) {
       await configFile.delete();
     }
-    _log.info('Browser config reset');
+    _log.warning('Browser config reset');
   }
 }

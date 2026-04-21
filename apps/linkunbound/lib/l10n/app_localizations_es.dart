@@ -53,6 +53,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get launchAtStartup => 'Iniciar con el sistema';
 
   @override
+  String get startupManagedByWindows =>
+      'Gestionado desde Configuración de Windows > Aplicaciones de inicio';
+
+  @override
   String get sectionLanguage => 'IDIOMA';
 
   @override
@@ -209,6 +213,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get updateDownload => 'Descargar';
 
   @override
+  String updateAvailableStore(String version) {
+    return 'Versión $version disponible — verifica en Microsoft Store la nueva versión';
+  }
+
+  @override
   String get updateTooltip =>
       'Nueva versión disponible — revisa las actualizaciones en Ajustes';
 
@@ -255,4 +264,17 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get exportDiagnosticsDescription =>
       'Genera un ZIP con info del sistema, datos del registro y logs para diagnóstico';
+
+  @override
+  String get errorStartupToggle =>
+      'No se pudo cambiar la configuración de inicio';
+
+  @override
+  String get errorUnregister => 'No se pudo desregistrar LinkUnbound';
+
+  @override
+  String get errorExportDiagnostics => 'No se pudo exportar el diagnóstico';
+
+  @override
+  String get errorResetConfig => 'No se pudo restablecer la configuración';
 }

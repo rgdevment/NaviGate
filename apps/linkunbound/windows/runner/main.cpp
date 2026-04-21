@@ -22,6 +22,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
 
+  // Escape hatch for older Windows 10 integrated GPUs (no Mica, limited
+  // DirectX) that crash the Impeller backend. Users can set this in their
+  // environment and we fall back to ANGLE/OpenGL.
+  wchar_t legacy_render[8] = {0};
+  DWORD legacy_len = ::GetEnvironmentVariableW(
+      L"LINKUNBOUND_LEGACY_RENDER", legacy_render, 8);
+  if (legacy_len > 0 && legacy_render[0] == L'1') {
+    command_line_arguments.push_back("--no-enable-impeller");
+  }
+
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);
@@ -41,3 +51,4 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   ::CoUninitialize();
   return EXIT_SUCCESS;
 }
+

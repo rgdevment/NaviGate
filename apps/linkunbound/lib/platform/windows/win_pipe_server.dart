@@ -172,7 +172,6 @@ final class WinPipeServer implements InboundEventServer {
     });
 
     _isolate = await Isolate.spawn(_serverLoop, _receivePort!.sendPort);
-    _log.info('Pipe server started');
   }
 
   @override
@@ -189,7 +188,6 @@ final class WinPipeServer implements InboundEventServer {
     _receivePort?.close();
     _receivePort = null;
     await _controller.close();
-    _log.info('Pipe server stopped');
   }
 
   static void _serverLoop(SendPort sendPort) {

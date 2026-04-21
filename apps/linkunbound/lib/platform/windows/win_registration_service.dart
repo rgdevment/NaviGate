@@ -4,6 +4,8 @@ import 'package:logging/logging.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:win32_registry/win32_registry.dart';
 
+import 'win_package_context.dart';
+
 final _log = Logger('WinRegistrationService');
 
 typedef _SHChangeNotifyNative =
@@ -27,6 +29,11 @@ const _shcnfIdList = 0x0000;
 final class WinRegistrationService implements RegistrationService {
   @override
   Future<void> register(String executablePath) async {
+    if (isRunningInMsix()) {
+      // Protocol association is declared via the MSIX manifest; HKCU writes
+      // are sandboxed to the package and invisible to the Shell.
+      return;
+    }
     final exe = executablePath.replaceAll('/', '\\');
     final quotedExe = '"$exe"';
 
@@ -35,19 +42,18 @@ final class WinRegistrationService implements RegistrationService {
     _writeCapabilities(exe, quotedExe);
     _writeRegisteredApplications();
     _notifyShell();
-
-    _log.info('Registered LinkUnbound as browser handler');
   }
 
   @override
   Future<void> unregister() async {
+    if (isRunningInMsix()) {
+      return;
+    }
     _deleteKeyTree(r'Software\Classes\LinkUnboundURL');
     _deleteKeyTree(r'Software\Clients\StartMenuInternet\LinkUnbound');
     _deleteKeyTree(r'Software\LinkUnbound');
     _removeRegisteredApplication();
     _notifyShell();
-
-    _log.info('Unregistered LinkUnbound from browser handlers');
   }
 
   @override
@@ -60,7 +66,11 @@ final class WinRegistrationService implements RegistrationService {
       );
       final progId = key.getValueAsString('ProgId');
       key.close();
-      return progId == 'LinkUnboundURL';
+      if (progId == null) return false;
+      // Desktop install writes "LinkUnboundURL"; MSIX writes a package-scoped
+      // AppX... ProgId that embeds the identity name.
+      return progId == 'LinkUnboundURL' ||
+          progId.toLowerCase().contains('linkunbound');
     } on Exception {
       return false;
     }
@@ -77,7 +87,11 @@ final class WinRegistrationService implements RegistrationService {
         );
         final progId = key.getValueAsString('ProgId');
         key.close();
-        if (progId == 'LinkUnboundURL') result.add(entry.key);
+        if (progId == null) continue;
+        if (progId == 'LinkUnboundURL' ||
+            progId.toLowerCase().contains('linkunbound')) {
+          result.add(entry.key);
+        }
       } on Exception {
         // Not set as default for this association.
       }

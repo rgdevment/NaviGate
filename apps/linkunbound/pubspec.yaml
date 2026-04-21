@@ -29,6 +29,9 @@ dependencies:
   url_launcher: ^6.3.1
   package_info_plus: ^8.3.0
   logging: ^1.3.0
+  archive: ^3.6.1
+  image: ^4.3.0
+  win32: ^5.15.0
 
 dev_dependencies:
   flutter_test:
@@ -45,3 +48,9 @@ flutter:
     - assets/copypaste_icon.png
     - assets/LinkUnbound_tray_32.png
     - assets/LinkUnbound_tray_64.png
+
+msix_config:
+  startup_task:
+    task_id: LinkUnboundStartup
+    enabled: true
+    parameters: --background

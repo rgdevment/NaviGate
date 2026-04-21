@@ -18,6 +18,7 @@
 
   "sectionStartup": "INICIO",
   "launchAtStartup": "Iniciar con el sistema",
+  "startupManagedByWindows": "Gestionado desde Configuración de Windows > Aplicaciones de inicio",
 
   "sectionLanguage": "IDIOMA",
   "languageAuto": "Automático (sistema)",
@@ -70,6 +71,12 @@
 
   "updateAvailable": "Versión {version} disponible",
   "updateDownload": "Descargar",
+  "updateAvailableStore": "Versión {version} disponible — verifica en Microsoft Store la nueva versión",
+  "@updateAvailableStore": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
   "updateTooltip": "Nueva versión disponible — revisa las actualizaciones en Ajustes",
 
   "sectionSupport": "APÓYANOS",
@@ -86,5 +93,10 @@
 
   "sectionMaintenance": "MANTENIMIENTO",
   "exportDiagnosticsLabel": "Exportar diagnóstico",
-  "exportDiagnosticsDescription": "Genera un ZIP con info del sistema, datos del registro y logs para diagnóstico"
+  "exportDiagnosticsDescription": "Genera un ZIP con info del sistema, datos del registro y logs para diagnóstico",
+
+  "errorStartupToggle": "No se pudo cambiar la configuración de inicio",
+  "errorUnregister": "No se pudo desregistrar LinkUnbound",
+  "errorExportDiagnostics": "No se pudo exportar el diagnóstico",
+  "errorResetConfig": "No se pudo restablecer la configuración"
 }

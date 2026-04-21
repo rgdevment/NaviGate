@@ -13,7 +13,6 @@ final class WinBrowserDetector implements BrowserDetector {
       _scanHive(hive, browsers);
     }
 
-    _log.info('Detected ${browsers.length} browsers');
     return browsers.values.toList();
   }
 

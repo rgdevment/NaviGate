@@ -18,6 +18,8 @@
 
   "sectionStartup": "STARTUP",
   "launchAtStartup": "Launch at system startup",
+  "startupManagedByWindows": "Managed by Windows Settings > Startup Apps",
+  "@startupManagedByWindows": {"description": "Tooltip shown when the startup toggle is disabled because the app runs as MSIX and Windows owns that preference."},
 
   "sectionLanguage": "LANGUAGE",
   "languageAuto": "Automatic (system)",
@@ -91,6 +93,12 @@
     }
   },
   "updateDownload": "Download",
+  "updateAvailableStore": "Version {version} available — check Microsoft Store for the new version",
+  "@updateAvailableStore": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
   "updateTooltip": "New version available — check for updates in Settings",
 
   "sectionSupport": "SUPPORT",
@@ -107,5 +115,10 @@
 
   "sectionMaintenance": "MAINTENANCE",
   "exportDiagnosticsLabel": "Export diagnostics",
-  "exportDiagnosticsDescription": "Generate a ZIP with system info, registry data, and logs for troubleshooting"
+  "exportDiagnosticsDescription": "Generate a ZIP with system info, registry data, and logs for troubleshooting",
+
+  "errorStartupToggle": "Could not change startup setting",
+  "errorUnregister": "Could not unregister LinkUnbound",
+  "errorExportDiagnostics": "Could not export diagnostics",
+  "errorResetConfig": "Could not reset configuration"
 }

@@ -51,6 +51,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get launchAtStartup => 'Launch at system startup';
 
   @override
+  String get startupManagedByWindows =>
+      'Managed by Windows Settings > Startup Apps';
+
+  @override
   String get sectionLanguage => 'LANGUAGE';
 
   @override
@@ -204,6 +208,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateDownload => 'Download';
 
   @override
+  String updateAvailableStore(String version) {
+    return 'Version $version available — check Microsoft Store for the new version';
+  }
+
+  @override
   String get updateTooltip =>
       'New version available — check for updates in Settings';
 
@@ -250,4 +259,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get exportDiagnosticsDescription =>
       'Generate a ZIP with system info, registry data, and logs for troubleshooting';
+
+  @override
+  String get errorStartupToggle => 'Could not change startup setting';
+
+  @override
+  String get errorUnregister => 'Could not unregister LinkUnbound';
+
+  @override
+  String get errorExportDiagnostics => 'Could not export diagnostics';
+
+  @override
+  String get errorResetConfig => 'Could not reset configuration';
 }

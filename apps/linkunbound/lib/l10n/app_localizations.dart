@@ -182,6 +182,12 @@ abstract class AppLocalizations {
   /// **'Launch at system startup'**
   String get launchAtStartup;
 
+  /// Tooltip shown when the startup toggle is disabled because the app runs as MSIX and Windows owns that preference.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by Windows Settings > Startup Apps'**
+  String get startupManagedByWindows;
+
   /// No description provided for @sectionLanguage.
   ///
   /// In en, this message translates to:
@@ -464,6 +470,12 @@ abstract class AppLocalizations {
   /// **'Download'**
   String get updateDownload;
 
+  /// No description provided for @updateAvailableStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} available — check Microsoft Store for the new version'**
+  String updateAvailableStore(String version);
+
   /// No description provided for @updateTooltip.
   ///
   /// In en, this message translates to:
@@ -547,6 +559,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate a ZIP with system info, registry data, and logs for troubleshooting'**
   String get exportDiagnosticsDescription;
+
+  /// No description provided for @errorStartupToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change startup setting'**
+  String get errorStartupToggle;
+
+  /// No description provided for @errorUnregister.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not unregister LinkUnbound'**
+  String get errorUnregister;
+
+  /// No description provided for @errorExportDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export diagnostics'**
+  String get errorExportDiagnostics;
+
+  /// No description provided for @errorResetConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset configuration'**
+  String get errorResetConfig;
 }
 
 class _AppLocalizationsDelegate
