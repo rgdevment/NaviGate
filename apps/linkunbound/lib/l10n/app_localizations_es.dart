@@ -218,9 +218,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get updateOpenStore => 'Abrir Store';
-
-  @override
   String get updateTooltip =>
       'Nueva versión disponible — revisa las actualizaciones en Ajustes';
 
