@@ -66,7 +66,9 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
     overrides: [
       browserServiceProvider.overrideWithValue(browserService),
       ruleServiceProvider.overrideWithValue(ruleService),
-      registrationServiceProvider.overrideWithValue(bindings.registrationService),
+      registrationServiceProvider.overrideWithValue(
+        bindings.registrationService,
+      ),
       startupServiceProvider.overrideWithValue(bindings.startupService),
       iconExtractorProvider.overrideWithValue(bindings.iconExtractor),
       iconsDirProvider.overrideWithValue(bindings.iconsDir),
@@ -92,7 +94,8 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
       case AppMode.picker:
         final browsers = container.read(browsersProvider);
         final winSize = PickerLayout.windowSize(browsers.length);
-        final (cursorX, cursorY) = await bindings.cursorLocator.cursorPosition();
+        final (cursorX, cursorY) = await bindings.cursorLocator
+            .cursorPosition();
         final (screenW, screenH) = await bindings.cursorLocator.screenSize();
         final x = (cursorX - winSize.width / 2).clamp(
           8.0,
@@ -146,7 +149,8 @@ Future<void> _firstBoot({
   await iconsDir.create(recursive: true);
   for (final browser in browserService.browsers) {
     try {
-      final outputPath = '${iconsDir.path}${Platform.pathSeparator}${browser.id}.png';
+      final outputPath =
+          '${iconsDir.path}${Platform.pathSeparator}${browser.id}.png';
       await iconExtractor.extractIcon(browser.executablePath, outputPath);
     } on Exception catch (e) {
       _log.warning('Icon extraction failed for ${browser.name}: $e');
