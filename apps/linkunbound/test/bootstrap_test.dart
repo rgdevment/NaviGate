@@ -340,6 +340,16 @@ final class _FakeBindings implements PlatformBindings {
   }
 }
 
+final class _ThrowingDelegateBindings extends _FakeBindings {
+  _ThrowingDelegateBindings({required super.rootDir});
+
+  @override
+  Future<bool> tryDelegate(InboundEvent? event) async {
+    tryDelegateCalls++;
+    throw const SocketException('simulated delegation failure');
+  }
+}
+
 void main() {
   if (!(Platform.isMacOS || Platform.isWindows)) {
     test('bootstrap suite skipped on this platform', () {}, skip: true);
@@ -566,4 +576,58 @@ void main() {
       expect(macWindowSpy.methods, contains('setSettingsMode'));
     }
   });
+
+  testWidgets('tryDelegate exception is non-fatal and boot continues', (
+    tester,
+  ) async {
+    final bindings = _ThrowingDelegateBindings(rootDir: tempDir);
+    addTearDown(bindings.close);
+
+    await boot(tester, bindings, const []);
+
+    expect(bindings.tryDelegateCalls, 1);
+    expect(find.byType(SettingsWindow), findsOneWidget);
+  });
+
+  testWidgets('corrupt browsers.json is reset and boot continues', (
+    tester,
+  ) async {
+    final bindings = _FakeBindings(
+      rootDir: tempDir,
+      detectedBrowsers: const [_chrome],
+    );
+    addTearDown(bindings.close);
+
+    bindings.browsersFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{{not valid json');
+
+    await boot(tester, bindings, const []);
+
+    expect(find.byType(SettingsWindow), findsOneWidget);
+  });
+
+  testWidgets(
+    'ShowSettingsEvent when settings already showing re-focuses window',
+    (tester) async {
+      final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = false;
+      addTearDown(bindings.close);
+
+      await boot(tester, bindings, const []);
+      expect(find.byType(SettingsWindow), findsOneWidget);
+
+      windowSpy.clear();
+
+      await tester.runAsync(() async {
+        bindings.emit(const ShowSettingsEvent());
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      });
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(SettingsWindow), findsOneWidget);
+      expect(windowSpy.methods, contains('show'));
+      expect(windowSpy.methods, contains('focus'));
+    },
+  );
 }
