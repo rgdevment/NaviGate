@@ -93,6 +93,12 @@
     }
   },
   "updateDownload": "Download",
+  "updateAvailableStore": "Version {version} available — check Microsoft Store for the new version",
+  "@updateAvailableStore": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
   "updateTooltip": "New version available — check for updates in Settings",
 
   "sectionSupport": "SUPPORT",

@@ -470,6 +470,18 @@ abstract class AppLocalizations {
   /// **'Download'**
   String get updateDownload;
 
+  /// No description provided for @updateAvailableStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} available — check Microsoft Store for the new version'**
+  String updateAvailableStore(String version);
+
+  /// No description provided for @updateOpenStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Store'**
+  String get updateOpenStore;
+
   /// No description provided for @updateTooltip.
   ///
   /// In en, this message translates to:

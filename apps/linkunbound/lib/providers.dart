@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'platform/windows/win_package_context.dart';
-
 StateError _mustOverride() => StateError('Override at startup');
 
 final browserServiceProvider = Provider<BrowserService>(
@@ -198,9 +196,6 @@ final packageInfoProvider = FutureProvider<PackageInfo>((ref) {
 const _updateService = UpdateService(owner: 'rgdevment', repo: 'LinkUnbound');
 
 final updateInfoProvider = FutureProvider<UpdateInfo?>((ref) async {
-  // MSIX packages are updated by the Microsoft Store; suppress the in-app
-  // update banner so we don't race with the Store's updater.
-  if (isRunningInMsix()) return null;
   final info = await ref.watch(packageInfoProvider.future);
   return _updateService.checkForUpdate(info.version);
 });

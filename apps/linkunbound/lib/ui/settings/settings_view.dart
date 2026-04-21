@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../platform/windows/win_package_context.dart';
 import '../../providers.dart';
 import '../shared/widgets/title_bar.dart';
 import 'about_page.dart';
@@ -103,6 +104,10 @@ class _UpdateBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final inStore = isRunningInMsix();
+    final message = inStore
+        ? l10n.updateAvailableStore(update.latestVersion)
+        : l10n.updateAvailable(update.latestVersion);
 
     return Container(
       width: double.infinity,
@@ -117,24 +122,25 @@ class _UpdateBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              l10n.updateAvailable(update.latestVersion),
+              message,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: colors.primary),
             ),
           ),
-          TextButton(
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              minimumSize: const Size(0, 28),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          if (!inStore)
+            TextButton(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                minimumSize: const Size(0, 28),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: () => launchUrl(Uri.parse(update.releaseUrl)),
+              child: Text(
+                l10n.updateDownload,
+                style: TextStyle(fontSize: 12, color: colors.primary),
+              ),
             ),
-            onPressed: () => launchUrl(Uri.parse(update.releaseUrl)),
-            child: Text(
-              l10n.updateDownload,
-              style: TextStyle(fontSize: 12, color: colors.primary),
-            ),
-          ),
         ],
       ),
     );

@@ -213,6 +213,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get updateDownload => 'Descargar';
 
   @override
+  String updateAvailableStore(String version) {
+    return 'Versión $version disponible — verifica en Microsoft Store la nueva versión';
+  }
+
+  @override
+  String get updateOpenStore => 'Abrir Store';
+
+  @override
   String get updateTooltip =>
       'Nueva versión disponible — revisa las actualizaciones en Ajustes';
 
