@@ -9,6 +9,12 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get exit => 'Salir';
+
+  @override
+  String get traySettings => 'Configuración';
+
+  @override
   String get copyUrl => 'Copiar URL';
 
   @override

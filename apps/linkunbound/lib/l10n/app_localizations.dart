@@ -98,6 +98,18 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
+  /// No description provided for @exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exit;
+
+  /// No description provided for @traySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get traySettings;
+
   /// No description provided for @copyUrl.
   ///
   /// In en, this message translates to:

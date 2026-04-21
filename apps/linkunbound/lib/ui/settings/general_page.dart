@@ -14,7 +14,12 @@ import '../shared/widgets/section_header.dart';
 class GeneralPage extends ConsumerWidget {
   const GeneralPage({super.key});
 
+  // On macOS LinkUnbound only registers as handler for http/https schemes
+  // (Launch Services treats `public.html` separately and rarely surfaces it
+  // to the user). The .htm/.html/.pdf extensions are Windows-only concepts
+  // exposed via the registry.
   static const _allAssociations = ['http', 'https', '.htm', '.html', '.pdf'];
+  static const _macAssociations = ['http', 'https'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,6 +63,7 @@ class GeneralPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final isDefault = isDefaultAsync.valueOrNull == true;
     final associations = associationsAsync.valueOrNull ?? {};
+    final assocList = Platform.isMacOS ? _macAssociations : _allAssociations;
 
     return [
       SectionHeader(label: l10n.sectionDefaultBrowser),
@@ -85,7 +91,9 @@ class GeneralPage extends ConsumerWidget {
                   TextButton(
                     onPressed: () => launchUrl(
                       Uri.parse(
-                        'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
+                        Platform.isMacOS
+                            ? 'x-apple.systempreferences:com.apple.preference.general'
+                            : 'ms-settings:defaultapps?registeredAppUser=LinkUnbound',
                       ),
                     ),
                     child: Text(l10n.setDefault),
@@ -97,7 +105,7 @@ class GeneralPage extends ConsumerWidget {
               child: Text.rich(
                 TextSpan(
                   children:
-                      _allAssociations
+                      assocList
                           .map((a) {
                             final label = a.replaceAll('.', '').toUpperCase();
                             final active = associations.contains(a);
@@ -339,7 +347,7 @@ class GeneralPage extends ConsumerWidget {
               return BrowserTile(
                 key: ValueKey(b.id),
                 name: b.name,
-                iconPath: '${iconsDir.path}\\${b.id}.png',
+                iconPath: '${iconsDir.path}/${b.id}.png',
                 onTap: () => _showEditBrowserDialog(context, ref, b),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -418,7 +426,7 @@ class GeneralPage extends ConsumerWidget {
       try {
         await iconExtractor.extractIcon(
           browser.executablePath,
-          '${iconsDir.path}\\${browser.id}.png',
+          '${iconsDir.path}/${browser.id}.png',
         );
       } on Exception {
         // Best-effort icon extraction
@@ -471,8 +479,8 @@ class GeneralPage extends ConsumerWidget {
     await ref.read(browsersProvider.notifier).add(copy);
 
     final iconsDir = ref.read(iconsDirProvider);
-    final sourceIcon = File('${iconsDir.path}\\${source.id}.png');
-    final destIcon = File('${iconsDir.path}\\$copyId.png');
+    final sourceIcon = File('${iconsDir.path}/${source.id}.png');
+    final destIcon = File('${iconsDir.path}/$copyId.png');
     if (sourceIcon.existsSync()) {
       await sourceIcon.copy(destIcon.path);
     }
@@ -621,7 +629,7 @@ class GeneralPage extends ConsumerWidget {
   ) async {
     final iconsDir = ref.read(iconsDirProvider);
     final iconSource = customIcon.isNotEmpty ? customIcon : exePath;
-    final iconDest = File('${iconsDir.path}\\$browserId.png');
+    final iconDest = File('${iconsDir.path}/$browserId.png');
 
     if (customIcon.isNotEmpty && iconDest.existsSync()) {
       await iconDest.delete();
@@ -630,7 +638,7 @@ class GeneralPage extends ConsumerWidget {
     try {
       await ref
           .read(iconExtractorProvider)
-          .extractIcon(iconSource, '${iconsDir.path}\\$browserId.png');
+          .extractIcon(iconSource, '${iconsDir.path}/$browserId.png');
     } on Exception {
       // Best-effort
     }

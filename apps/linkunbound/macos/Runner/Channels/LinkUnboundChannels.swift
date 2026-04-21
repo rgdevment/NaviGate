@@ -8,6 +8,7 @@ final class LinkUnboundChannels {
   let iconExtractor: IconExtractorChannel
   let registration: RegistrationChannel
   let startup: StartupChannel
+  let window: WindowChannel
 
   init(messenger: FlutterBinaryMessenger) {
     inboundEvents = InboundEventsChannel(messenger: messenger)
@@ -15,5 +16,6 @@ final class LinkUnboundChannels {
     iconExtractor = IconExtractorChannel(messenger: messenger)
     registration = RegistrationChannel(messenger: messenger)
     startup = StartupChannel(messenger: messenger)
+    window = WindowChannel(messenger: messenger)
   }
 }

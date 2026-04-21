@@ -17,6 +17,11 @@ final class NavigateApp extends ConsumerStatefulWidget {
 
 final class _NavigateAppState extends ConsumerState<NavigateApp>
     with WindowListener {
+  /// Timestamp when the current picker session became visible. Used to ignore
+  /// the spurious blur events that fire while the LSUIElement window is still
+  /// in the process of becoming key on macOS.
+  DateTime? _pickerShownAt;
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +47,21 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
   }
 
   @override
+  void onWindowBlur() {
+    final mode = ref.read(appStateProvider).mode;
+    if (mode != AppMode.picker) return;
+    final shownAt = _pickerShownAt;
+    if (shownAt == null) return;
+    // Ignore blur bursts within the first ~400 ms of showing the picker —
+    // those come from the window not yet being key, not from a real focus
+    // change by the user.
+    if (DateTime.now().difference(shownAt) < const Duration(milliseconds: 400)) {
+      return;
+    }
+    ref.read(appStateProvider.notifier).hide();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appState = ref.watch(appStateProvider);
     final locale = ref.watch(localeProvider);
@@ -49,6 +69,11 @@ final class _NavigateAppState extends ConsumerState<NavigateApp>
     // Show window after the new widget has been painted, not before.
     ref.listen<AppState>(appStateProvider, (prev, next) {
       if (prev?.mode == next.mode) return;
+      if (next.mode == AppMode.picker) {
+        _pickerShownAt = DateTime.now();
+      } else {
+        _pickerShownAt = null;
+      }
       if (next.mode == AppMode.hidden) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await windowManager.show();

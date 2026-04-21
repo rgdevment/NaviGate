@@ -1,5 +1,6 @@
 import AppKit
 import FlutterMacOS
+import UniformTypeIdentifiers
 
 /// `linkunbound/browser_detector` — discovers installed apps that handle web URLs.
 final class BrowserDetectorChannel {
@@ -34,12 +35,45 @@ final class BrowserDetectorChannel {
       candidateURLs.append(contentsOf: workspace.urlsForApplications(toOpen: httpsURL))
     }
 
+    // True browsers register themselves as VIEWERS for the `public.html`
+    // UTI so the Finder can route .html files to them. Apps like iTerm,
+    // Terminal, VS Code or Slack declare http/https URL-scheme handlers
+    // (so `open https://…` works internally) but never claim to *display*
+    // HTML — so they're absent from this set. This is a structural signal,
+    // not a hand-maintained blacklist.
+    let htmlViewers: Set<String> = {
+      guard let html = UTType("public.html") else { return [] }
+      let urls = workspace.urlsForApplications(toOpen: html)
+      var ids: Set<String> = []
+      for url in urls {
+        if let id = Bundle(url: url)?.bundleIdentifier {
+          ids.insert(id.lowercased())
+        }
+      }
+      return ids
+    }()
+
+    // Only surface real, user-installed browsers from standard application
+    // directories. This excludes Chrome-for-Testing, Playwright/Puppeteer
+    // browsers cached under ~/.cache, Xcode device-support copies, etc.
+    let allowedAppRoots: [String] = [
+      "/Applications/",
+      "/System/Applications/",
+      "/System/Volumes/Preboot/",
+      NSString("~/Applications/").expandingTildeInPath + "/",
+    ]
+
     for appURL in candidateURLs {
       guard let bundle = Bundle(url: appURL),
             let bundleId = bundle.bundleIdentifier,
             bundleId != ownBundleId,
+            htmlViewers.contains(bundleId.lowercased()),
             !seen.contains(bundleId)
       else { continue }
+
+      let path = appURL.path
+      guard allowedAppRoots.contains(where: { path.hasPrefix($0) }) else { continue }
+
       seen.insert(bundleId)
 
       let name = (bundle.infoDictionary?["CFBundleDisplayName"] as? String)
