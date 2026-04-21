@@ -71,6 +71,12 @@
 
   "updateAvailable": "Versión {version} disponible",
   "updateDownload": "Descargar",
+  "updateAvailableStore": "Versión {version} disponible — verifica en Microsoft Store la nueva versión",
+  "@updateAvailableStore": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
   "updateTooltip": "Nueva versión disponible — revisa las actualizaciones en Ajustes",
 
   "sectionSupport": "APÓYANOS",
