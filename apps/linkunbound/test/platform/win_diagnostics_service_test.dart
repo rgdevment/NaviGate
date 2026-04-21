@@ -103,7 +103,7 @@ void main() {
 
     test('includes navigate.log when file exists', () async {
       File(
-        '${appDataDir.path}\\navigate.log',
+        '${appDataDir.path}${Platform.pathSeparator}navigate.log',
       ).writeAsStringSync('line1\nline2\nline3');
 
       final zipPath = await export();
@@ -113,7 +113,7 @@ void main() {
 
     test('navigate.log content is preserved when small', () async {
       File(
-        '${appDataDir.path}\\navigate.log',
+        '${appDataDir.path}${Platform.pathSeparator}navigate.log',
       ).writeAsStringSync('alpha\nbeta\ngamma');
 
       final zipPath = await export();
@@ -127,7 +127,7 @@ void main() {
     test('navigate.log is truncated to last 200 lines when large', () async {
       final lines = List.generate(350, (i) => 'entry $i');
       File(
-        '${appDataDir.path}\\navigate.log',
+        '${appDataDir.path}${Platform.pathSeparator}navigate.log',
       ).writeAsStringSync(lines.join('\n'));
 
       final zipPath = await export();
@@ -150,7 +150,9 @@ void main() {
     });
 
     test('data files listed in system_info.txt', () async {
-      File('${appDataDir.path}\\browsers.json').writeAsStringSync('[]');
+      File(
+        '${appDataDir.path}${Platform.pathSeparator}browsers.json',
+      ).writeAsStringSync('[]');
 
       final zipPath = await export();
       final files = zipFiles(zipPath);
