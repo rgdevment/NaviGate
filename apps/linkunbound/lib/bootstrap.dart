@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -21,15 +22,24 @@ final _log = Logger('Bootstrap');
 Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   initLogging(bindings.logFile);
 
-  _log.info('Started with args: $args');
+  _log.info('LinkUnbound starting (msix=${isRunningInMsix()})');
 
-  if (await bindings.tryDelegate(bindings.initialEvent)) {
-    exit(0);
+  try {
+    if (await bindings.tryDelegate(bindings.initialEvent)) {
+      exit(0);
+    }
+  } on Object catch (e, st) {
+    _log.warning('Delegation check failed', e, st);
   }
 
-  if (!await bindings.claim()) {
-    exit(0);
+  bool claimed;
+  try {
+    claimed = await bindings.claim();
+  } on Object catch (e, st) {
+    _log.severe('claim() crashed', e, st);
+    claimed = false;
   }
+  if (!claimed) exit(0);
 
   final browserService = BrowserService(
     configFile: bindings.browsersFile,
@@ -38,7 +48,17 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   final ruleService = RuleService(rulesFile: bindings.rulesFile);
 
   final isFirstBoot = !bindings.browsersFile.existsSync();
-  await browserService.load();
+
+  try {
+    await browserService.load();
+  } on Object catch (e, st) {
+    _log.severe('Browser config corrupted, resetting', e, st);
+    try {
+      await browserService.reset();
+    } on Object catch (e, st) {
+      _log.warning('Browser reset failed', e, st);
+    }
+  }
 
   if (isFirstBoot) {
     try {
@@ -55,24 +75,32 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
     }
   }
 
-  await ruleService.load();
+  try {
+    await ruleService.load();
+  } on Object catch (e, st) {
+    _log.severe('Rules config corrupted, ignoring', e, st);
+  }
 
-  await windowManager.ensureInitialized();
-  await windowManager.setPreventClose(true);
-  await windowManager.waitUntilReadyToShow(
-    const WindowOptions(
-      titleBarStyle: TitleBarStyle.hidden,
-      size: Size(640, 700),
-      center: false,
-    ),
-    () async {
-      await windowManager.setSkipTaskbar(true);
-      if (!Platform.isMacOS) {
-        await windowManager.setPosition(const Offset(-9999, -9999));
-        await windowManager.hide();
-      }
-    },
-  );
+  try {
+    await windowManager.ensureInitialized();
+    await windowManager.setPreventClose(true);
+    await windowManager.waitUntilReadyToShow(
+      const WindowOptions(
+        titleBarStyle: TitleBarStyle.hidden,
+        size: Size(640, 700),
+        center: false,
+      ),
+      () async {
+        await windowManager.setSkipTaskbar(true);
+        if (!Platform.isMacOS) {
+          await windowManager.setPosition(const Offset(-9999, -9999));
+          await windowManager.hide();
+        }
+      },
+    );
+  } on Object catch (e, st) {
+    _log.severe('Window manager init failed', e, st);
+  }
 
   final container = ProviderContainer(
     overrides: [
@@ -89,7 +117,11 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
       edgeWarningFileProvider.overrideWithValue(bindings.edgeWarningFile),
       appDataDirProvider.overrideWithValue(bindings.appDataDir),
       exitAppProvider.overrideWithValue(() async {
-        await bindings.release();
+        try {
+          await bindings.release();
+        } on Object catch (e, st) {
+          _log.warning('Release failed during exit', e, st);
+        }
         exit(0);
       }),
     ],
@@ -100,62 +132,30 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   final macWindow = Platform.isMacOS ? MacWindowChannel() : null;
 
   container.listen<AppState>(appStateProvider, (prev, next) async {
-    if (prev?.mode == next.mode) {
-      if (next.mode == AppMode.settings) {
-        await windowManager.show();
-        await windowManager.focus();
-        await macWindow?.activate();
-      }
-      return;
-    }
-    switch (next.mode) {
-      case AppMode.hidden:
-        await windowManager.hide();
-      case AppMode.settings:
-        await macWindow?.setSettingsMode();
-        await windowManager.setSize(const Size(640, 700));
-        await windowManager.center();
-        await windowManager.setSkipTaskbar(false);
-        await windowManager.setAlwaysOnTop(false);
-        await windowManager.show();
-        await windowManager.focus();
-        await macWindow?.activate();
-      case AppMode.picker:
-        await macWindow?.setPickerMode();
-        final browsers = container.read(browsersProvider);
-        final winSize = PickerLayout.windowSize(browsers.length);
-        final (cursorX, cursorY) = await bindings.cursorLocator
-            .cursorPosition();
-        final (screenW, screenH) = await bindings.cursorLocator.screenSize();
-        final x = (cursorX - winSize.width / 2).clamp(
-          8.0,
-          screenW - winSize.width - 8,
-        );
-        final y = (cursorY + 16).clamp(8.0, screenH - winSize.height - 8);
-        _log.info(
-          'Picker: ${browsers.length} browsers, '
-          'window=${winSize.width.toInt()}x${winSize.height.toInt()}, '
-          'pos=(${x.toInt()}, ${y.toInt()})',
-        );
-        await windowManager.setSize(winSize);
-        await windowManager.setPosition(Offset(x, y));
-        await windowManager.setSkipTaskbar(true);
-        await windowManager.setAlwaysOnTop(true);
-        await windowManager.show();
-        await macWindow?.activate();
+    try {
+      await _applyAppMode(prev, next, container, bindings, macWindow);
+    } on Object catch (e, st) {
+      _log.warning('App mode transition failed', e, st);
     }
   });
 
-  bindings.inboundEvents.listen((event) {
-    switch (event) {
-      case OpenUrlEvent(:final url):
-        _log.info('Inbound: open_url ${_redactForLog(url)}');
-        _handleUrl(url, container);
-      case ShowSettingsEvent():
-        _log.info('Inbound: show_settings');
-        container.read(appStateProvider.notifier).showSettings();
-    }
-  });
+  bindings.inboundEvents.listen(
+    (event) {
+      try {
+        switch (event) {
+          case OpenUrlEvent(:final url):
+            _handleUrl(url, container);
+          case ShowSettingsEvent():
+            container.read(appStateProvider.notifier).showSettings();
+        }
+      } on Object catch (e, st) {
+        _log.warning('Inbound event handler failed', e, st);
+      }
+    },
+    onError: (Object e, StackTrace st) {
+      _log.warning('Inbound event stream error', e, st);
+    },
+  );
 
   try {
     await _initTray(bindings, container);
@@ -174,6 +174,53 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   });
 }
 
+Future<void> _applyAppMode(
+  AppState? prev,
+  AppState next,
+  ProviderContainer container,
+  PlatformBindings bindings,
+  MacWindowChannel? macWindow,
+) async {
+  if (prev?.mode == next.mode) {
+    if (next.mode == AppMode.settings) {
+      await windowManager.show();
+      await windowManager.focus();
+      await macWindow?.activate();
+    }
+    return;
+  }
+  switch (next.mode) {
+    case AppMode.hidden:
+      await windowManager.hide();
+    case AppMode.settings:
+      await macWindow?.setSettingsMode();
+      await windowManager.setSize(const Size(640, 700));
+      await windowManager.center();
+      await windowManager.setSkipTaskbar(false);
+      await windowManager.setAlwaysOnTop(false);
+      await windowManager.show();
+      await windowManager.focus();
+      await macWindow?.activate();
+    case AppMode.picker:
+      await macWindow?.setPickerMode();
+      final browsers = container.read(browsersProvider);
+      final winSize = PickerLayout.windowSize(browsers.length);
+      final (cursorX, cursorY) = await bindings.cursorLocator.cursorPosition();
+      final (screenW, screenH) = await bindings.cursorLocator.screenSize();
+      final x = (cursorX - winSize.width / 2).clamp(
+        8.0,
+        screenW - winSize.width - 8,
+      );
+      final y = (cursorY + 16).clamp(8.0, screenH - winSize.height - 8);
+      await windowManager.setSize(winSize);
+      await windowManager.setPosition(Offset(x, y));
+      await windowManager.setSkipTaskbar(true);
+      await windowManager.setAlwaysOnTop(true);
+      await windowManager.show();
+      await macWindow?.activate();
+  }
+}
+
 Future<void> _firstBoot({
   required BrowserService browserService,
   required IconExtractor iconExtractor,
@@ -183,28 +230,30 @@ Future<void> _firstBoot({
   bool skipRegistration = false,
 }) async {
   await browserService.scanAndMerge();
-  await iconsDir.create(recursive: true);
+  try {
+    await iconsDir.create(recursive: true);
+  } on Object catch (e, st) {
+    _log.warning('Could not create icons directory', e, st);
+  }
   for (final browser in browserService.browsers) {
     try {
       final outputPath =
           '${iconsDir.path}${Platform.pathSeparator}${browser.id}.png';
       await iconExtractor.extractIcon(browser.executablePath, outputPath);
-    } on Exception catch (e) {
+    } on Object catch (e) {
       _log.warning('Icon extraction failed for ${browser.name}: $e');
     }
   }
   if (skipRegistration) {
-    _log.info('First boot: skipping browser registration (MSIX context)');
+    _log.info('Skipping browser registration in MSIX context');
   } else {
     try {
       await registrationService.register(executablePath);
     } on Object catch (e, st) {
-      _log.warning('Browser registration failed (non-fatal): $e', e, st);
+      _log.warning('Browser registration failed (non-fatal)', e, st);
     }
   }
-  _log.info(
-    'First boot: scanned ${browserService.browsers.length} browsers',
-  );
+  _log.info('First boot complete: ${browserService.browsers.length} browsers');
 }
 
 void _handleUrl(String url, ProviderContainer container) {
@@ -214,7 +263,6 @@ void _handleUrl(String url, ProviderContainer container) {
       _log.warning('Rejected local file: ${_redactForLog(url)}');
       return;
     }
-    _log.info('Local file accepted: ${redactPath(resolved)}');
     final fileUri = Uri.file(resolved).toString();
     container.read(appStateProvider.notifier).showPicker(fileUri);
     return;
@@ -228,10 +276,15 @@ void _handleUrl(String url, ProviderContainer container) {
     final browsers = container.read(browserServiceProvider).browsers;
     final browser = browsers.where((b) => b.id == matchedBrowserId).firstOrNull;
     if (browser != null) {
-      _log.info('Rule match: ${_redactForLog(resolved)} → ${browser.name}');
-      container
+      final launch = container
           .read(launchServiceProvider)
           .launch(browser.executablePath, resolved, browser.extraArgs);
+      unawaited(
+        launch.catchError((Object e, StackTrace st) {
+          _log.severe('Launch failed for ${browser.name}', e, st);
+          container.read(appStateProvider.notifier).showPicker(resolved);
+        }),
+      );
       return;
     }
   }
@@ -267,9 +320,8 @@ Future<void> _initTray(
     () => container.read(appStateProvider.notifier).showSettings(),
   );
 
-  // Resolve the active locale once so the tray menu matches the user's
-  // configured language (the tray runs outside the MaterialApp tree, so
-  // `AppLocalizations.of(context)` isn't available here).
+  // The tray runs outside the MaterialApp tree, so AppLocalizations.of(context)
+  // is not available here; load the configured locale's strings directly.
   final locale = container.read(localeProvider);
   final l10n = await AppLocalizations.delegate.load(
     locale ?? const Locale('en'),

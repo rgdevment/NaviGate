@@ -86,5 +86,10 @@
 
   "sectionMaintenance": "MANTENIMIENTO",
   "exportDiagnosticsLabel": "Exportar diagnóstico",
-  "exportDiagnosticsDescription": "Genera un ZIP con info del sistema, datos del registro y logs para diagnóstico"
+  "exportDiagnosticsDescription": "Genera un ZIP con info del sistema, datos del registro y logs para diagnóstico",
+
+  "errorStartupToggle": "No se pudo cambiar la configuración de inicio",
+  "errorUnregister": "No se pudo desregistrar LinkUnbound",
+  "errorExportDiagnostics": "No se pudo exportar el diagnóstico",
+  "errorResetConfig": "No se pudo restablecer la configuración"
 }

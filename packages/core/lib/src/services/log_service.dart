@@ -28,15 +28,20 @@ String redactUrls(String text) {
   return result;
 }
 
-void initLogging(File logFile) {
+void initLogging(File logFile, {Level fileLevel = Level.INFO}) {
   _logSubscription?.cancel();
   _logSubscription = null;
 
-  logFile.parent.createSync(recursive: true);
-  _rotateIfNeeded(logFile);
+  try {
+    logFile.parent.createSync(recursive: true);
+    _rotateIfNeeded(logFile);
+  } on FileSystemException {
+    // Best-effort: file logging will be disabled below if writes fail.
+  }
 
   Logger.root.level = Level.ALL;
   _logSubscription = Logger.root.onRecord.listen((record) {
+    if (record.level < fileLevel) return;
     final message = redactUrls(record.message);
     final line =
         '${record.time.toIso8601String()} '

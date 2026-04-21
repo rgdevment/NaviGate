@@ -65,14 +65,12 @@ final class WinInstance {
       final result = waitForSingleObject(handle, 0);
       if (result == _waitObject0 || result == _waitAbandoned) {
         _mutexHandle = handle;
-        _log.info('Single instance acquired');
         return true;
       }
 
       final closeHandle = _kernel32
           .lookupFunction<_CloseHandleNative, _CloseHandleDart>('CloseHandle');
       closeHandle(handle);
-      _log.info('Another instance already running');
       return false;
     } finally {
       calloc.free(name);
@@ -90,7 +88,6 @@ final class WinInstance {
     releaseMutex(_mutexHandle);
     closeHandle(_mutexHandle);
     _mutexHandle = 0;
-    _log.info('Single instance released');
   }
 
   static void allowForeground() {

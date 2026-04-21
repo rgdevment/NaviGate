@@ -23,7 +23,6 @@ final class WinStartupService implements StartupService {
       ),
     );
     key.close();
-    _log.info('Startup enabled');
   }
 
   @override
@@ -36,7 +35,6 @@ final class WinStartupService implements StartupService {
       );
       key.deleteValue(_valueName);
       key.close();
-      _log.info('Startup disabled');
     } on Exception {
       _log.fine('Run key not found during disable');
     }

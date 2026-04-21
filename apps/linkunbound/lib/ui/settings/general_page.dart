@@ -221,13 +221,20 @@ class GeneralPage extends ConsumerWidget {
             Switch(
               value: isStartupAsync.valueOrNull ?? false,
               onChanged: (enabled) async {
+                final messenger = ScaffoldMessenger.maybeOf(context);
+                final errorMsg = l10n.errorStartupToggle;
                 final service = ref.read(startupServiceProvider);
-                if (enabled) {
-                  await service.enable(Platform.resolvedExecutable);
-                } else {
-                  await service.disable();
+                try {
+                  if (enabled) {
+                    await service.enable(Platform.resolvedExecutable);
+                  } else {
+                    await service.disable();
+                  }
+                } on Object {
+                  messenger?.showSnackBar(SnackBar(content: Text(errorMsg)));
+                } finally {
+                  ref.invalidate(isStartupEnabledProvider);
                 }
-                ref.invalidate(isStartupEnabledProvider);
               },
             ),
           ],
