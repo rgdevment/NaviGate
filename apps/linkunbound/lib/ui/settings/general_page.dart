@@ -6,6 +6,7 @@ import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../platform/windows/win_package_context.dart';
 import '../../providers.dart';
 import '../shared/widgets/browser_tile.dart';
 import '../shared/widgets/group_card.dart';
@@ -206,6 +207,7 @@ class GeneralPage extends ConsumerWidget {
     AsyncValue<bool> isStartupAsync,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final managedByOs = isRunningInMsix();
 
     return [
       SectionHeader(label: l10n.sectionStartup),
@@ -213,29 +215,36 @@ class GeneralPage extends ConsumerWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                l10n.launchAtStartup,
-                style: Theme.of(context).textTheme.bodyMedium,
+              child: Tooltip(
+                message: managedByOs ? l10n.startupManagedByWindows : '',
+                child: Text(
+                  l10n.launchAtStartup,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ),
             Switch(
               value: isStartupAsync.valueOrNull ?? false,
-              onChanged: (enabled) async {
-                final messenger = ScaffoldMessenger.maybeOf(context);
-                final errorMsg = l10n.errorStartupToggle;
-                final service = ref.read(startupServiceProvider);
-                try {
-                  if (enabled) {
-                    await service.enable(Platform.resolvedExecutable);
-                  } else {
-                    await service.disable();
-                  }
-                } on Object {
-                  messenger?.showSnackBar(SnackBar(content: Text(errorMsg)));
-                } finally {
-                  ref.invalidate(isStartupEnabledProvider);
-                }
-              },
+              onChanged: managedByOs
+                  ? null
+                  : (enabled) async {
+                      final messenger = ScaffoldMessenger.maybeOf(context);
+                      final errorMsg = l10n.errorStartupToggle;
+                      final service = ref.read(startupServiceProvider);
+                      try {
+                        if (enabled) {
+                          await service.enable(Platform.resolvedExecutable);
+                        } else {
+                          await service.disable();
+                        }
+                      } on Object {
+                        messenger?.showSnackBar(
+                          SnackBar(content: Text(errorMsg)),
+                        );
+                      } finally {
+                        ref.invalidate(isStartupEnabledProvider);
+                      }
+                    },
             ),
           ],
         ),

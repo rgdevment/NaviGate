@@ -182,6 +182,12 @@ abstract class AppLocalizations {
   /// **'Launch at system startup'**
   String get launchAtStartup;
 
+  /// Tooltip shown when the startup toggle is disabled because the app runs as MSIX and Windows owns that preference.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by Windows Settings > Startup Apps'**
+  String get startupManagedByWindows;
+
   /// No description provided for @sectionLanguage.
   ///
   /// In en, this message translates to:

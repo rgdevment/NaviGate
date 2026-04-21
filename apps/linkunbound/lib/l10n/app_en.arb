@@ -18,6 +18,8 @@
 
   "sectionStartup": "STARTUP",
   "launchAtStartup": "Launch at system startup",
+  "startupManagedByWindows": "Managed by Windows Settings > Startup Apps",
+  "@startupManagedByWindows": {"description": "Tooltip shown when the startup toggle is disabled because the app runs as MSIX and Windows owns that preference."},
 
   "sectionLanguage": "LANGUAGE",
   "languageAuto": "Automatic (system)",

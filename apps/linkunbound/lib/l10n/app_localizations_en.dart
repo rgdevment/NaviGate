@@ -51,6 +51,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get launchAtStartup => 'Launch at system startup';
 
   @override
+  String get startupManagedByWindows =>
+      'Managed by Windows Settings > Startup Apps';
+
+  @override
   String get sectionLanguage => 'LANGUAGE';
 
   @override
