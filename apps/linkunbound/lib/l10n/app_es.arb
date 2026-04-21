@@ -1,6 +1,8 @@
 {
   "@@locale": "es",
 
+  "exit": "Salir",
+  "traySettings": "Configuración",
   "copyUrl": "Copiar URL",
   "alwaysOpenHere": "Abrir siempre aquí",
 
@@ -15,7 +17,7 @@
   "setDefault": "Establecer",
 
   "sectionStartup": "INICIO",
-  "launchAtStartup": "Iniciar con Windows",
+  "launchAtStartup": "Iniciar con el sistema",
 
   "sectionLanguage": "IDIOMA",
   "languageAuto": "Automático (sistema)",

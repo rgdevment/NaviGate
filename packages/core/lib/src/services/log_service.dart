@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
 
 const _maxLogSize = 2 * 1024 * 1024; // 2 MB
+
+StreamSubscription<LogRecord>? _logSubscription;
 
 final _urlPattern = RegExp(r'https?://[^\s,\]\)]+', caseSensitive: false);
 final _filePathPattern = RegExp(
@@ -26,11 +29,14 @@ String redactUrls(String text) {
 }
 
 void initLogging(File logFile) {
+  _logSubscription?.cancel();
+  _logSubscription = null;
+
   logFile.parent.createSync(recursive: true);
   _rotateIfNeeded(logFile);
 
   Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
+  _logSubscription = Logger.root.onRecord.listen((record) {
     final message = redactUrls(record.message);
     final line =
         '${record.time.toIso8601String()} '
@@ -40,7 +46,11 @@ void initLogging(File logFile) {
         '${record.error != null ? '\n  ${record.error}' : ''}'
         '${record.stackTrace != null ? '\n  ${record.stackTrace}' : ''}';
     stderr.writeln(line);
-    logFile.writeAsStringSync('$line\n', mode: FileMode.append);
+    try {
+      logFile.writeAsStringSync('$line\n', mode: FileMode.append);
+    } on FileSystemException {
+      // Log directory may have been removed (e.g. during tests). Drop silently.
+    }
   });
 }
 

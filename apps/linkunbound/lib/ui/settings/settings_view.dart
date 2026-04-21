@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
@@ -62,6 +64,12 @@ class _SettingsViewState extends ConsumerState<SettingsView>
             await windowManager.hide();
             ref.read(appStateProvider.notifier).hide();
           },
+          onExit: Platform.isMacOS
+              ? () async {
+                  await windowManager.hide();
+                  ref.read(appStateProvider.notifier).hide();
+                }
+              : null,
         ),
         Divider(
           height: 0.5,

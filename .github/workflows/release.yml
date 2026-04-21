@@ -41,9 +41,16 @@ jobs:
             version: ${{ needs.extract-version.outputs.version }}
         secrets: inherit
 
+    build-macos:
+        needs: extract-version
+        uses: ./.github/workflows/release-mac.yml
+        with:
+            version: ${{ needs.extract-version.outputs.version }}
+        secrets: inherit
+
     github-release:
         runs-on: ubuntu-latest
-        needs: [extract-version, build-windows]
+        needs: [extract-version, build-windows, build-macos]
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         timeout-minutes: 10
         name: Create GitHub Release
@@ -68,6 +75,12 @@ jobs:
                   name: release-windows
                   path: artifacts/windows
 
+            - name: Download macOS artifacts
+              uses: actions/download-artifact@v7
+              with:
+                  name: release-macos
+                  path: artifacts/macos
+
             - name: List artifacts
               run: find artifacts/ -type f
 
@@ -81,8 +94,80 @@ jobs:
                   files: |
                       artifacts/windows/**/*_Setup.exe
                       artifacts/windows/**/*_store.msix*
+                      artifacts/macos/**/*.dmg
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    update-homebrew-cask:
+        runs-on: ubuntu-latest
+        needs: github-release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        timeout-minutes: 5
+        name: Update Homebrew Tap
+
+        steps:
+            - name: Update Homebrew Tap
+              env:
+                  GH_TOKEN: ${{ secrets.GIST_TOKEN }}
+              run: |
+                  TAG="${GITHUB_REF_NAME}"
+                  VERSION="${TAG#v}"
+
+                  DMG_NAME="LinkUnbound_${VERSION}_universal.dmg"
+                  DMG_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${DMG_NAME}"
+
+                  echo "Downloading DMG to compute SHA256..."
+                  curl -fSL -o "/tmp/${DMG_NAME}" "${DMG_URL}"
+                  DMG_SHA256=$(sha256sum "/tmp/${DMG_NAME}" | awk '{print $1}')
+                  rm -f "/tmp/${DMG_NAME}"
+
+                  echo "Version: ${VERSION}"
+                  echo "DMG SHA256: ${DMG_SHA256}"
+
+                  if [[ "$VERSION" == *-* ]]; then
+                    CASK_FILE="Casks/linkunbound-beta.rb"
+                    CASK_NAME="linkunbound-beta"
+                    CASK_DESC="Smart browser router for HTTP(S) links (beta)"
+                  else
+                    CASK_FILE="Casks/linkunbound.rb"
+                    CASK_NAME="linkunbound"
+                    CASK_DESC="Smart browser router for HTTP(S) links"
+                  fi
+
+                  git clone "https://x-access-token:${GH_TOKEN}@github.com/rgdevment/homebrew-tap.git" /tmp/homebrew-tap
+                  cd /tmp/homebrew-tap
+
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+
+                  mkdir -p Casks
+
+                  cat > "${CASK_FILE}" <<- CASK_EOF
+                  	cask "${CASK_NAME}" do
+                  	  version "${VERSION}"
+                  	  sha256 "${DMG_SHA256}"
+
+                  	  url "${DMG_URL}"
+                  	  name "LinkUnbound"
+                  	  desc "${CASK_DESC}"
+                  	  homepage "https://github.com/${{ github.repository }}"
+
+                  	  depends_on macos: ">= :ventura"
+
+                  	  app "LinkUnbound.app"
+
+                  	  zap trash: [
+                  	    "~/Library/Application Support/com.rgdevment.linkunbound",
+                  	    "~/Library/Preferences/com.rgdevment.linkunbound.plist",
+                  	  ]
+                  	end
+                  CASK_EOF
+
+                  git add "${CASK_FILE}"
+                  git commit -m "Update ${CASK_NAME} to ${VERSION}"
+                  git push origin main
+
+                  echo "Homebrew Tap updated: cask ${CASK_NAME} → ${VERSION}"
 
     # publish-to-store:
     #     runs-on: windows-latest

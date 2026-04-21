@@ -66,6 +66,37 @@ void main() {
   });
 
   group('MaintenancePage dialogs', () {
+    testWidgets('tapping Export diagnostics shows loading indicator', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(const MaintenancePage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Export diagnostics'));
+      await tester.pump(); // show loading dialog
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      // Don't pumpAndSettle: the export runs real Process.run on the host
+      // and the spinner animates indefinitely. Verify the dialog opened.
+    });
+
+    testWidgets('confirming Reset executes reset and closes dialog', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(const MaintenancePage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reset configuration'));
+      await tester.pumpAndSettle();
+      // Tap the destructive confirm button
+      await tester.tap(find.text('Reset'));
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsNothing);
+    });
+
     testWidgets('tapping Reset configuration shows confirmation dialog', (
       tester,
     ) async {
