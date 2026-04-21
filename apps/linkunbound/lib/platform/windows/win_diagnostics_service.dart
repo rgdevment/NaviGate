@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
 import 'package:win32_registry/win32_registry.dart';
 
@@ -31,24 +32,22 @@ Future<String> exportDiagnostics({
 
     final zipPath = '${appDataDir.path}\\linkunbound-diag-$timestamp.zip';
 
-    ProcessResult result;
     try {
-      result = await Process.run('powershell', [
-        '-NoProfile',
-        '-Command',
-        'Compress-Archive'
-            ' -Path "${staging.path}\\*"'
-            ' -DestinationPath "$zipPath"'
-            ' -Force',
-      ]);
-    } on ProcessException catch (e) {
-      _log.warning('powershell not available: ${e.message}');
-      throw Exception('powershell not available: ${e.message}');
-    }
-
-    if (result.exitCode != 0) {
-      _log.warning('Compress-Archive failed: ${result.stderr}');
-      throw Exception('Compress-Archive failed: ${result.stderr}');
+      final encoder = ZipFileEncoder()..create(zipPath);
+      for (final entity in staging.listSync(recursive: true)) {
+        if (entity is File) {
+          await encoder.addFile(
+            entity,
+            entity.path
+                .substring(staging.path.length + 1)
+                .replaceAll('\\', '/'),
+          );
+        }
+      }
+      await encoder.close();
+    } on Object catch (e) {
+      _log.warning('Diagnostics zip creation failed: $e');
+      throw Exception('Diagnostics zip creation failed: $e');
     }
 
     try {
