@@ -15,6 +15,9 @@ import 'package:linkunbound/ui/settings/settings_window.dart';
 
 const _windowChannel = MethodChannel('window_manager');
 const _macWindowChannel = MethodChannel('linkunbound/window');
+const _screenChannel = MethodChannel(
+  'dev.leanflutter.plugins/screen_retriever',
+);
 
 const _chrome = Browser(
   id: 'chrome',
@@ -40,6 +43,46 @@ final class _MethodChannelSpy {
       case 'isVisible':
       case 'isFocused':
         return false;
+      case 'getBounds':
+        // window_manager casts the result to Map<dynamic,dynamic> before
+        // parsing; returning null causes a TypeError, so return a fake rect.
+        return <String, dynamic>{
+          'x': 0.0,
+          'y': 0.0,
+          'width': 800.0,
+          'height': 600.0,
+        };
+      default:
+        return null;
+    }
+  }
+}
+
+/// Mocks the screen_retriever channel that window_manager's center() uses
+/// to locate the primary display and cursor position.
+final class _ScreenSpy {
+  final List<MethodCall> calls = [];
+
+  static const _fakeDisplay = <String, dynamic>{
+    'id': '1',
+    'name': 'Test Display',
+    'size': <String, dynamic>{'width': 1280.0, 'height': 800.0},
+    'visiblePosition': <String, dynamic>{'dx': 0.0, 'dy': 0.0},
+    'visibleSize': <String, dynamic>{'width': 1280.0, 'height': 800.0},
+    'scaleFactor': 2.0,
+  };
+
+  Future<dynamic> handle(MethodCall call) async {
+    calls.add(call);
+    switch (call.method) {
+      case 'getPrimaryDisplay':
+        return _fakeDisplay;
+      case 'getAllDisplays':
+        return <String, dynamic>{
+          'displays': [_fakeDisplay],
+        };
+      case 'getCursorScreenPoint':
+        return <String, dynamic>{'dx': 640.0, 'dy': 400.0};
       default:
         return null;
     }
@@ -257,8 +300,9 @@ final class _FakeBindings implements PlatformBindings {
   }
 
   Future<void> emit(InboundEvent event) async {
+    // Broadcast streams deliver synchronously; callers pump the tester
+    // themselves to drain any Riverpod state-change microtasks.
     _events.add(event);
-    await Future<void>.delayed(Duration.zero);
   }
 
   @override
@@ -294,18 +338,6 @@ final class _FakeBindings implements PlatformBindings {
 }
 
 void main() {
-  // Bootstrap is an integration-level entry point that calls
-  // windowManager.ensureInitialized() + waitUntilReadyToShow(). Under
-  // flutter_test the mock channel never emits the readiness signal, so the
-  // suite hangs indefinitely (CI timeout, ~10 min wall clock). Validate
-  // bootstrap behavior via E2E manual smoke tests on macOS/Windows.
-  test(
-    'bootstrap suite skipped (integration-level, requires real plugins)',
-    () {},
-    skip: true,
-  );
-  return;
-  // ignore: dead_code
   if (!(Platform.isMacOS || Platform.isWindows)) {
     test('bootstrap suite skipped on this platform', () {}, skip: true);
     return;
@@ -315,6 +347,7 @@ void main() {
   late Directory tempDir;
   late _MethodChannelSpy windowSpy;
   late _MethodChannelSpy macWindowSpy;
+  late _ScreenSpy screenSpy;
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('bootstrap_test_');
@@ -327,10 +360,13 @@ void main() {
     );
     windowSpy = _MethodChannelSpy();
     macWindowSpy = _MethodChannelSpy();
+    screenSpy = _ScreenSpy();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_windowChannel, windowSpy.handle);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_macWindowChannel, macWindowSpy.handle);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_screenChannel, screenSpy.handle);
   });
 
   tearDown(() {
@@ -338,6 +374,8 @@ void main() {
         .setMockMethodCallHandler(_windowChannel, null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_macWindowChannel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_screenChannel, null);
     if (tempDir.existsSync()) {
       tempDir.deleteSync(recursive: true);
     }
@@ -348,10 +386,16 @@ void main() {
     _FakeBindings bindings,
     List<String> args,
   ) async {
-    await HttpOverrides.runZoned(
-      () => bootstrap(bindings, args),
-      createHttpClient: (_) => _FailingHttpClient(),
-    );
+    // bootstrap() performs real dart:io and platform-channel operations
+    // (file reads, tray init, AppLocalizations.delegate.load, runApp) that
+    // need the real event loop.  tester.runAsync escapes FakeAsync so those
+    // futures can complete, then we pump to process widget frames.
+    await tester.runAsync(() async {
+      await HttpOverrides.runZoned(
+        () => bootstrap(bindings, args),
+        createHttpClient: (_) => _FailingHttpClient(),
+      );
+    });
     await tester.pump();
     await tester.pump();
   }
@@ -408,9 +452,11 @@ void main() {
   ) async {
     final bindings = _FakeBindings(rootDir: tempDir);
     addTearDown(bindings.close);
-    await bindings.seed(
-      browsers: const [_chrome],
-      rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
+    await tester.runAsync(
+      () => bindings.seed(
+        browsers: const [_chrome],
+        rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
+      ),
     );
 
     await boot(tester, bindings, const ['--background']);
@@ -432,9 +478,11 @@ void main() {
   ) async {
     final bindings = _FakeBindings(rootDir: tempDir);
     addTearDown(bindings.close);
-    await bindings.seed(
-      browsers: const [_chrome],
-      rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
+    await tester.runAsync(
+      () => bindings.seed(
+        browsers: const [_chrome],
+        rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
+      ),
     );
 
     await boot(tester, bindings, const ['--background']);
@@ -463,7 +511,14 @@ void main() {
       ..writeAsStringSync('<html></html>');
 
     await boot(tester, bindings, const ['--background']);
-    await bindings.emit(OpenUrlEvent(htmlFile.uri.toString()));
+    // bootstrap() runs in tester.runAsync, so its listeners are in the real
+    // event loop zone.  emit + a small real-time delay lets all the async
+    // channel calls (setPickerMode, setSize, setPosition, show, …) complete
+    // before tearDown removes the spy handlers.
+    await tester.runAsync(() async {
+      bindings.emit(OpenUrlEvent(htmlFile.uri.toString()));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
     await tester.pump();
     await tester.pump();
 
@@ -483,5 +538,23 @@ void main() {
 
     expect(bindings.launchService.calls, isEmpty);
     expect(find.byType(PickerWindow), findsNothing);
+  });
+
+  testWidgets('ShowSettingsEvent opens settings window', (tester) async {
+    final bindings = _FakeBindings(rootDir: tempDir);
+    addTearDown(bindings.close);
+
+    await boot(tester, bindings, const ['--background']);
+    expect(find.byType(SettingsWindow), findsNothing);
+
+    await tester.runAsync(() async {
+      bindings.emit(const ShowSettingsEvent());
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(SettingsWindow), findsOneWidget);
+    expect(macWindowSpy.methods, contains('setSettingsMode'));
   });
 }
