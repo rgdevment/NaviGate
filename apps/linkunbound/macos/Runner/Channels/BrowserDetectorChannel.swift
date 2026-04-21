@@ -1,8 +1,6 @@
 import AppKit
 import FlutterMacOS
-import UniformTypeIdentifiers
 
-/// `linkunbound/browser_detector` — discovers installed apps that handle web URLs.
 final class BrowserDetectorChannel {
   static let channelName = "linkunbound/browser_detector"
 
@@ -28,39 +26,18 @@ final class BrowserDetectorChannel {
     var seen = Set<String>()
     var browsers: [[String: String]] = []
 
-    // Gather candidate bundle URLs that handle https. Almost every browser
-    // also registers as an http handler, so a single query is enough.
     var candidateURLs: [URL] = []
     if let httpsURL = URL(string: "https://example.com") {
       candidateURLs.append(contentsOf: workspace.urlsForApplications(toOpen: httpsURL))
     }
 
-    // True browsers register themselves as the *primary* handler for the
-    // http/https URL schemes — i.e. their `CFBundleURLTypes` entry that
-    // contains "http"/"https" has either no `LSHandlerRank` (defaults to
-    // "Default") or `LSHandlerRank = Owner`. Apps like iTerm, Hyper, Warp,
-    // Office, etc. instead declare `LSHandlerRank = Alternate`, meaning
-    // "I can open it if asked, but I'm not the canonical handler". This is
-    // the structural signal we use to keep them out of the picker.
-    let isHandlerRank: (URL) -> Bool = { appURL in
+    let isPrimaryHttpHandler: (URL) -> Bool = { appURL in
       guard
-        let plistURL = Bundle(url: appURL)?.url(
-          forResource: "Info",
-          withExtension: "plist"
-        ),
-        let data = try? Data(contentsOf: plistURL),
-        let plist = try? PropertyListSerialization.propertyList(
-          from: data,
-          options: [],
-          format: nil
-        ) as? [String: Any],
-        let urlTypes = plist["CFBundleURLTypes"] as? [[String: Any]]
+        let info = Bundle(url: appURL)?.infoDictionary,
+        let urlTypes = info["CFBundleURLTypes"] as? [[String: Any]]
       else {
-        // No URL types declared — be conservative and accept (Safari is
-        // delivered without a parseable plist on some systems).
-        return true
+        return false
       }
-
       for entry in urlTypes {
         let schemes = (entry["CFBundleURLSchemes"] as? [String] ?? []).map {
           $0.lowercased()
@@ -69,17 +46,11 @@ final class BrowserDetectorChannel {
           continue
         }
         let rank = (entry["LSHandlerRank"] as? String)?.lowercased() ?? "default"
-        // "Default" / "Owner" => primary handler. "Alternate" / "None" => skip.
         return rank == "default" || rank == "owner"
       }
-      // No http/https entry found in the Info.plist (the candidate appeared
-      // because it declared the scheme dynamically). Treat as non-browser.
       return false
     }
 
-    // Only surface real, user-installed browsers from standard application
-    // directories. This excludes Chrome-for-Testing, Playwright/Puppeteer
-    // browsers cached under ~/.cache, Xcode device-support copies, etc.
     let allowedAppRoots: [String] = [
       "/Applications/",
       "/System/Applications/",
@@ -91,7 +62,7 @@ final class BrowserDetectorChannel {
       guard let bundle = Bundle(url: appURL),
             let bundleId = bundle.bundleIdentifier,
             bundleId != ownBundleId,
-            isHandlerRank(appURL),
+            isPrimaryHttpHandler(appURL),
             !seen.contains(bundleId)
       else { continue }
 

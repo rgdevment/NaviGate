@@ -92,7 +92,6 @@ final class MacOsBindings implements PlatformBindings {
 
   final MacInboundEvents _inboundServer;
 
-  /// macOS receives URLs via Apple Events, never via argv.
   @override
   InboundEvent? get initialEvent => null;
 
@@ -105,9 +104,6 @@ final class MacOsBindings implements PlatformBindings {
   @override
   String get trayIconPath => 'assets/LinkUnbound_tray_64.png';
 
-  /// Single-instance enforcement is handled by `NSApplication` (LSMultipleInstancesProhibited
-  /// is implicit for `.app` bundles double-launched from Finder). A second
-  /// process from the CLI would be rare; we don't attempt IPC for it.
   @override
   Future<bool> tryDelegate(InboundEvent? event) async => false;
 

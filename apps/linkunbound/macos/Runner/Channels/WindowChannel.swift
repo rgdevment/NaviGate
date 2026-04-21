@@ -1,8 +1,6 @@
 import Cocoa
 import FlutterMacOS
 
-/// `linkunbound/window` — runtime-controlled NSWindow tweaks the Flutter side
-/// triggers as the app switches between picker and settings modes.
 final class WindowChannel {
   static let channelName = "linkunbound/window"
 
@@ -18,6 +16,9 @@ final class WindowChannel {
         result(nil)
       case "setSettingsMode":
         Self.applySettingsMode()
+        result(nil)
+      case "activate":
+        Self.activate()
         result(nil)
       default:
         result(FlutterMethodNotImplemented)
@@ -37,11 +38,6 @@ final class WindowChannel {
       win.standardWindowButton(.miniaturizeButton)?.isHidden = true
       win.standardWindowButton(.zoomButton)?.isHidden = true
       win.level = .statusBar
-      // LSUIElement apps don't auto-activate on window show — without these
-      // calls the picker appears already "blurred" and would dismiss itself
-      // immediately via `onWindowBlur`.
-      NSApp.activate(ignoringOtherApps: true)
-      win.makeKeyAndOrderFront(nil)
     }
   }
 
@@ -49,13 +45,16 @@ final class WindowChannel {
     guard let win = mainWindow() else { return }
     DispatchQueue.main.async {
       win.styleMask.insert(.resizable)
-      // Hide the traffic-light buttons in Settings too — the in-app "Salir"
-      // button is the canonical way to close the window on macOS for this
-      // LSUIElement app, matching the Windows-style chrome.
       win.standardWindowButton(.closeButton)?.isHidden = true
       win.standardWindowButton(.miniaturizeButton)?.isHidden = true
       win.standardWindowButton(.zoomButton)?.isHidden = true
       win.level = .normal
+    }
+  }
+
+  private static func activate() {
+    guard let win = mainWindow() else { return }
+    DispatchQueue.main.async {
       NSApp.activate(ignoringOtherApps: true)
       win.makeKeyAndOrderFront(nil)
     }

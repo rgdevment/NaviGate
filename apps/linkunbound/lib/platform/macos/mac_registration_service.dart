@@ -6,7 +6,6 @@ class MacRegistrationService implements RegistrationService {
 
   @override
   Future<void> register(String executablePath) async {
-    // executablePath is ignored on macOS — registration is bundle-based.
     await _channel.invokeMethod<void>('register');
   }
 
