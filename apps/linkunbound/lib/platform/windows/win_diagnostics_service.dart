@@ -17,6 +17,7 @@ const _registryPaths = [
 Future<String> exportDiagnostics({
   required Directory appDataDir,
   required String appVersion,
+  void Function(Directory staging)? registryDumper,
 }) async {
   final timestamp = DateTime.now()
       .toIso8601String()
@@ -27,7 +28,7 @@ Future<String> exportDiagnostics({
 
   try {
     _writeSystemInfo(staging, appDataDir, appVersion);
-    _writeRegistryDump(staging);
+    (registryDumper ?? _writeRegistryDump)(staging);
     _copyLogTail(appDataDir, staging);
 
     final zipPath = '${appDataDir.path}\\linkunbound-diag-$timestamp.zip';
