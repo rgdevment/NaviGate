@@ -189,7 +189,7 @@ void main() {
         buildTestApp(const GeneralPage(), overrides: f.overrides),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Launch at Windows startup'), findsOneWidget);
+      expect(find.text('Launch at system startup'), findsOneWidget);
     });
 
     testWidgets('startup switch is off by default', (tester) async {
