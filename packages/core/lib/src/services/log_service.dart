@@ -44,7 +44,12 @@ void initLogging(File logFile, {Level fileLevel = Level.INFO}) {
   // valid stdio handles, and even `stderr.hasTerminal` can lie; a single
   // write then crashes the main zone asynchronously. On Windows we therefore
   // skip console output entirely and rely on the file sink.
-  var useStderr = !Platform.isWindows;     '${record.time.toIso8601String()} '
+  var useStderr = !Platform.isWindows;
+  _logSubscription = Logger.root.onRecord.listen((record) {
+    if (record.level < fileLevel) return;
+    final message = redactUrls(record.message);
+    final line =
+        '${record.time.toIso8601String()} '
         '[${record.level.name}] '
         '${record.loggerName}: '
         '$message'
