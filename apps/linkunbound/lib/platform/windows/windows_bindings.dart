@@ -43,10 +43,16 @@ final class WindowsBindings implements PlatformBindings {
        _pipeServer = pipeServer;
 
   static Future<WindowsBindings> create(List<String> args) async {
-    final appDataDir = Directory(
-      '${Platform.environment['APPDATA']}\\LinkUnbound',
-    );
-    await appDataDir.create(recursive: true);
+    final baseDir =
+        Platform.environment['APPDATA'] ??
+        Platform.environment['LOCALAPPDATA'] ??
+        '${Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path}\\AppData\\Roaming';
+    final appDataDir = Directory('$baseDir\\LinkUnbound');
+    try {
+      await appDataDir.create(recursive: true);
+    } on FileSystemException catch (e) {
+      _log.severe('Could not create app data dir at ${appDataDir.path}', e);
+    }
 
     return WindowsBindings._(
       browserDetector: WinBrowserDetector(),

@@ -31,21 +31,31 @@ Future<String> exportDiagnostics({
 
     final zipPath = '${appDataDir.path}\\linkunbound-diag-$timestamp.zip';
 
-    final result = await Process.run('powershell', [
-      '-NoProfile',
-      '-Command',
-      'Compress-Archive'
-          ' -Path "${staging.path}\\*"'
-          ' -DestinationPath "$zipPath"'
-          ' -Force',
-    ]);
+    ProcessResult result;
+    try {
+      result = await Process.run('powershell', [
+        '-NoProfile',
+        '-Command',
+        'Compress-Archive'
+            ' -Path "${staging.path}\\*"'
+            ' -DestinationPath "$zipPath"'
+            ' -Force',
+      ]);
+    } on ProcessException catch (e) {
+      _log.warning('powershell not available: ${e.message}');
+      throw Exception('powershell not available: ${e.message}');
+    }
 
     if (result.exitCode != 0) {
       _log.warning('Compress-Archive failed: ${result.stderr}');
       throw Exception('Compress-Archive failed: ${result.stderr}');
     }
 
-    await Process.run('explorer.exe', ['/select,$zipPath']);
+    try {
+      await Process.run('explorer.exe', ['/select,$zipPath']);
+    } on ProcessException catch (e) {
+      _log.fine('Could not reveal zip in Explorer: ${e.message}');
+    }
 
     return zipPath;
   } on Exception catch (e) {

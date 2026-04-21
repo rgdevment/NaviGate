@@ -39,9 +39,17 @@ Future<void> main(List<String> args) async {
 
 void _writeStartupCrashLog(String source, Object error, StackTrace? stack) {
   try {
-    final dir = Platform.isWindows
-        ? '${Platform.environment['APPDATA']}\\LinkUnbound'
-        : '${Platform.environment['HOME']}/Library/Application Support/LinkUnbound';
+    final String base;
+    if (Platform.isWindows) {
+      base =
+          Platform.environment['APPDATA'] ??
+          Platform.environment['LOCALAPPDATA'] ??
+          '${Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path}\\AppData\\Roaming';
+    } else {
+      base =
+          '${Platform.environment['HOME'] ?? Directory.systemTemp.path}/Library/Application Support';
+    }
+    final dir = Platform.isWindows ? '$base\\LinkUnbound' : '$base/LinkUnbound';
     Directory(dir).createSync(recursive: true);
     final file = File('$dir${Platform.pathSeparator}startup_crash.log');
     final now = DateTime.now().toIso8601String();
