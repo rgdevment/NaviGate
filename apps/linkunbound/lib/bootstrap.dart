@@ -12,6 +12,7 @@ import 'platform/local_file_url.dart';
 import 'platform/macos/mac_window_channel.dart';
 import 'platform/platform_bindings.dart';
 import 'platform/tray_controller.dart';
+import 'platform/windows/win_package_context.dart';
 import 'providers.dart';
 import 'ui/picker/picker_layout.dart';
 
@@ -40,13 +41,18 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
   await browserService.load();
 
   if (isFirstBoot) {
-    await _firstBoot(
-      browserService: browserService,
-      iconExtractor: bindings.iconExtractor,
-      iconsDir: bindings.iconsDir,
-      registrationService: bindings.registrationService,
-      executablePath: bindings.executablePath,
-    );
+    try {
+      await _firstBoot(
+        browserService: browserService,
+        iconExtractor: bindings.iconExtractor,
+        iconsDir: bindings.iconsDir,
+        registrationService: bindings.registrationService,
+        executablePath: bindings.executablePath,
+        skipRegistration: isRunningInMsix(),
+      );
+    } on Object catch (e, st) {
+      _log.severe('First boot failed (non-fatal)', e, st);
+    }
   }
 
   await ruleService.load();
@@ -151,7 +157,11 @@ Future<void> bootstrap(PlatformBindings bindings, List<String> args) async {
     }
   });
 
-  await _initTray(bindings, container);
+  try {
+    await _initTray(bindings, container);
+  } on Object catch (e, st) {
+    _log.severe('Tray init failed (non-fatal)', e, st);
+  }
 
   runApp(
     UncontrolledProviderScope(container: container, child: const NavigateApp()),
@@ -170,6 +180,7 @@ Future<void> _firstBoot({
   required Directory iconsDir,
   required RegistrationService registrationService,
   required String executablePath,
+  bool skipRegistration = false,
 }) async {
   await browserService.scanAndMerge();
   await iconsDir.create(recursive: true);
@@ -182,9 +193,17 @@ Future<void> _firstBoot({
       _log.warning('Icon extraction failed for ${browser.name}: $e');
     }
   }
-  await registrationService.register(executablePath);
+  if (skipRegistration) {
+    _log.info('First boot: skipping browser registration (MSIX context)');
+  } else {
+    try {
+      await registrationService.register(executablePath);
+    } on Object catch (e, st) {
+      _log.warning('Browser registration failed (non-fatal): $e', e, st);
+    }
+  }
   _log.info(
-    'First boot: scanned ${browserService.browsers.length} browsers, registered',
+    'First boot: scanned ${browserService.browsers.length} browsers',
   );
 }
 
