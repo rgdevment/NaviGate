@@ -6,6 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:linkunbound/platform/windows/win_diagnostics_service.dart';
 
+void _stubRegistry(Directory staging) {
+  File(
+    '${staging.path}${Platform.pathSeparator}registry.txt',
+  ).writeAsStringSync('');
+}
+
 void main() {
   group('parseWindowsVersion', () {
     test('returns Windows 11 for build 22000', () {
@@ -38,6 +44,12 @@ void main() {
   group('exportDiagnostics', () {
     late Directory appDataDir;
 
+    Future<String> export({String appVersion = '1.0.0'}) => exportDiagnostics(
+      appDataDir: appDataDir,
+      appVersion: appVersion,
+      registryDumper: _stubRegistry,
+    );
+
     setUp(() {
       appDataDir = Directory.systemTemp.createTempSync('lu_diag_test_');
     });
@@ -52,44 +64,29 @@ void main() {
     }
 
     test('creates a zip file and returns its path', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0-test',
-      );
+      final zipPath = await export(appVersion: '1.0.0-test');
       expect(File(zipPath).existsSync(), isTrue);
     });
 
     test('returned path is inside appDataDir', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       expect(zipPath, startsWith(appDataDir.path));
     });
 
     test('zip contains system_info.txt', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final names = zipFiles(zipPath).map((f) => f.name).toList();
       expect(names, contains('system_info.txt'));
     });
 
     test('zip contains registry.txt', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final names = zipFiles(zipPath).map((f) => f.name).toList();
       expect(names, contains('registry.txt'));
     });
 
     test('system_info.txt contains the app version', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '9.8.7-diag-test',
-      );
+      final zipPath = await export(appVersion: '9.8.7-diag-test');
       final files = zipFiles(zipPath);
       final sysInfo = files.firstWhere((f) => f.name == 'system_info.txt');
       final content = utf8.decode(sysInfo.content as List<int>);
@@ -97,10 +94,7 @@ void main() {
     });
 
     test('system_info.txt includes appDataDir path', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final files = zipFiles(zipPath);
       final sysInfo = files.firstWhere((f) => f.name == 'system_info.txt');
       final content = utf8.decode(sysInfo.content as List<int>);
@@ -112,10 +106,7 @@ void main() {
         '${appDataDir.path}\\navigate.log',
       ).writeAsStringSync('line1\nline2\nline3');
 
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final names = zipFiles(zipPath).map((f) => f.name).toList();
       expect(names, contains('navigate.log'));
     });
@@ -125,10 +116,7 @@ void main() {
         '${appDataDir.path}\\navigate.log',
       ).writeAsStringSync('alpha\nbeta\ngamma');
 
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final files = zipFiles(zipPath);
       final logFile = files.firstWhere((f) => f.name == 'navigate.log');
       final content = utf8.decode(logFile.content as List<int>);
@@ -142,10 +130,7 @@ void main() {
         '${appDataDir.path}\\navigate.log',
       ).writeAsStringSync(lines.join('\n'));
 
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final files = zipFiles(zipPath);
       final logFile = files.firstWhere((f) => f.name == 'navigate.log');
       final content = utf8.decode(logFile.content as List<int>);
@@ -159,10 +144,7 @@ void main() {
     });
 
     test('navigate.log missing is silently skipped', () async {
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final names = zipFiles(zipPath).map((f) => f.name).toList();
       expect(names, isNot(contains('navigate.log')));
     });
@@ -170,10 +152,7 @@ void main() {
     test('data files listed in system_info.txt', () async {
       File('${appDataDir.path}\\browsers.json').writeAsStringSync('[]');
 
-      final zipPath = await exportDiagnostics(
-        appDataDir: appDataDir,
-        appVersion: '1.0.0',
-      );
+      final zipPath = await export();
       final files = zipFiles(zipPath);
       final sysInfo = files.firstWhere((f) => f.name == 'system_info.txt');
       final content = utf8.decode(sysInfo.content as List<int>);
