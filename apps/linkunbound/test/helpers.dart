@@ -88,9 +88,11 @@ Widget buildTestApp(Widget child, {required List<Override> overrides}) {
 makeFixtures({
   Directory? dir,
   List<Browser> browsers = const [],
+  List<Browser> detectedBrowsers = const [],
   List<Rule> rules = const [],
   bool isDefault = false,
   bool isStartupEnabled = false,
+  StartupService? startupService,
   UpdateInfo? updateInfo,
 }) {
   final tempDir = dir ?? Directory.systemTemp.createTempSync('lu_test_');
@@ -102,7 +104,7 @@ makeFixtures({
 
   final browserService = BrowserService(
     configFile: configFile,
-    browserDetector: FakeBrowserDetector([]),
+    browserDetector: FakeBrowserDetector(detectedBrowsers),
   );
   for (final b in browsers) {
     browserService.addBrowser(b);
@@ -122,7 +124,7 @@ makeFixtures({
       FakeRegistrationService(isDefaultValue: isDefault),
     ),
     startupServiceProvider.overrideWithValue(
-      FakeStartupService(isEnabledValue: isStartupEnabled),
+      startupService ?? FakeStartupService(isEnabledValue: isStartupEnabled),
     ),
     launchServiceProvider.overrideWithValue(launchService),
     iconExtractorProvider.overrideWithValue(FakeIconExtractor()),

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
 import 'package:win32_registry/win32_registry.dart';
 
@@ -16,6 +17,7 @@ const _registryPaths = [
 Future<String> exportDiagnostics({
   required Directory appDataDir,
   required String appVersion,
+  void Function(Directory staging)? registryDumper,
 }) async {
   final timestamp = DateTime.now()
       .toIso8601String()
@@ -26,26 +28,35 @@ Future<String> exportDiagnostics({
 
   try {
     _writeSystemInfo(staging, appDataDir, appVersion);
-    _writeRegistryDump(staging);
+    (registryDumper ?? _writeRegistryDump)(staging);
     _copyLogTail(appDataDir, staging);
 
-    final zipPath = '${appDataDir.path}\\linkunbound-diag-$timestamp.zip';
+    final zipPath =
+        '${appDataDir.path}${Platform.pathSeparator}linkunbound-diag-$timestamp.zip';
 
-    final result = await Process.run('powershell', [
-      '-NoProfile',
-      '-Command',
-      'Compress-Archive'
-          ' -Path "${staging.path}\\*"'
-          ' -DestinationPath "$zipPath"'
-          ' -Force',
-    ]);
-
-    if (result.exitCode != 0) {
-      _log.warning('Compress-Archive failed: ${result.stderr}');
-      throw Exception('Compress-Archive failed: ${result.stderr}');
+    try {
+      final encoder = ZipFileEncoder()..create(zipPath);
+      for (final entity in staging.listSync(recursive: true)) {
+        if (entity is File) {
+          await encoder.addFile(
+            entity,
+            entity.path
+                .substring(staging.path.length + 1)
+                .replaceAll('\\', '/'),
+          );
+        }
+      }
+      await encoder.close();
+    } on Object catch (e) {
+      _log.warning('Diagnostics zip creation failed: $e');
+      throw Exception('Diagnostics zip creation failed: $e');
     }
 
-    await Process.run('explorer.exe', ['/select,$zipPath']);
+    try {
+      await Process.run('explorer.exe', ['/select,$zipPath']);
+    } on ProcessException catch (e) {
+      _log.fine('Could not reveal zip in Explorer: ${e.message}');
+    }
 
     return zipPath;
   } on Exception catch (e) {
@@ -83,7 +94,7 @@ void _writeSystemInfo(
   try {
     if (appDataDir.existsSync()) {
       for (final entity in appDataDir.listSync()) {
-        final name = entity.path.split('\\').last;
+        final name = entity.uri.pathSegments.where((s) => s.isNotEmpty).last;
         if (entity is File) {
           buf.writeln('  $name (${entity.lengthSync()} bytes)');
         } else if (entity is Directory) {
@@ -95,7 +106,9 @@ void _writeSystemInfo(
     buf.writeln('  <error listing files: $e>');
   }
 
-  File('${staging.path}\\system_info.txt').writeAsStringSync(buf.toString());
+  File(
+    '${staging.path}${Platform.pathSeparator}system_info.txt',
+  ).writeAsStringSync(buf.toString());
 }
 
 String _osVersion() => parseWindowsVersion(Platform.operatingSystemVersion);
@@ -119,7 +132,9 @@ void _writeRegistryDump(Directory staging) {
     buf.writeln();
   }
 
-  File('${staging.path}\\registry.txt').writeAsStringSync(buf.toString());
+  File(
+    '${staging.path}${Platform.pathSeparator}registry.txt',
+  ).writeAsStringSync(buf.toString());
 }
 
 void _dumpKey(String path, StringBuffer buf, {int depth = 0}) {
@@ -149,7 +164,9 @@ void _dumpKey(String path, StringBuffer buf, {int depth = 0}) {
 }
 
 void _copyLogTail(Directory appDataDir, Directory staging) {
-  final logFile = File('${appDataDir.path}\\navigate.log');
+  final logFile = File(
+    '${appDataDir.path}${Platform.pathSeparator}navigate.log',
+  );
   if (!logFile.existsSync()) return;
 
   try {
@@ -158,10 +175,12 @@ void _copyLogTail(Directory appDataDir, Directory staging) {
         ? lines.sublist(lines.length - _maxLogLines)
         : lines;
 
-    File('${staging.path}\\navigate.log').writeAsStringSync(tail.join('\n'));
+    File(
+      '${staging.path}${Platform.pathSeparator}navigate.log',
+    ).writeAsStringSync(tail.join('\n'));
   } on Exception catch (e) {
     File(
-      '${staging.path}\\navigate.log',
+      '${staging.path}${Platform.pathSeparator}navigate.log',
     ).writeAsStringSync('<error reading log: $e>');
   }
 }

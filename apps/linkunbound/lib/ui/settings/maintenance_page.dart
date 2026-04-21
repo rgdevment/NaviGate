@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/macos/mac_diagnostics_service.dart';
 import '../../platform/windows/win_diagnostics_service.dart';
+import '../../platform/windows/win_package_context.dart';
 import '../../providers.dart';
 import '../shared/widgets/base_dialog.dart';
 import '../shared/widgets/group_card.dart';
@@ -18,6 +19,7 @@ class MaintenancePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final showUnregister = !isRunningInMsix();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
@@ -41,14 +43,16 @@ class MaintenancePage extends ConsumerWidget {
                 color: colors.error,
                 onTap: () => _confirmReset(context, ref),
               ),
-              Divider(height: 1, color: colors.outline.withAlpha(40)),
-              _ActionRow(
-                icon: Icons.delete_outline,
-                label: l10n.unregisterLabel,
-                description: l10n.unregisterDescription,
-                color: colors.error,
-                onTap: () => _confirmUnregister(context, ref),
-              ),
+              if (showUnregister) ...[
+                Divider(height: 1, color: colors.outline.withAlpha(40)),
+                _ActionRow(
+                  icon: Icons.delete_outline,
+                  label: l10n.unregisterLabel,
+                  description: l10n.unregisterDescription,
+                  color: colors.error,
+                  onTap: () => _confirmUnregister(context, ref),
+                ),
+              ],
             ],
           ),
         ),
@@ -57,12 +61,15 @@ class MaintenancePage extends ConsumerWidget {
   }
 
   Future<void> _exportDiagnostics(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final errorMsg = AppLocalizations.of(context)!.errorExportDiagnostics;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
+    var failed = false;
     try {
       final appDataDir = ref.read(appDataDirProvider);
       final version =
@@ -73,15 +80,19 @@ class MaintenancePage extends ConsumerWidget {
       } else {
         await exportDiagnostics(appDataDir: appDataDir, appVersion: version);
       }
-    } on Exception {
-      // Best-effort
+    } on Object {
+      failed = true;
     } finally {
       if (context.mounted) Navigator.of(context).pop();
+      if (failed) {
+        messenger?.showSnackBar(SnackBar(content: Text(errorMsg)));
+      }
     }
   }
 
   void _confirmReset(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.maybeOf(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => BaseDialog(
@@ -91,23 +102,29 @@ class MaintenancePage extends ConsumerWidget {
         confirmColor: Theme.of(ctx).colorScheme.error,
         onConfirm: () async {
           Navigator.of(ctx).pop();
-          final browserService = ref.read(browserServiceProvider);
-          await browserService.reset();
-          await browserService.scanAndMerge();
-          final iconsDir = ref.read(iconsDirProvider);
-          final iconExtractor = ref.read(iconExtractorProvider);
-          for (final browser in browserService.browsers) {
-            try {
-              await iconExtractor.extractIcon(
-                browser.executablePath,
-                '${iconsDir.path}/${browser.id}.png',
-              );
-            } on Exception {
-              // Best-effort
+          try {
+            final browserService = ref.read(browserServiceProvider);
+            await browserService.reset();
+            await browserService.scanAndMerge();
+            final iconsDir = ref.read(iconsDirProvider);
+            final iconExtractor = ref.read(iconExtractorProvider);
+            for (final browser in browserService.browsers) {
+              try {
+                await iconExtractor.extractIcon(
+                  browser.executablePath,
+                  '${iconsDir.path}/${browser.id}.png',
+                );
+              } on Exception {
+                // Best-effort
+              }
             }
+            ref.invalidate(browsersProvider);
+            ref.invalidate(rulesProvider);
+          } on Object {
+            messenger?.showSnackBar(
+              SnackBar(content: Text(l10n.errorResetConfig)),
+            );
           }
-          ref.invalidate(browsersProvider);
-          ref.invalidate(rulesProvider);
         },
       ),
     );
@@ -115,6 +132,7 @@ class MaintenancePage extends ConsumerWidget {
 
   void _confirmUnregister(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.maybeOf(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => BaseDialog(
@@ -124,8 +142,15 @@ class MaintenancePage extends ConsumerWidget {
         confirmColor: Theme.of(ctx).colorScheme.error,
         onConfirm: () async {
           Navigator.of(ctx).pop();
-          await ref.read(registrationServiceProvider).unregister();
-          ref.invalidate(isDefaultBrowserProvider);
+          try {
+            await ref.read(registrationServiceProvider).unregister();
+          } on Object {
+            messenger?.showSnackBar(
+              SnackBar(content: Text(l10n.errorUnregister)),
+            );
+          } finally {
+            ref.invalidate(isDefaultBrowserProvider);
+          }
         },
       ),
     );

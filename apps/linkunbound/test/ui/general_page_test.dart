@@ -473,4 +473,63 @@ void main() {
       expect(find.text('Microsoft Edge detected'), findsNothing);
     });
   });
+
+  group('GeneralPage — refresh with changes', () {
+    testWidgets('refresh shows result snackbar when new browser detected', (
+      tester,
+    ) async {
+      // Detector returns _firefox but initial list is empty → added: 1
+      final f = makeFixtures(dir: tempDir, detectedBrowsers: [_firefox]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Refresh browsers'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 added, 0 removed'), findsOneWidget);
+    });
+
+    testWidgets('refresh result snackbar contains added count', (tester) async {
+      final f = makeFixtures(
+        dir: tempDir,
+        detectedBrowsers: [_chrome, _firefox],
+      );
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Refresh browsers'));
+      await tester.pumpAndSettle();
+      expect(find.text('2 added, 0 removed'), findsOneWidget);
+    });
+  });
+
+  group('GeneralPage — startup toggle error', () {
+    testWidgets('startup toggle error shows error snackbar', (tester) async {
+      final f = makeFixtures(
+        dir: tempDir,
+        startupService: _ThrowingStartupService(),
+        isStartupEnabled: false,
+      );
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(find.text('Could not change startup setting'), findsOneWidget);
+    });
+  });
+}
+
+final class _ThrowingStartupService implements StartupService {
+  @override
+  Future<void> enable(String executablePath) =>
+      Future.error(Exception('startup failed'));
+
+  @override
+  Future<void> disable() => Future.error(Exception('startup failed'));
+
+  @override
+  Future<bool> get isEnabled async => false;
 }

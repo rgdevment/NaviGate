@@ -1,5 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
+import 'package:logging/logging.dart';
+
+final _log = Logger('MacStartupService');
 
 class MacStartupService implements StartupService {
   static const _channel = MethodChannel('linkunbound/startup');
@@ -16,7 +19,12 @@ class MacStartupService implements StartupService {
 
   @override
   Future<bool> get isEnabled async {
-    final result = await _channel.invokeMethod<bool>('isEnabled');
-    return result ?? false;
+    try {
+      final result = await _channel.invokeMethod<bool>('isEnabled');
+      return result ?? false;
+    } on PlatformException catch (e, st) {
+      _log.warning('isEnabled check failed', e, st);
+      return false;
+    }
   }
 }
