@@ -15,11 +15,12 @@ class MacLaunchService implements LaunchService {
     String url,
     List<String> extraArgs,
   ) async {
-    final args = <String>['-a', executablePath];
+    // `open` requires the document/URL BEFORE `--args`; everything after
+    // `--args` is forwarded as argv to the launched app.
+    final args = <String>['-a', executablePath, url];
     if (extraArgs.isNotEmpty) {
-      args.addAll(['--args', ...extraArgs, url]);
-    } else {
-      args.add(url);
+      args.add('--args');
+      args.addAll(extraArgs);
     }
     await Process.start('/usr/bin/open', args, mode: ProcessStartMode.detached);
   }
