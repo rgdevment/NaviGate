@@ -35,8 +35,6 @@ final class WinRegistrationService implements RegistrationService {
     _writeCapabilities(exe, quotedExe);
     _writeRegisteredApplications();
     _notifyShell();
-
-    _log.info('Registered LinkUnbound as browser handler');
   }
 
   @override
@@ -46,8 +44,6 @@ final class WinRegistrationService implements RegistrationService {
     _deleteKeyTree(r'Software\LinkUnbound');
     _removeRegisteredApplication();
     _notifyShell();
-
-    _log.info('Unregistered LinkUnbound from browser handlers');
   }
 
   @override

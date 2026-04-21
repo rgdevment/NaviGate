@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:linkunbound_core/linkunbound_core.dart';
-import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../cursor_locator.dart';
@@ -15,8 +14,6 @@ import 'mac_launch_service.dart';
 import 'mac_registration_service.dart';
 import 'mac_startup_service.dart';
 import 'macos_tray_controller.dart';
-
-final _log = Logger('MacOsBindings');
 
 final class MacOsBindings implements PlatformBindings {
   MacOsBindings._({
@@ -113,7 +110,6 @@ final class MacOsBindings implements PlatformBindings {
   @override
   Future<bool> claim() async {
     await _inboundServer.start();
-    _log.info('macOS bindings ready');
     return true;
   }
 

@@ -1,15 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
-
 import '../models/rule.dart';
 
 final class RuleService {
   RuleService({required this.rulesFile});
 
   final File rulesFile;
-  final _log = Logger('RuleService');
 
   List<Rule> _rules = [];
 
@@ -20,7 +17,6 @@ final class RuleService {
       _rules = [];
       return;
     }
-    _log.info('Loading rules from ${rulesFile.path}');
     final content = await rulesFile.readAsString();
     final decoded = jsonDecode(content) as List;
     _rules = decoded
@@ -29,7 +25,6 @@ final class RuleService {
   }
 
   Future<void> save() async {
-    _log.info('Saving ${_rules.length} rules to ${rulesFile.path}');
     await rulesFile.parent.create(recursive: true);
     const encoder = JsonEncoder.withIndent('  ');
     await rulesFile.writeAsString(

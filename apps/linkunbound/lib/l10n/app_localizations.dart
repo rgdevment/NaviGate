@@ -547,6 +547,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate a ZIP with system info, registry data, and logs for troubleshooting'**
   String get exportDiagnosticsDescription;
+
+  /// No description provided for @errorStartupToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change startup setting'**
+  String get errorStartupToggle;
+
+  /// No description provided for @errorUnregister.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not unregister LinkUnbound'**
+  String get errorUnregister;
+
+  /// No description provided for @errorExportDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export diagnostics'**
+  String get errorExportDiagnostics;
+
+  /// No description provided for @errorResetConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset configuration'**
+  String get errorResetConfig;
 }
 
 class _AppLocalizationsDelegate

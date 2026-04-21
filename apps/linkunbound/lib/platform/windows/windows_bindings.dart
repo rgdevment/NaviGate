@@ -132,11 +132,7 @@ final class WindowsBindings implements PlatformBindings {
     final client = WinPipeClient();
     final payload = event ?? const ShowSettingsEvent();
     WinInstance.allowForeground();
-    if (await client.send(payload)) {
-      _log.info('Delegated to existing instance');
-      return true;
-    }
-    return false;
+    return client.send(payload);
   }
 
   @override

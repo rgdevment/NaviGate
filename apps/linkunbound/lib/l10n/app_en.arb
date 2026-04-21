@@ -107,5 +107,10 @@
 
   "sectionMaintenance": "MAINTENANCE",
   "exportDiagnosticsLabel": "Export diagnostics",
-  "exportDiagnosticsDescription": "Generate a ZIP with system info, registry data, and logs for troubleshooting"
+  "exportDiagnosticsDescription": "Generate a ZIP with system info, registry data, and logs for troubleshooting",
+
+  "errorStartupToggle": "Could not change startup setting",
+  "errorUnregister": "Could not unregister LinkUnbound",
+  "errorExportDiagnostics": "Could not export diagnostics",
+  "errorResetConfig": "Could not reset configuration"
 }

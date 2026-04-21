@@ -255,4 +255,17 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get exportDiagnosticsDescription =>
       'Genera un ZIP con info del sistema, datos del registro y logs para diagnóstico';
+
+  @override
+  String get errorStartupToggle =>
+      'No se pudo cambiar la configuración de inicio';
+
+  @override
+  String get errorUnregister => 'No se pudo desregistrar LinkUnbound';
+
+  @override
+  String get errorExportDiagnostics => 'No se pudo exportar el diagnóstico';
+
+  @override
+  String get errorResetConfig => 'No se pudo restablecer la configuración';
 }
