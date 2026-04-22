@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -7,6 +8,7 @@ import 'package:linkunbound/ui/shared/widgets/base_dialog.dart';
 import 'package:linkunbound/ui/shared/widgets/browser_tile.dart';
 import 'package:linkunbound/ui/shared/widgets/group_card.dart';
 import 'package:linkunbound/ui/shared/widgets/section_header.dart';
+import 'package:linkunbound/ui/shared/widgets/title_bar.dart';
 
 import '../helpers.dart';
 
@@ -278,4 +280,101 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
     });
   });
+
+  group('TitleBar', () {
+    testWidgets('renders tab labels', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(_TitleBarHost(onClose: () {}), overrides: []),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Alpha'), findsOneWidget);
+      expect(find.text('Beta'), findsOneWidget);
+    });
+
+    testWidgets('close button calls onClose when tapped', (tester) async {
+      var called = false;
+      await tester.pumpWidget(
+        buildTestApp(
+          _TitleBarHost(onClose: () => called = true),
+          overrides: [],
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.close));
+      expect(called, isTrue);
+    });
+
+    testWidgets('close button turns red on hover and reverts on exit', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestApp(_TitleBarHost(onClose: () {}), overrides: []),
+      );
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+
+      await gesture.moveTo(tester.getCenter(find.byIcon(Icons.close)));
+      await tester.pumpAndSettle();
+
+      final containers = tester.widgetList<Container>(
+        find.ancestor(
+          of: find.byIcon(Icons.close),
+          matching: find.byType(Container),
+        ),
+      );
+      expect(containers.any((c) => c.color == const Color(0xFFE81123)), isTrue);
+
+      // Move away — triggers onExit, reverts hover state
+      await gesture.moveTo(Offset.zero);
+      await tester.pumpAndSettle();
+
+      final containersAfter = tester.widgetList<Container>(
+        find.ancestor(
+          of: find.byIcon(Icons.close),
+          matching: find.byType(Container),
+        ),
+      );
+      expect(
+        containersAfter.any((c) => c.color == const Color(0xFFE81123)),
+        isFalse,
+      );
+    });
+  });
+}
+
+class _TitleBarHost extends StatefulWidget {
+  const _TitleBarHost({required this.onClose});
+  final VoidCallback onClose;
+
+  @override
+  State<_TitleBarHost> createState() => _TitleBarHostState();
+}
+
+class _TitleBarHostState extends State<_TitleBarHost>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tc;
+
+  @override
+  void initState() {
+    super.initState();
+    _tc = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TitleBar(
+      tabController: _tc,
+      tabs: const ['Alpha', 'Beta'],
+      onClose: widget.onClose,
+    );
+  }
 }

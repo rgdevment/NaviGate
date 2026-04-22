@@ -211,11 +211,12 @@ final class _FakeBindings implements PlatformBindings {
   _FakeBindings({
     required this.rootDir,
     List<Browser> detectedBrowsers = const [],
+    LaunchService? launchOverride,
   }) : browserDetector = _FakeBrowserDetector(detectedBrowsers),
        iconExtractor = _RecordingIconExtractor(),
        registrationService = _RecordingRegistrationService(),
        startupService = _FakeStartupService(),
-       launchService = _RecordingLaunchService(),
+       launchService = launchOverride ?? _RecordingLaunchService(),
        trayController = _FakeTrayController(),
        cursorLocator = _FakeCursorLocator(),
        _events = StreamController<InboundEvent>.broadcast() {
@@ -235,7 +236,10 @@ final class _FakeBindings implements PlatformBindings {
   final _RecordingIconExtractor iconExtractor;
 
   @override
-  final _RecordingLaunchService launchService;
+  final LaunchService launchService;
+
+  _RecordingLaunchService get launchRecorder =>
+      launchService as _RecordingLaunchService;
 
   @override
   final _RecordingRegistrationService registrationService;
@@ -308,6 +312,10 @@ final class _FakeBindings implements PlatformBindings {
     _events.add(event);
   }
 
+  Future<void> emitError(Object error) async {
+    _events.addError(error);
+  }
+
   @override
   Future<void> release() async {
     releaseCalls++;
@@ -338,6 +346,15 @@ final class _FakeBindings implements PlatformBindings {
     tryDelegateCalls++;
     return false;
   }
+}
+
+final class _FailingLaunchService implements LaunchService {
+  @override
+  Future<void> launch(
+    String executablePath,
+    String url,
+    List<String> extraArgs,
+  ) => Future.error(Exception('launch failed'));
 }
 
 final class _ThrowingDelegateBindings extends _FakeBindings {
@@ -479,12 +496,15 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(bindings.launchService.calls, hasLength(1));
+    expect(bindings.launchRecorder.calls, hasLength(1));
     expect(
-      bindings.launchService.calls.single.executablePath,
+      bindings.launchRecorder.calls.single.executablePath,
       _chrome.executablePath,
     );
-    expect(bindings.launchService.calls.single.url, 'https://example.com/docs');
+    expect(
+      bindings.launchRecorder.calls.single.url,
+      'https://example.com/docs',
+    );
     expect(find.byType(PickerWindow), findsNothing);
   });
 
@@ -509,9 +529,9 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(bindings.launchService.calls, hasLength(1));
+    expect(bindings.launchRecorder.calls, hasLength(1));
     expect(
-      bindings.launchService.calls.single.url,
+      bindings.launchRecorder.calls.single.url,
       'https://example.com/report?id=7',
     );
   });
@@ -553,7 +573,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(bindings.launchService.calls, isEmpty);
+    expect(bindings.launchRecorder.calls, isEmpty);
     expect(find.byType(PickerWindow), findsNothing);
   });
 
@@ -630,4 +650,95 @@ void main() {
       expect(windowSpy.methods, contains('focus'));
     },
   );
+
+  testWidgets('corrupt rules.json is ignored and boot continues', (
+    tester,
+  ) async {
+    final bindings = _FakeBindings(rootDir: tempDir);
+    addTearDown(bindings.close);
+    bindings.rulesFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{{not valid json');
+
+    await boot(tester, bindings, const []);
+
+    expect(find.byType(SettingsWindow), findsOneWidget);
+  });
+
+  testWidgets('no matching rule opens picker', (tester) async {
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
+    addTearDown(bindings.close);
+    await tester.runAsync(() => bindings.seed(browsers: const [_chrome]));
+
+    await boot(tester, bindings, const ['--background']);
+    await tester.runAsync(() async {
+      bindings.emit(const OpenUrlEvent('https://no-rule-site.com/page'));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(PickerWindow), findsOneWidget);
+    expect(bindings.launchRecorder.calls, isEmpty);
+  });
+
+  testWidgets('rule matched but browser missing opens picker', (tester) async {
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
+    addTearDown(bindings.close);
+    await tester.runAsync(
+      () => bindings.seed(
+        rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
+      ),
+    );
+
+    await boot(tester, bindings, const ['--background']);
+    await tester.runAsync(() async {
+      bindings.emit(const OpenUrlEvent('https://example.com/page'));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(PickerWindow), findsOneWidget);
+    expect(bindings.launchRecorder.calls, isEmpty);
+  });
+
+  testWidgets('launch failure falls back to picker', (tester) async {
+    final bindings = _FakeBindings(
+      rootDir: tempDir,
+      launchOverride: _FailingLaunchService(),
+    )..startsHidden = true;
+    addTearDown(bindings.close);
+    await tester.runAsync(
+      () => bindings.seed(
+        browsers: const [_chrome],
+        rules: const [Rule(domain: 'example.com', browserId: 'chrome')],
+      ),
+    );
+
+    await boot(tester, bindings, const ['--background']);
+    await tester.runAsync(() async {
+      bindings.emit(const OpenUrlEvent('https://example.com/docs'));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    });
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(PickerWindow), findsOneWidget);
+  });
+
+  testWidgets('inbound events stream error is non-fatal', (tester) async {
+    final bindings = _FakeBindings(rootDir: tempDir)..startsHidden = true;
+    addTearDown(bindings.close);
+
+    await boot(tester, bindings, const ['--background']);
+    await tester.runAsync(() async {
+      await bindings.emitError(Exception('stream error'));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    await tester.pump();
+
+    expect(find.byType(SettingsWindow), findsNothing);
+    expect(find.byType(PickerWindow), findsNothing);
+  });
 }
