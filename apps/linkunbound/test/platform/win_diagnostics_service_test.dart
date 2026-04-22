@@ -160,5 +160,25 @@ void main() {
       final content = utf8.decode(sysInfo.content as List<int>);
       expect(content, contains('browsers.json'));
     });
+
+    test('subdirectory in appDataDir is listed with trailing slash', () async {
+      Directory(
+        '${appDataDir.path}${Platform.pathSeparator}icons',
+      ).createSync();
+
+      final zipPath = await export();
+      final files = zipFiles(zipPath);
+      final sysInfo = files.firstWhere((f) => f.name == 'system_info.txt');
+      final content = utf8.decode(sysInfo.content as List<int>);
+      expect(content, contains('icons/'));
+    });
+
+    test('system_info.txt contains OS version line', () async {
+      final zipPath = await export();
+      final files = zipFiles(zipPath);
+      final sysInfo = files.firstWhere((f) => f.name == 'system_info.txt');
+      final content = utf8.decode(sysInfo.content as List<int>);
+      expect(content, contains('OS:'));
+    });
   });
 }

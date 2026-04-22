@@ -405,6 +405,68 @@ void main() {
       // The in-memory service list is updated synchronously before the async save.
       expect(f.browserService.browsers, isEmpty);
     });
+
+    testWidgets('add dialog saves new browser when name and path are filled', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Add custom browser'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Name'),
+        'My Browser',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Executable path'),
+        '/usr/bin/mybrowser',
+      );
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+      expect(find.text('My Browser'), findsOneWidget);
+    });
+
+    testWidgets('edit dialog path field is disabled for non-custom browser', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit'));
+      await tester.pumpAndSettle();
+      final pathField = tester
+          .widgetList<TextField>(find.byType(TextField))
+          .firstWhere((f) => f.decoration?.labelText == 'Executable path');
+      expect(pathField.enabled, isFalse);
+    });
+
+    testWidgets('edit dialog saves name change for existing browser', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit'));
+      await tester.pumpAndSettle();
+      final nameField = tester
+          .widgetList<TextField>(find.byType(TextField))
+          .firstWhere((f) => f.decoration?.labelText == 'Name');
+      await tester.enterText(find.byWidget(nameField), 'Chrome Renamed');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('Chrome Renamed'), findsOneWidget);
+    });
   });
 
   group('GeneralPage — edge warning card', () {
