@@ -1,10 +1,12 @@
 ﻿<div align="center">
 
+<img src="resources/assets/navigate.svg" alt="LinkUnbound icon" width="96" height="96"/>
+
 # LinkUnbound
 
 **A free, open source browser picker for Windows and macOS. Choose which browser opens every link.**
 
-No ads. No telemetry. No accounts. Everything local.
+**Open source. Local-first. Privacy-first. Zero telemetry.**
 
 <p>
   <a href="https://github.com/rgdevment/LinkUnbound/actions/workflows/ci.yml">
@@ -24,15 +26,52 @@ No ads. No telemetry. No accounts. Everything local.
   <a href="#license">
     <img src="https://img.shields.io/github/license/rgdevment/LinkUnbound?style=flat-square&color=lightgrey" alt="License GPL-3.0"/>
   </a>
+  <a href="https://buymeacoffee.com/rgdevment">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee"/>
+  </a>
+</p>
+
+<p>
+  <img src="resources/assets/linkUnbound_1_picker_en.png" alt="LinkUnbound browser picker popup near the cursor" width="45%"/>
+  &nbsp;
+  <img src="resources/assets/linkUnbound_2_settings_en.png" alt="LinkUnbound settings window with browsers and domain rules" width="45%"/>
+</p>
+
+<h4>Download LinkUnbound</h4>
+
+<p align="center">
+  <a href="https://apps.microsoft.com/detail/9N9F7C8Q43KC">
+    <img src="https://img.shields.io/badge/Windows-Microsoft_Store-0078D4?style=for-the-badge&logo=microsoft" alt="Get LinkUnbound browser picker from Microsoft Store"/>
+  </a>
+  &nbsp;
+  <a href="#getting-started">
+    <img src="https://img.shields.io/badge/macOS-Homebrew-FBB040?style=for-the-badge&logo=homebrew&logoColor=black" alt="Install LinkUnbound browser picker via Homebrew on macOS"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/rgdevment/LinkUnbound/releases">
+    <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rgdevment/283d803e965b119371a704501932961f/raw/linkunbound_downloads_windows.json&style=flat-square&logo=windows&logoColor=white" alt="Windows Downloads"/>
+  </a>
+  &nbsp;
+  <a href="https://github.com/rgdevment/LinkUnbound/releases">
+    <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rgdevment/283d803e965b119371a704501932961f/raw/linkunbound_downloads_macos.json&style=flat-square&logo=apple&logoColor=white" alt="macOS Downloads"/>
+  </a>
+</p>
+
+<p align="center">
+  <sub>Prefer a direct download? <a href="https://github.com/rgdevment/LinkUnbound/releases/latest">GitHub Releases</a> has standalone installers — Windows (.exe) · macOS (.dmg)</sub>
 </p>
 
 </div>
 
 ---
 
-**LinkUnbound** is a free, open source **browser picker** and **browser chooser** for Windows and macOS. Every link you click — in Teams, Outlook, Slack, a PDF, wherever — gets intercepted. If there's a domain rule, the assigned browser opens instantly. If not, a small **browser selection popup** appears near your cursor and lets you choose.
+**LinkUnbound** is a free, open source **browser picker**, **browser chooser** and **default browser manager** for Windows and macOS. Every link you click — in Teams, Outlook, Slack, Discord, a PDF, an email client, wherever — gets intercepted. If there's a domain rule, the assigned browser opens instantly. If not, a small **browser selection popup** appears next to your cursor so you can pick the right browser for that link.
 
-This isn't a company product. I'm a developer who needed a way to pick which browser opens each link, built it for myself, and decided to share it. No ads, no telemetry, no subscriptions, no data collection — just a lightweight **browser routing tool** that lives on your machine and nowhere else.
+Think of it as a lightweight **link router** / **URL router** and **browser switcher** that sits between your operating system and your browsers. Perfect for separating **work and personal browsing**, routing client domains to specific browser profiles, or handling multiple browsers without changing the system default every time.
+
+This isn't a company product or a startup. I'm a solo developer who got tired of the OS deciding which browser opens a link, built this for myself, and decided to share it with the community. **No ads, no telemetry, no analytics, no accounts, no subscriptions, no cloud, no data collection.** Just a small native tool that lives on your machine and nowhere else.
 
 ---
 
@@ -71,7 +110,7 @@ This isn't a company product. I'm a developer who needed a way to pick which bro
 **LinkUnbound is:**
 
 - A **local-first browser picker** and **default browser manager** for Windows and macOS
-- A lightweight **browser routing utility** that works offline
+- A lightweight **browser switcher** and **browser selector** that works offline
 - An **open source** tool you can trust — GPL v3, inspect every line, fork it, contribute
 
 **LinkUnbound is not:**
@@ -108,9 +147,9 @@ For responsible disclosure and security contact info, see [SECURITY.md](SECURITY
 
 ### Installation
 
-**Microsoft Store** (coming soon) — one click, auto-updates, no security warnings.
+**Windows — Microsoft Store** (recommended): [Get it from Microsoft Store](https://apps.microsoft.com/detail/9N9F7C8Q43KC) — one click, auto-updates, no security warnings.
 
-**Windows standalone installer** — download from [GitHub Releases](https://github.com/rgdevment/LinkUnbound/releases/latest).
+**Windows — standalone installer**: download from [GitHub Releases](https://github.com/rgdevment/LinkUnbound/releases/latest).
 
 **macOS** — install via Homebrew (signed and notarized):
 
@@ -267,3 +306,5 @@ Distributed under the **GNU General Public License v3.0**. See [LICENSE](LICENSE
 ---
 
 I built LinkUnbound because I was tired of my OS not letting me choose which browser opens a link. This is a personal tool, built from a real need, shared because others might need it too. Free to use, free to inspect, free forever.
+
+<sub>**Keywords:** browser picker, browser chooser, default browser manager, browser switcher, link router, URL router, link handler, multi-browser workflow, open source browser picker Windows, browser picker macOS, Microsoft Store browser picker, privacy-first link handler, local-first browser routing, no telemetry, work and personal browser separation, Teams links browser, Outlook links browser, Slack links browser, SafeLinks resolver, Browserosaurus alternative, Choosy alternative, BrowserPick alternative.</sub>
