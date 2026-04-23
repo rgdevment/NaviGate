@@ -93,6 +93,7 @@ makeFixtures({
   bool isDefault = false,
   bool isStartupEnabled = false,
   StartupService? startupService,
+  IconExtractor? iconExtractor,
   UpdateInfo? updateInfo,
 }) {
   final tempDir = dir ?? Directory.systemTemp.createTempSync('lu_test_');
@@ -127,7 +128,9 @@ makeFixtures({
       startupService ?? FakeStartupService(isEnabledValue: isStartupEnabled),
     ),
     launchServiceProvider.overrideWithValue(launchService),
-    iconExtractorProvider.overrideWithValue(FakeIconExtractor()),
+    iconExtractorProvider.overrideWithValue(
+      iconExtractor ?? FakeIconExtractor(),
+    ),
     iconsDirProvider.overrideWithValue(iconsDir),
     localeFileProvider.overrideWithValue(localeFile),
     edgeWarningFileProvider.overrideWithValue(edgeWarningFile),
