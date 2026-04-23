@@ -750,6 +750,74 @@ void main() {
       expect(find.byType(GeneralPage), findsOneWidget);
     });
   });
+
+  group('GeneralPage — associations row labels', () {
+    testWidgets('shows XHTML and SVG labels in associations row', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('XHTML'), findsOneWidget);
+      expect(find.textContaining('SVG'), findsOneWidget);
+    });
+
+    testWidgets('shows HTTP, HTTPS, HTM, HTML, PDF labels', (tester) async {
+      final f = makeFixtures(dir: tempDir);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('HTTP'), findsWidgets);
+      expect(find.textContaining('HTTPS'), findsWidgets);
+      expect(find.textContaining('HTM'), findsWidgets);
+      expect(find.textContaining('HTML'), findsWidgets);
+      expect(find.textContaining('PDF'), findsWidgets);
+    });
+
+    testWidgets('all association labels visible when all associations set', (
+      tester,
+    ) async {
+      final f = makeFixtures(
+        dir: tempDir,
+        isDefault: true,
+        associations: {
+          'http',
+          'https',
+          '.htm',
+          '.html',
+          '.xhtml',
+          '.svg',
+          '.pdf',
+        },
+      );
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('XHTML'), findsOneWidget);
+      expect(find.textContaining('SVG'), findsOneWidget);
+    });
+
+    testWidgets(
+      'xhtml and svg labels present when only those associations set',
+      (tester) async {
+        final f = makeFixtures(
+          dir: tempDir,
+          isDefault: true,
+          associations: {'.xhtml', '.svg'},
+        );
+        await tester.pumpWidget(
+          buildTestApp(const GeneralPage(), overrides: f.overrides),
+        );
+        await tester.pumpAndSettle();
+        expect(find.textContaining('XHTML'), findsOneWidget);
+        expect(find.textContaining('SVG'), findsOneWidget);
+      },
+    );
+  });
 }
 
 final class _ThrowingStartupService implements StartupService {
