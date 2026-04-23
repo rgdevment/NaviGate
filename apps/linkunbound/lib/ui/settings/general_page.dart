@@ -18,7 +18,15 @@ class GeneralPage extends ConsumerWidget {
   // (Launch Services treats `public.html` separately and rarely surfaces it
   // to the user). The .htm/.html/.pdf extensions are Windows-only concepts
   // exposed via the registry.
-  static const _allAssociations = ['http', 'https', '.htm', '.html', '.pdf'];
+  static const _allAssociations = [
+    'http',
+    'https',
+    '.htm',
+    '.html',
+    '.xhtml',
+    '.svg',
+    '.pdf',
+  ];
   static const _macAssociations = ['http', 'https'];
 
   @override

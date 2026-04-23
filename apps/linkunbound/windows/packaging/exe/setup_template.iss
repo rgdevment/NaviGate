@@ -61,7 +61,27 @@ Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\URLAssociations"; ValueNa
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\URLAssociations"; ValueName: "https"; ValueType: string; ValueData: "LinkUnboundURL"
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".htm"; ValueType: string; ValueData: "LinkUnboundURL"
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".html"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".xhtml"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".xht"; ValueType: string; ValueData: "LinkUnboundURL"
 Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".pdf"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".svg"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".mhtml"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".mht"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".shtml"; ValueType: string; ValueData: "LinkUnboundURL"
+Root: HKLM; Subkey: "SOFTWARE\LinkUnbound\Capabilities\FileAssociations"; ValueName: ".webp"; ValueType: string; ValueData: "LinkUnboundURL"
+
+; Advertise our ProgID as a candidate handler for these file types so they
+; appear in the per-app default association page in Windows Settings.
+Root: HKLM; Subkey: "SOFTWARE\Classes\.htm\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.html\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.xhtml\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.xht\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.pdf\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.svg\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.mhtml\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.mht\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.shtml\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\.webp\OpenWithProgIds"; ValueName: "LinkUnboundURL"; ValueType: string; ValueData: ""
 
 ; RegisteredApplications (only delete value, not the shared key)
 Root: HKLM; Subkey: "SOFTWARE\RegisteredApplications"; ValueName: "LinkUnbound"; ValueType: string; ValueData: "SOFTWARE\LinkUnbound\Capabilities"; Flags: uninsdeletevalue
