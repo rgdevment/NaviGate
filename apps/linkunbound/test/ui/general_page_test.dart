@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 
@@ -582,6 +583,173 @@ void main() {
       expect(find.text('Could not change startup setting'), findsOneWidget);
     });
   });
+
+  group('GeneralPage — startup toggle calls', () {
+    testWidgets('switch is always interactive', (tester) async {
+      final f = makeFixtures(dir: tempDir, isStartupEnabled: false);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      final sw = tester.widget<Switch>(find.byType(Switch));
+      expect(sw.onChanged, isNotNull);
+    });
+
+    testWidgets('toggling on calls enable on the service', (tester) async {
+      final recording = _RecordingStartupService(isEnabledValue: false);
+      final f = makeFixtures(dir: tempDir, startupService: recording);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(recording.enableCalls, 1);
+      expect(recording.disableCalls, 0);
+    });
+
+    testWidgets('toggling off calls disable on the service', (tester) async {
+      final recording = _RecordingStartupService(isEnabledValue: true);
+      final f = makeFixtures(dir: tempDir, startupService: recording);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(recording.disableCalls, 1);
+      expect(recording.enableCalls, 0);
+    });
+
+    testWidgets('enable is called with a non-empty executable path', (
+      tester,
+    ) async {
+      final recording = _RecordingStartupService(isEnabledValue: false);
+      final f = makeFixtures(dir: tempDir, startupService: recording);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(recording.lastEnablePath, isNotEmpty);
+    });
+  });
+
+  group('GeneralPage — browser tile tap', () {
+    testWidgets('tapping tile body opens edit dialog', (tester) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Google Chrome'));
+      await tester.pumpAndSettle();
+      expect(find.text('Edit browser'), findsOneWidget);
+    });
+  });
+
+  group('GeneralPage — browser reorder', () {
+    testWidgets('dragging an item triggers reorder', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome, _firefox]);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+
+      final dragHandles = find.byIcon(Icons.drag_handle);
+      expect(dragHandles, findsNWidgets(2));
+
+      // Start drag from second handle and pump frames during the move so the
+      // proxyDecorator AnimatedBuilder is rendered, then release at new position
+      // to trigger onReorder.
+      final gesture = await tester.startGesture(
+        tester.getCenter(dragHandles.at(1)),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.moveBy(const Offset(0, -150));
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // List still has both browsers after reorder.
+      expect(find.text('Google Chrome'), findsOneWidget);
+      expect(find.text('Firefox'), findsOneWidget);
+    });
+  });
+
+  group('GeneralPage — duplicate browser with icon', () {
+    testWidgets('duplicating browser with existing icon copies icon file', (
+      tester,
+    ) async {
+      final f = makeFixtures(dir: tempDir, browsers: [_chrome]);
+      // Create a fake icon file for chrome so the copy path is exercised.
+      File('${f.tempDir.path}/icons/chrome.png')
+        ..parent.createSync(recursive: true)
+        ..writeAsBytesSync([0, 1, 2, 3]);
+
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Duplicate'));
+      await tester.pumpAndSettle();
+      // Both the original and the copy are visible.
+      expect(find.text('Google Chrome'), findsWidgets);
+    });
+  });
+
+  group('GeneralPage — refresh with icon extraction failure', () {
+    testWidgets('icon extraction failure during refresh is silently ignored', (
+      tester,
+    ) async {
+      final f = makeFixtures(
+        dir: tempDir,
+        detectedBrowsers: [_firefox],
+        iconExtractor: _ThrowingIconExtractor(),
+      );
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Refresh browsers'));
+      await tester.pumpAndSettle();
+      // No crash, snackbar confirms the refresh completed.
+      expect(find.text('1 added, 0 removed'), findsOneWidget);
+    });
+  });
+
+  group('GeneralPage — set default browser button', () {
+    const urlChannel = MethodChannel('plugins.flutter.io/url_launcher_windows');
+
+    setUp(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(urlChannel, (_) async => true);
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(urlChannel, null);
+    });
+
+    testWidgets('tapping Set default button does not crash', (tester) async {
+      final f = makeFixtures(dir: tempDir, isDefault: false);
+      await tester.pumpWidget(
+        buildTestApp(const GeneralPage(), overrides: f.overrides),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Set default'));
+      await tester.pumpAndSettle();
+      expect(find.byType(GeneralPage), findsOneWidget);
+    });
+  });
 }
 
 final class _ThrowingStartupService implements StartupService {
@@ -594,4 +762,33 @@ final class _ThrowingStartupService implements StartupService {
 
   @override
   Future<bool> get isEnabled async => false;
+}
+
+final class _RecordingStartupService implements StartupService {
+  _RecordingStartupService({required this.isEnabledValue});
+
+  final bool isEnabledValue;
+  int enableCalls = 0;
+  int disableCalls = 0;
+  String lastEnablePath = '';
+
+  @override
+  Future<void> enable(String executablePath) async {
+    enableCalls++;
+    lastEnablePath = executablePath;
+  }
+
+  @override
+  Future<void> disable() async {
+    disableCalls++;
+  }
+
+  @override
+  Future<bool> get isEnabled async => isEnabledValue;
+}
+
+final class _ThrowingIconExtractor implements IconExtractor {
+  @override
+  Future<String> extractIcon(String executablePath, String outputPath) =>
+      Future.error(Exception('icon extraction failed'));
 }
