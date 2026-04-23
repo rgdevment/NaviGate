@@ -9,8 +9,13 @@ import 'package:linkunbound/l10n/app_localizations.dart';
 import 'package:linkunbound/providers.dart';
 
 final class FakeRegistrationService implements RegistrationService {
-  FakeRegistrationService({this.isDefaultValue = false});
+  FakeRegistrationService({
+    this.isDefaultValue = false,
+    Set<String>? associations,
+  }) : _associations = associations;
+
   final bool isDefaultValue;
+  final Set<String>? _associations;
 
   @override
   Future<void> register(String executablePath) async {}
@@ -23,7 +28,7 @@ final class FakeRegistrationService implements RegistrationService {
 
   @override
   Future<Set<String>> get defaultAssociations async =>
-      isDefaultValue ? {'http', 'https'} : {};
+      _associations ?? (isDefaultValue ? {'http', 'https'} : {});
 }
 
 final class FakeStartupService implements StartupService {
@@ -91,6 +96,7 @@ makeFixtures({
   List<Browser> detectedBrowsers = const [],
   List<Rule> rules = const [],
   bool isDefault = false,
+  Set<String>? associations,
   bool isStartupEnabled = false,
   StartupService? startupService,
   IconExtractor? iconExtractor,
@@ -122,7 +128,10 @@ makeFixtures({
     browserServiceProvider.overrideWithValue(browserService),
     ruleServiceProvider.overrideWithValue(ruleService),
     registrationServiceProvider.overrideWithValue(
-      FakeRegistrationService(isDefaultValue: isDefault),
+      FakeRegistrationService(
+        isDefaultValue: isDefault,
+        associations: associations,
+      ),
     ),
     startupServiceProvider.overrideWithValue(
       startupService ?? FakeStartupService(isEnabledValue: isStartupEnabled),

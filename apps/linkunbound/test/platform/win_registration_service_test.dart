@@ -1,0 +1,60 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:linkunbound/platform/windows/win_registration_service.dart';
+
+void main() {
+  group('progIdMatchesLinkUnbound', () {
+    test('returns false for null', () {
+      expect(progIdMatchesLinkUnbound(null), isFalse);
+    });
+
+    test('returns true for exact desktop ProgId', () {
+      expect(progIdMatchesLinkUnbound('LinkUnboundURL'), isTrue);
+    });
+
+    test(
+      'returns true when ProgId contains linkunbound (case-insensitive)',
+      () {
+        expect(progIdMatchesLinkUnbound('somethingLinkunboundXYZ'), isTrue);
+        expect(progIdMatchesLinkUnbound('LINKUNBOUND'), isTrue);
+        expect(progIdMatchesLinkUnbound('linkunbound'), isTrue);
+      },
+    );
+
+    test('returns false for an unrelated ProgId', () {
+      expect(progIdMatchesLinkUnbound('ChromeHTML'), isFalse);
+    });
+
+    test('returns false for opaque MSIX-style ProgId without name', () {
+      // MSIX assigns ProgIds like "AppXabc123..." which do not embed identity.
+      expect(progIdMatchesLinkUnbound('AppXabc123def456'), isFalse);
+    });
+
+    test('returns false for empty string', () {
+      expect(progIdMatchesLinkUnbound(''), isFalse);
+    });
+  });
+
+  group('userChoicePaths keys', () {
+    // Verify that the registry path map covers the expected association keys
+    // so that defaultAssociations can report them.
+    test('includes http and https URL schemes', () {
+      final keys = winRegistrationUserChoiceKeys;
+      expect(keys, containsAll(['http', 'https']));
+    });
+
+    test('includes htm and html file extensions', () {
+      final keys = winRegistrationUserChoiceKeys;
+      expect(keys, containsAll(['.htm', '.html']));
+    });
+
+    test('includes xhtml and svg file extensions', () {
+      final keys = winRegistrationUserChoiceKeys;
+      expect(keys, containsAll(['.xhtml', '.svg']));
+    });
+
+    test('includes pdf file extension', () {
+      expect(winRegistrationUserChoiceKeys, contains('.pdf'));
+    });
+  });
+}

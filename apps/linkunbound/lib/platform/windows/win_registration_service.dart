@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:linkunbound_core/linkunbound_core.dart';
 import 'package:win32_registry/win32_registry.dart';
@@ -7,6 +8,21 @@ import 'package:win32_registry/win32_registry.dart';
 import 'win_package_context.dart';
 
 final _log = Logger('WinRegistrationService');
+
+/// Returns true when [progId] is a known LinkUnbound ProgId based on exact
+/// match or name containment alone — without reading the registry.
+@visibleForTesting
+bool progIdMatchesLinkUnbound(String? progId) {
+  if (progId == null) return false;
+  if (progId == 'LinkUnboundURL') return true;
+  return progId.toLowerCase().contains('linkunbound');
+}
+
+/// Keys checked in the per-user registry when resolving default associations.
+/// Exposed for testing.
+@visibleForTesting
+Iterable<String> get winRegistrationUserChoiceKeys =>
+    WinRegistrationService._userChoicePaths.keys;
 
 typedef _SHChangeNotifyNative =
     Void Function(
@@ -92,9 +108,7 @@ final class WinRegistrationService implements RegistrationService {
   // identity name, so we resolve it via the class registration which carries
   // our AppUserModelID (containing the package family name).
   bool _progIdBelongsToUs(String? progId) {
-    if (progId == null) return false;
-    if (progId == 'LinkUnboundURL') return true;
-    if (progId.toLowerCase().contains('linkunbound')) return true;
+    if (progIdMatchesLinkUnbound(progId)) return true;
     try {
       final key = Registry.openPath(
         RegistryHive.currentUser,
