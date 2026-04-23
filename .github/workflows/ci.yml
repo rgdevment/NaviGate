@@ -82,7 +82,10 @@ jobs:
         run: flutter test --coverage
 
       - name: Merge coverage reports
-        run: cat packages/core/coverage/lcov.info apps/linkunbound/coverage/lcov.info > coverage-merged.info
+        run: |
+          sed 's|^SF:lib/|SF:apps/linkunbound/lib/|g' apps/linkunbound/coverage/lcov.info > /tmp/app_lcov.info
+          sed 's|^SF:lib/|SF:packages/core/lib/|g' packages/core/coverage/lcov.info > /tmp/core_lcov.info
+          cat /tmp/core_lcov.info /tmp/app_lcov.info > coverage-merged.info
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4

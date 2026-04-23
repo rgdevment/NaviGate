@@ -42,9 +42,9 @@ void _writeStartupCrashLog(String source, Object error, StackTrace? stack) {
     final String base;
     if (Platform.isWindows) {
       base =
-          Platform.environment['APPDATA'] ??
           Platform.environment['LOCALAPPDATA'] ??
-          '${Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path}\\AppData\\Roaming';
+          Platform.environment['APPDATA'] ??
+          '${Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path}\\AppData\\Local';
     } else {
       base =
           '${Platform.environment['HOME'] ?? Directory.systemTemp.path}/Library/Application Support';
