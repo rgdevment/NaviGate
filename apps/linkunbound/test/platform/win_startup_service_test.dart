@@ -100,78 +100,85 @@ void main() {
 
   // ─── Non-MSIX (standalone) registry paths ─────────────────────────────────
 
-  group('WinStartupService — standalone (non-MSIX)', () {
-    late Directory tempDir;
-    late File exeFile;
+  group(
+    'WinStartupService — standalone (non-MSIX)',
+    skip: Platform.isWindows ? null : 'Registry API is Windows-only',
+    () {
+      late Directory tempDir;
+      late File exeFile;
 
-    WinStartupService standalone() =>
-        WinStartupService(isMsixDetector: () => false);
+      WinStartupService standalone() =>
+          WinStartupService(isMsixDetector: () => false);
 
-    setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('ws_standalone_');
-      exeFile = File('${tempDir.path}\\app.exe')..createSync();
-    });
+      setUp(() {
+        tempDir = Directory.systemTemp.createTempSync('ws_standalone_');
+        exeFile = File('${tempDir.path}\\app.exe')..createSync();
+      });
 
-    tearDown(() async {
-      // Ensure the registry entry is always cleaned up after each test.
-      await standalone().disable();
-      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
-    });
+      tearDown(() async {
+        // Ensure the registry entry is always cleaned up after each test.
+        await standalone().disable();
+        if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+      });
 
-    test('constructor does not throw', () {
-      expect(standalone, returnsNormally);
-    });
+      test('constructor does not throw', () {
+        expect(standalone, returnsNormally);
+      });
 
-    test('isEnabled returns false when no Run entry exists', () async {
-      await standalone().disable();
-      expect(await standalone().isEnabled, isFalse);
-    });
-
-    test(
-      'enable with non-exe path is a no-op (does not write registry)',
-      () async {
-        await standalone().enable('${tempDir.path}\\script.bat');
+      test('isEnabled returns false when no Run entry exists', () async {
+        await standalone().disable();
         expect(await standalone().isEnabled, isFalse);
-      },
-    );
+      });
 
-    test('enable with dev build path is a no-op', () async {
-      final devDir = Directory('${tempDir.path}\\build\\windows\\runner')
-        ..createSync(recursive: true);
-      final devExe = File('${devDir.path}\\app.exe')..createSync();
-      await standalone().enable(devExe.path);
-      expect(await standalone().isEnabled, isFalse);
-    });
+      test(
+        'enable with non-exe path is a no-op (does not write registry)',
+        () async {
+          await standalone().enable('${tempDir.path}\\script.bat');
+          expect(await standalone().isEnabled, isFalse);
+        },
+      );
 
-    test('enable with non-existent exe is a no-op', () async {
-      await standalone().enable('${tempDir.path}\\missing.exe');
-      expect(await standalone().isEnabled, isFalse);
-    });
+      test('enable with dev build path is a no-op', () async {
+        final devDir = Directory('${tempDir.path}\\build\\windows\\runner')
+          ..createSync(recursive: true);
+        final devExe = File('${devDir.path}\\app.exe')..createSync();
+        await standalone().enable(devExe.path);
+        expect(await standalone().isEnabled, isFalse);
+      });
 
-    test('disable when no Run entry does not throw', () async {
-      await standalone().disable();
-      expect(true, isTrue);
-    });
+      test('enable with non-existent exe is a no-op', () async {
+        await standalone().enable('${tempDir.path}\\missing.exe');
+        expect(await standalone().isEnabled, isFalse);
+      });
 
-    test('enable then isEnabled returns true', () async {
-      await standalone().enable(exeFile.path);
-      expect(await standalone().isEnabled, isTrue);
-    });
+      test('disable when no Run entry does not throw', () async {
+        await standalone().disable();
+        expect(true, isTrue);
+      });
 
-    test('enable then disable → isEnabled returns false', () async {
-      await standalone().enable(exeFile.path);
-      await standalone().disable();
-      expect(await standalone().isEnabled, isFalse);
-    });
+      test('enable then isEnabled returns true', () async {
+        await standalone().enable(exeFile.path);
+        expect(await standalone().isEnabled, isTrue);
+      });
 
-    test('isEnabled auto-cleans stale entry pointing to missing exe', () async {
-      await standalone().enable(exeFile.path);
-      exeFile.deleteSync();
-      expect(await standalone().isEnabled, isFalse);
-      // After clean-up the entry is gone; second check must also be false.
-      expect(await standalone().isEnabled, isFalse);
-    });
-  });
+      test('enable then disable → isEnabled returns false', () async {
+        await standalone().enable(exeFile.path);
+        await standalone().disable();
+        expect(await standalone().isEnabled, isFalse);
+      });
+
+      test(
+        'isEnabled auto-cleans stale entry pointing to missing exe',
+        () async {
+          await standalone().enable(exeFile.path);
+          exeFile.deleteSync();
+          expect(await standalone().isEnabled, isFalse);
+          // After clean-up the entry is gone; second check must also be false.
+          expect(await standalone().isEnabled, isFalse);
+        },
+      );
+    },
+  );
 
   // ─── MSIX paths (mocked channels) ─────────────────────────────────────────
 
