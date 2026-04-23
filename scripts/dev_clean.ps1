@@ -209,6 +209,7 @@ if (-not $SkipRegistry) {
 if (-not $SkipFiles) {
     Write-Section "Files: AppData"
 
+    Remove-Folder "$env:LOCALAPPDATA\LinkUnbound"
     Remove-Folder "$env:APPDATA\LinkUnbound"
     Remove-Folder "$env:APPDATA\Navigate"
     Remove-Folder "$env:APPDATA\navigate"

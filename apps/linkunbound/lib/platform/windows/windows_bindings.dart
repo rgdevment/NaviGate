@@ -44,10 +44,13 @@ final class WindowsBindings implements PlatformBindings {
 
   static Future<WindowsBindings> create(List<String> args) async {
     final baseDir =
-        Platform.environment['APPDATA'] ??
         Platform.environment['LOCALAPPDATA'] ??
-        '${Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path}\\AppData\\Roaming';
+        Platform.environment['APPDATA'] ??
+        '${Platform.environment['USERPROFILE'] ?? Directory.systemTemp.path}\\AppData\\Local';
     final appDataDir = Directory('$baseDir\\LinkUnbound');
+
+    _migrateFromRoamingIfNeeded(appDataDir);
+
     try {
       await appDataDir.create(recursive: true);
     } on FileSystemException catch (e) {
@@ -172,5 +175,19 @@ final class WindowsBindings implements PlatformBindings {
       if (_windowsAbsPath.hasMatch(arg)) return OpenUrlEvent(arg);
     }
     return null;
+  }
+
+  static void _migrateFromRoamingIfNeeded(Directory newDir) {
+    final roamingBase = Platform.environment['APPDATA'];
+    if (roamingBase == null || roamingBase.isEmpty) return;
+    final oldDir = Directory('$roamingBase\\LinkUnbound');
+    if (!oldDir.existsSync()) return;
+    if (newDir.existsSync()) return;
+    try {
+      oldDir.renameSync(newDir.path);
+      _log.info('Migrated app data from ${oldDir.path} to ${newDir.path}');
+    } on FileSystemException catch (e) {
+      _log.warning('Could not migrate app data from ${oldDir.path}: $e');
+    }
   }
 }

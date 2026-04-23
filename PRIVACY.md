@@ -67,14 +67,14 @@ Browser icons are extracted locally from installed browser executables and store
 
 All data is stored locally under your user profile.
 
-**Windows** — `%APPDATA%\LinkUnbound\`:
+**Windows** — `%LOCALAPPDATA%\LinkUnbound\`:
 
 | Data     | Location                                    |
 | :------- | :------------------------------------------ |
-| Browsers | `%APPDATA%\LinkUnbound\browsers.json`       |
-| Rules    | `%APPDATA%\LinkUnbound\rules.json`          |
-| Log      | `%APPDATA%\LinkUnbound\navigate.log`        |
-| Icons    | `%APPDATA%\LinkUnbound\icons\`              |
+| Browsers | `%LOCALAPPDATA%\LinkUnbound\browsers.json`       |
+| Rules    | `%LOCALAPPDATA%\LinkUnbound\rules.json`          |
+| Log      | `%LOCALAPPDATA%\LinkUnbound\navigate.log`        |
+| Icons    | `%LOCALAPPDATA%\LinkUnbound\icons\`              |
 
 **macOS** — `~/Library/Application Support/LinkUnbound/`:
 
@@ -157,7 +157,7 @@ Settings → **Maintenance** tab provides:
 **Windows:**
 
 1. Uninstall LinkUnbound (via Settings → Apps or the standalone uninstaller).
-2. Delete the data folder: `%APPDATA%\LinkUnbound\`
+2. Delete the data folder: `%LOCALAPPDATA%\LinkUnbound\` (and the legacy `%APPDATA%\LinkUnbound\` if present from older versions)
 
 **macOS:**
 
