@@ -368,10 +368,6 @@ final class _ThrowingDelegateBindings extends _FakeBindings {
 }
 
 void main() {
-  if (!(Platform.isMacOS || Platform.isWindows)) {
-    test('bootstrap suite skipped on this platform', () {}, skip: true);
-    return;
-  }
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory tempDir;
