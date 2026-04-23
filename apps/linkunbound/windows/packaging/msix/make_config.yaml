@@ -9,3 +9,4 @@ architecture: x64
 languages: en-us, es-es
 capabilities: internetClient
 protocol_activation: http, https
+file_extension: .htm, .html, .xhtml, .xht, .pdf, .svg, .mhtml, .mht, .shtml, .webp

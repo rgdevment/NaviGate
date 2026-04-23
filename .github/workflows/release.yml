@@ -169,54 +169,54 @@ jobs:
 
                   echo "Homebrew Tap updated: cask ${CASK_NAME} → ${VERSION}"
 
-    # publish-to-store:
-    #     runs-on: windows-latest
-    #     needs: [extract-version, github-release]
-    #     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(needs.extract-version.outputs.version, '-')
-    #     timeout-minutes: 15
-    #     name: Publish to Microsoft Store
-    #
-    #     steps:
-    #         - uses: actions/checkout@v6
-    #           with:
-    #               ref: ${{ github.ref_name }}
-    #               fetch-depth: 0
-    #
-    #         - name: Install Microsoft Store Developer CLI
-    #           uses: microsoft/microsoft-store-apppublisher@v1.3
-    #
-    #         - name: Download Windows artifacts
-    #           uses: actions/download-artifact@v7
-    #           with:
-    #               name: release-windows
-    #               path: artifacts/windows
-    #
-    #         - name: Find MSIX package
-    #           id: find_msix
-    #           shell: bash
-    #           run: |
-    #               MSIX=$(find artifacts/windows -name "*.msixupload" | head -1)
-    #               [ -z "$MSIX" ] && MSIX=$(find artifacts/windows -name "*.msixbundle" | head -1)
-    #               [ -z "$MSIX" ] && MSIX=$(find artifacts/windows -name "*.msix" | head -1)
-    #               if [ -z "$MSIX" ]; then
-    #                 echo "Error: No MSIX package found in release-windows artifact"
-    #                 find artifacts/windows -type f
-    #                 exit 1
-    #               fi
-    #               echo "MSIX_PATH=$MSIX" >> $GITHUB_OUTPUT
-    #               echo "Found: $MSIX"
-    #
-    #         - name: Configure Microsoft Store CLI
-    #           shell: bash
-    #           run: |
-    #               msstore reconfigure \
-    #                 --tenantId "${{ secrets.STORE_TENANT_ID }}" \
-    #                 --sellerId "${{ secrets.STORE_SELLER_ID }}" \
-    #                 --clientId "${{ secrets.STORE_CLIENT_ID }}" \
-    #                 --clientSecret "${{ secrets.STORE_CLIENT_SECRET }}"
-    #
-    #         - name: Publish to Microsoft Store
-    #           shell: bash
-    #           run: |
-    #               msstore publish "${{ steps.find_msix.outputs.MSIX_PATH }}" \
-    #                 --appId "${{ vars.STORE_APP_ID }}"
+    publish-to-store:
+        runs-on: windows-latest
+        needs: [extract-version, github-release]
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(needs.extract-version.outputs.version, '-')
+        timeout-minutes: 15
+        name: Publish to Microsoft Store
+
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
+                  fetch-depth: 0
+
+            - name: Install Microsoft Store Developer CLI
+              uses: microsoft/microsoft-store-apppublisher@v1.3
+
+            - name: Download Windows artifacts
+              uses: actions/download-artifact@v7
+              with:
+                  name: release-windows
+                  path: artifacts/windows
+
+            - name: Find MSIX package
+              id: find_msix
+              shell: bash
+              run: |
+                  MSIX=$(find artifacts/windows -name "*.msixupload" | head -1)
+                  [ -z "$MSIX" ] && MSIX=$(find artifacts/windows -name "*.msixbundle" | head -1)
+                  [ -z "$MSIX" ] && MSIX=$(find artifacts/windows -name "*.msix" | head -1)
+                  if [ -z "$MSIX" ]; then
+                    echo "Error: No MSIX package found in release-windows artifact"
+                    find artifacts/windows -type f
+                    exit 1
+                  fi
+                  echo "MSIX_PATH=$MSIX" >> $GITHUB_OUTPUT
+                  echo "Found: $MSIX"
+
+            - name: Configure Microsoft Store CLI
+              shell: bash
+              run: |
+                  msstore reconfigure \
+                    --tenantId "${{ secrets.STORE_TENANT_ID }}" \
+                    --sellerId "${{ secrets.STORE_SELLER_ID }}" \
+                    --clientId "${{ secrets.STORE_CLIENT_ID }}" \
+                    --clientSecret "${{ secrets.STORE_CLIENT_SECRET }}"
+
+            - name: Publish to Microsoft Store
+              shell: bash
+              run: |
+                  msstore publish "${{ steps.find_msix.outputs.MSIX_PATH }}" \
+                    --appId "${{ vars.STORE_APP_ID }}"

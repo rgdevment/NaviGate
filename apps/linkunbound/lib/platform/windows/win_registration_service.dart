@@ -40,6 +40,7 @@ final class WinRegistrationService implements RegistrationService {
     _writeProgId(exe, quotedExe);
     _writeStartMenuInternet(exe, quotedExe);
     _writeCapabilities(exe, quotedExe);
+    _writeOpenWithProgIds();
     _writeRegisteredApplications();
     _notifyShell();
   }
@@ -58,45 +59,59 @@ final class WinRegistrationService implements RegistrationService {
 
   @override
   Future<bool> get isDefault async {
-    try {
-      final key = Registry.openPath(
-        RegistryHive.currentUser,
-        path:
-            r'Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice',
-      );
-      final progId = key.getValueAsString('ProgId');
-      key.close();
-      if (progId == null) return false;
-      // Desktop install writes "LinkUnboundURL"; MSIX writes a package-scoped
-      // AppX... ProgId that embeds the identity name.
-      return progId == 'LinkUnboundURL' ||
-          progId.toLowerCase().contains('linkunbound');
-    } on Exception {
-      return false;
-    }
+    return _progIdBelongsToUs(
+      _readUserChoiceProgId(_userChoicePaths['https']!),
+    );
   }
 
   @override
   Future<Set<String>> get defaultAssociations async {
     final result = <String>{};
     for (final entry in _userChoicePaths.entries) {
-      try {
-        final key = Registry.openPath(
-          RegistryHive.currentUser,
-          path: entry.value,
-        );
-        final progId = key.getValueAsString('ProgId');
-        key.close();
-        if (progId == null) continue;
-        if (progId == 'LinkUnboundURL' ||
-            progId.toLowerCase().contains('linkunbound')) {
-          result.add(entry.key);
-        }
-      } on Exception {
-        // Not set as default for this association.
+      final progId = _readUserChoiceProgId(entry.value);
+      if (_progIdBelongsToUs(progId)) {
+        result.add(entry.key);
       }
     }
     return result;
+  }
+
+  String? _readUserChoiceProgId(String path) {
+    try {
+      final key = Registry.openPath(RegistryHive.currentUser, path: path);
+      final progId = key.getValueAsString('ProgId');
+      key.close();
+      return progId;
+    } on Exception {
+      return null;
+    }
+  }
+
+  // Desktop install writes "LinkUnboundURL". MSIX writes a package-scoped
+  // ProgId of the form "AppX<base32-sha1-hash>" that does NOT embed the
+  // identity name, so we resolve it via the class registration which carries
+  // our AppUserModelID (containing the package family name).
+  bool _progIdBelongsToUs(String? progId) {
+    if (progId == null) return false;
+    if (progId == 'LinkUnboundURL') return true;
+    if (progId.toLowerCase().contains('linkunbound')) return true;
+    try {
+      final key = Registry.openPath(
+        RegistryHive.currentUser,
+        path:
+            r'Software\Classes\'
+            '$progId'
+            r'\Application',
+      );
+      final aumid = key.getValueAsString('AppUserModelID');
+      key.close();
+      if (aumid != null && aumid.toLowerCase().contains('linkunbound')) {
+        return true;
+      }
+    } on Exception {
+      // Class entry not found or no AppUserModelID — not ours.
+    }
+    return false;
   }
 
   static const _userChoicePaths = {
@@ -108,6 +123,10 @@ final class WinRegistrationService implements RegistrationService {
         r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.htm\UserChoice',
     '.html':
         r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice',
+    '.xhtml':
+        r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.xhtml\UserChoice',
+    '.svg':
+        r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.svg\UserChoice',
     '.pdf':
         r'Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.pdf\UserChoice',
   };
@@ -279,6 +298,40 @@ final class WinRegistrationService implements RegistrationService {
 
     caps.close();
     root.close();
+  }
+
+  void _writeOpenWithProgIds() {
+    const exts = [
+      '.htm',
+      '.html',
+      '.xhtml',
+      '.xht',
+      '.pdf',
+      '.svg',
+      '.mhtml',
+      '.mht',
+      '.shtml',
+      '.webp',
+    ];
+    final classes = Registry.openPath(
+      RegistryHive.currentUser,
+      path: r'Software\Classes',
+      desiredAccessRights: AccessRights.allAccess,
+    );
+    for (final ext in exts) {
+      try {
+        final extKey = classes.createKey(ext);
+        final openWith = extKey.createKey('OpenWithProgIds');
+        openWith.createValue(
+          const RegistryValue('LinkUnboundURL', RegistryValueType.string, ''),
+        );
+        openWith.close();
+        extKey.close();
+      } on Exception catch (e) {
+        _log.fine('Failed to write OpenWithProgIds for $ext: $e');
+      }
+    }
+    classes.close();
   }
 
   void _writeRegisteredApplications() {
