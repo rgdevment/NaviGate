@@ -41,15 +41,18 @@ We believe in:
 ### Contribute Code
 
 1. **Fork** the repository.
-2. **Create a branch** from `main` (`git checkout -b feature/my-improvement`).
-3. **Make your changes** following the style guide below.
-4. **Run checks:**
+2. **Choose the base branch:**
+   - `main` — active development. Version 2.0 lands here.
+   - `v1-stable` — the frozen 1.4.x line. Security and crash fixes only, no new features.
+3. **Create a branch** from it (`git checkout -b feature/my-improvement`).
+4. **Make your changes** following the style guide below.
+5. **Run checks:**
    ```sh
    melos run format
    melos run analyze
    melos run test
    ```
-5. **Open a Pull Request** to `main`.
+6. **Open a Pull Request** to the branch you started from.
 
 ### Translate
 

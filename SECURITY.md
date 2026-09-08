@@ -33,12 +33,12 @@ LinkUnbound makes exactly **one type of network request**: a read-only GET to th
 
 ## Supported Versions
 
-| Version        | Supported |
-| :------------- | :-------: |
-| Latest Release | Yes       |
-| Older Releases | No        |
+| Version          | Supported            |
+| :--------------- | :------------------: |
+| 1.4.x            | Yes                  |
+| Older than 1.4.x | No                   |
 
-Always use the [latest version](https://github.com/rgdevment/LinkUnbound/releases/latest).
+The 1.4.x line lives on the `v1-stable` branch and receives security and crash fixes only — no new features. Always use the [latest version](https://github.com/rgdevment/LinkUnbound/releases/latest).
 
 ---
 
