@@ -1,0 +1,15 @@
+{
+  "globs": ["**/*.md", "!node_modules", "!target", "!app/node_modules", "!THIRD-PARTY-BUNDLED.md"],
+  "config": {
+    "default": true,
+    "MD013": { "line_length": 80, "code_blocks": false, "tables": false },
+    "MD014": false,
+    "MD024": { "siblings_only": true },
+    "MD033": {
+      "allowed_elements": ["a", "br", "div", "h1", "h4", "img", "kbd", "p", "strong", "sub"]
+    },
+    "MD041": false,
+    "MD046": { "style": "fenced" },
+    "MD060": false
+  }
+}
