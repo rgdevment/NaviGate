@@ -1,0 +1,24 @@
+[package]
+name = "linkunbound-spike"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+name = "linkunbound_spike_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
+[dependencies]
+linkunbound-core.workspace = true
+tauri.workspace = true
+tauri-plugin-single-instance.workspace = true
+serde.workspace = true
+serde_json.workspace = true
